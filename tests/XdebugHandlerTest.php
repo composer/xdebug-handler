@@ -58,7 +58,14 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $expected = XdebugHandlerMock::RESTART_ID;
+
+        $params = array(
+            XdebugHandlerMock::RESTART_ID,
+            '',
+            $xdebug->testVersion,
+        );
+
+        $expected = implode('|', $params);
         $this->assertEquals($expected, getenv(XdebugHandlerMock::ENV_ALLOW));
 
         // Mimic restart
@@ -76,7 +83,14 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $expected = XdebugHandlerMock::RESTART_ID.'|'.$dir;
+
+        $params = array(
+            XdebugHandlerMock::RESTART_ID,
+            $dir,
+            $xdebug->testVersion,
+        );
+
+        $expected = implode('|', $params);
         $this->assertEquals($expected, getenv(XdebugHandlerMock::ENV_ALLOW));
 
         // Mimic setting scan dir and restart
@@ -93,7 +107,14 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $expected = XdebugHandlerMock::RESTART_ID.'|';
+
+        $params = array(
+            XdebugHandlerMock::RESTART_ID,
+            '',
+            $xdebug->testVersion,
+        );
+
+        $expected = implode('|', $params);
         $this->assertEquals($expected, getenv(XdebugHandlerMock::ENV_ALLOW));
 
         // Unset scan dir and mimic restart
@@ -103,31 +124,31 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('', getenv('PHP_INI_SCAN_DIR'));
     }
 
-    public function testEnvVersionWhenLoaded()
+    public function testSkippedVersionWhenLoaded()
     {
         $loaded = true;
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals($xdebug->testVersion, getenv(XdebugHandlerMock::ENV_VERSION));
+        $this->assertEquals('', XdebugHandlerMock::getSkippedVersion());
 
         // Mimic successful restart
         $loaded = false;
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals($xdebug->testVersion, getenv(XdebugHandlerMock::ENV_VERSION));
+        $this->assertEquals($xdebug->testVersion, XdebugHandlerMock::getSkippedVersion());
     }
 
-    public function testEnvVersionWhenNotLoaded()
+    public function testSkippedVersionWhenNotLoaded()
     {
         $loaded = false;
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals(false, getenv(XdebugHandlerMock::ENV_VERSION));
+        $this->assertEquals('', XdebugHandlerMock::getSkippedVersion());
     }
 
-    public function testEnvVersionWhenRestartFails()
+    public function testSkippedVersionWhenRestartFails()
     {
         $loaded = true;
 
@@ -137,7 +158,7 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
         // Mimic failed restart
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals(false, getenv(XdebugHandlerMock::ENV_VERSION));
+        $this->assertEquals('', XdebugHandlerMock::getSkippedVersion());
     }
 
     public static function setUpBeforeClass()
@@ -145,7 +166,6 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
         // Save current state
         $names = array(
             XdebugHandlerMock::ENV_ALLOW,
-            XdebugHandlerMock::ENV_VERSION,
             'PHP_INI_SCAN_DIR',
             XdebugHandlerMock::ENV_ORIGINAL,
         );
@@ -171,7 +191,6 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
     {
         // Ensure env is unset
         putenv(XdebugHandlerMock::ENV_ALLOW);
-        putenv(XdebugHandlerMock::ENV_VERSION);
         putenv('PHP_INI_SCAN_DIR');
         putenv(XdebugHandlerMock::ENV_ORIGINAL);
     }

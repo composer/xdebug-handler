@@ -32,6 +32,10 @@ class XdebugHandlerMock extends XdebugHandler
         $version = $loaded ? $this->testVersion : '';
         $prop->setValue($this, $version);
 
+        $prop = $class->getProperty('skipped');
+        $prop->setAccessible(true);
+        $prop->setValue($this, '');
+
         $this->restarted = false;
     }
 

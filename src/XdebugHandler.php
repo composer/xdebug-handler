@@ -18,9 +18,9 @@ class XdebugHandler
 {
     const ENV_ALLOW = 'COMPOSER_ALLOW_XDEBUG';
     const ENV_ORIGINAL = 'COMPOSER_ORIGINAL_INIS';
-    const ENV_VERSION = 'COMPOSER_XDEBUG_VERSION';
     const RESTART_ID = 'internal';
 
+    private static $skipped;
     private $loaded;
     private $envScanDir;
     private $version;
@@ -55,7 +55,7 @@ class XdebugHandler
      */
     public function check()
     {
-        $args = explode('|', strval(getenv(self::ENV_ALLOW)), 2);
+        $args = explode('|', strval(getenv(self::ENV_ALLOW)), 3);
 
         if ($this->needsRestart($args[0])) {
             if ($this->prepareRestart()) {
@@ -79,9 +79,9 @@ class XdebugHandler
                 }
             }
 
-            // Clear version if the restart failed to disable xdebug
-            if ($this->loaded) {
-                putenv(self::ENV_VERSION);
+            // $args[2] contains the xdebug version
+            if (isset($args[2]) && !$this->loaded) {
+                self::$skipped = $args[2];
             }
         }
     }
@@ -109,6 +109,16 @@ class XdebugHandler
         }
 
         return $paths;
+    }
+
+    /**
+     * Returns the xdebug version that triggered a successful restart
+     *
+     * @return string
+     */
+    public static function getSkippedVersion()
+    {
+        return strval(self::$skipped);
     }
 
     /**
@@ -239,18 +249,12 @@ class XdebugHandler
             return false;
         }
 
-        // Make xdebug version available to restarted process
-        if (!putenv(self::ENV_VERSION.'='.$this->version)) {
-            return false;
-        }
-
-        // Flag restarted process and save env scan dir state
-        $args = array(self::RESTART_ID);
-
-        if (false !== $this->envScanDir) {
-            // Save current PHP_INI_SCAN_DIR
-            $args[] = $this->envScanDir;
-        }
+        // Flag restarted process and save scan dir and version
+        $args = array(
+            self::RESTART_ID,
+            strval($this->envScanDir),
+            $this->version,
+        );
 
         return putenv(self::ENV_ALLOW.'='.implode('|', $args));
     }
