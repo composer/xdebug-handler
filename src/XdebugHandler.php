@@ -328,7 +328,7 @@ class XdebugHandler
      */
     private function hasColorOutput($output)
     {
-        if (defined(PHP_WINDOWS_VERSION_MAJOR)) {
+        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             // Switch on vt100 support if we can
             if (function_exists('sapi_windows_vt100_output')) {
                 return sapi_windows_vt100_support($output, true);
