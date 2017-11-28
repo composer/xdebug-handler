@@ -30,7 +30,7 @@ class XdebugHandlerTest extends TestCase
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
         $this->assertTrue($xdebug->restarted);
-        $this->assertInternalType('string', getenv(XdebugHandlerMock::ENV_ORIGINAL));
+        $this->assertInternalType('string', getenv(XdebugHandlerMock::ORIGINAL_INIS));
     }
 
     public function testNoRestartWhenNotLoaded()
@@ -40,13 +40,13 @@ class XdebugHandlerTest extends TestCase
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
         $this->assertFalse($xdebug->restarted);
-        $this->assertFalse(getenv(XdebugHandlerMock::ENV_ORIGINAL));
+        $this->assertFalse(getenv(XdebugHandlerMock::ORIGINAL_INIS));
     }
 
     public function testNoRestartWhenLoadedAndAllowed()
     {
         $loaded = true;
-        putenv(XdebugHandlerMock::ENV_ALLOW.'=1');
+        putenv(XdebugHandlerMock::ALLOW_XDEBUG.'=1');
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
@@ -67,13 +67,13 @@ class XdebugHandlerTest extends TestCase
         );
 
         $expected = implode('|', $params);
-        $this->assertEquals($expected, getenv(XdebugHandlerMock::ENV_ALLOW));
+        $this->assertEquals($expected, getenv(XdebugHandlerMock::ALLOW_XDEBUG));
 
         // Mimic restart
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
         $this->assertFalse($xdebug->restarted);
-        $this->assertFalse(getenv(XdebugHandlerMock::ENV_ALLOW));
+        $this->assertFalse(getenv(XdebugHandlerMock::ALLOW_XDEBUG));
     }
 
     public function testEnvAllowWithScanDir()
@@ -92,7 +92,7 @@ class XdebugHandlerTest extends TestCase
         );
 
         $expected = implode('|', $params);
-        $this->assertEquals($expected, getenv(XdebugHandlerMock::ENV_ALLOW));
+        $this->assertEquals($expected, getenv(XdebugHandlerMock::ALLOW_XDEBUG));
 
         // Mimic setting scan dir and restart
         putenv('PHP_INI_SCAN_DIR=');
@@ -116,7 +116,7 @@ class XdebugHandlerTest extends TestCase
         );
 
         $expected = implode('|', $params);
-        $this->assertEquals($expected, getenv(XdebugHandlerMock::ENV_ALLOW));
+        $this->assertEquals($expected, getenv(XdebugHandlerMock::ALLOW_XDEBUG));
 
         // Mimic restart
         $xdebug = new XdebugHandlerMock($loaded);
@@ -161,13 +161,31 @@ class XdebugHandlerTest extends TestCase
         $this->assertSame('', XdebugHandlerMock::getSkippedVersion());
     }
 
+    /**
+     * @expectedException RuntimeException
+     *
+     */
+    public function testThrowsOnEmptyEnvPrefix()
+    {
+        $xdebug = new XdebugHandler('');
+    }
+
+    /**
+     * @expectedException RuntimeException
+     *
+     */
+    public function testThrowsOnInvalidEnvPrefix()
+    {
+        $xdebug = new XdebugHandler(array('name'));
+    }
+
     public static function setUpBeforeClass()
     {
         // Save current state
         $names = array(
-            XdebugHandlerMock::ENV_ALLOW,
+            XdebugHandlerMock::ALLOW_XDEBUG,
             'PHP_INI_SCAN_DIR',
-            XdebugHandlerMock::ENV_ORIGINAL,
+            XdebugHandlerMock::ORIGINAL_INIS,
         );
 
         foreach ($names as $name) {
@@ -190,8 +208,8 @@ class XdebugHandlerTest extends TestCase
     protected function setUp()
     {
         // Ensure env is unset
-        putenv(XdebugHandlerMock::ENV_ALLOW);
+        putenv(XdebugHandlerMock::ALLOW_XDEBUG);
         putenv('PHP_INI_SCAN_DIR');
-        putenv(XdebugHandlerMock::ENV_ORIGINAL);
+        putenv(XdebugHandlerMock::ORIGINAL_INIS);
     }
 }

@@ -72,7 +72,7 @@ class XdebugColorsTest extends TestCase
 
     protected function setUp()
     {
-        $this->xdebug = new XdebugHandler('');
+        $this->xdebug = new XdebugHandler('test');
         $class = new \ReflectionClass($this->xdebug);
         $this->method = $class->getMethod('addColorOption');
         $this->method->setAccessible(true);

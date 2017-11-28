@@ -16,13 +16,17 @@ namespace Composer\XdebugHandler;
  */
 class XdebugHandler
 {
-    const ENV_ALLOW = 'COMPOSER_ALLOW_XDEBUG';
-    const ENV_ORIGINAL = 'COMPOSER_ORIGINAL_INIS';
+    const SUFFIX_ALLOW = '_ALLOW_XDEBUG';
+    const SUFFIX_INIS = '_ORIGINAL_INIS';
     const RESTART_ID = 'internal';
 
+    private static $name;
     private static $skipped;
+
     private $colorOption;
     private $loaded;
+    private $envAllowXdebug;
+    private $envOriginalInis;
     private $envScanDir;
     private $version;
     private $tmpIni;
@@ -30,10 +34,24 @@ class XdebugHandler
     /**
      * Constructor
      *
-     * @param $colorOption string Command-line long option to force color output
+     * The $envPrefix is used to create distinct environment variables. It is
+     * uppercased and prepended to the default base values. For example 'app'
+     * would result in APP_ALLOW_XDEBUG and APP_ORIGINAL_INIS.
+     *
+     * @param string $envPrefix Value used in environment variables
+     * @param string $colorOption Command-line long option to force color output
+     * @throws RuntimeException If $envPrefix is not a non-empty string
      */
-    public function __construct($colorOption = '')
+    public function __construct($envPrefix, $colorOption = '')
     {
+        if (!is_string($envPrefix) || empty($envPrefix)) {
+            throw new \RuntimeException('$envPrefix must be a non-empty string');
+        }
+
+        self::$name = strtoupper($envPrefix);
+        $this->envAllowXdebug = self::$name.self::SUFFIX_ALLOW;
+        $this->envOriginalInis = self::$name.self::SUFFIX_INIS;
+
         $this->colorOption = $colorOption;
         $this->loaded = extension_loaded('xdebug');
         $this->envScanDir = getenv('PHP_INI_SCAN_DIR');
@@ -50,16 +68,17 @@ class XdebugHandler
      * If so, then a tmp ini is created with the xdebug ini entry commented out.
      * If additional inis have been loaded, these are combined into the tmp ini
      * and PHP_INI_SCAN_DIR is set to an empty value. Current ini locations are
-     * are stored in COMPOSER_ORIGINAL_INIS, for use in the restarted process.
+     * are stored in APP_ORIGINAL_INIS (where 'APP' is the prefix passed in the
+     * constructor) for use in the restarted process.
      *
-     * This behaviour can be disabled by setting the COMPOSER_ALLOW_XDEBUG
+     * This behaviour can be disabled by setting the APP_ALLOW_XDEBUG
      * environment variable to 1. This variable is used internally so that the
      * restarted process is created only once and PHP_INI_SCAN_DIR can be
      * restored to its original value.
      */
     public function check()
     {
-        $args = explode('|', strval(getenv(self::ENV_ALLOW)), 3);
+        $args = explode('|', strval(getenv($this->envAllowXdebug)), 3);
 
         if ($this->needsRestart($args[0])) {
             if ($this->prepareRestart()) {
@@ -72,7 +91,7 @@ class XdebugHandler
 
         // Restore environment variables if we are restarting
         if (self::RESTART_ID === $args[0]) {
-            putenv(self::ENV_ALLOW);
+            putenv($this->envAllowXdebug);
 
             if (false !== $this->envScanDir) {
                 // $args[1] contains the original value
@@ -100,10 +119,12 @@ class XdebugHandler
      */
     public static function getAllIniFiles()
     {
-        $env = getenv(self::ENV_ORIGINAL);
+        if (!empty(self::$name)) {
+            $env = getenv(self::$name.self::SUFFIX_INIS);
 
-        if (false !== $env) {
-            return explode(PATH_SEPARATOR, $env);
+            if (false !== $env) {
+                return explode(PATH_SEPARATOR, $env);
+            }
         }
 
         $paths = array(strval(php_ini_loaded_file()));
@@ -254,7 +275,7 @@ class XdebugHandler
         }
 
         // Make original inis available to restarted process
-        if (!putenv(self::ENV_ORIGINAL.'='.implode(PATH_SEPARATOR, $iniPaths))) {
+        if (!putenv($this->envOriginalInis.'='.implode(PATH_SEPARATOR, $iniPaths))) {
             return false;
         }
 
@@ -265,7 +286,7 @@ class XdebugHandler
             $this->version,
         );
 
-        return putenv(self::ENV_ALLOW.'='.implode('|', $args));
+        return putenv($this->envAllowXdebug.'='.implode('|', $args));
     }
 
     /**
