@@ -21,6 +21,7 @@ class XdebugHandler
     const RESTART_ID = 'internal';
 
     private static $skipped;
+    private $colorOption;
     private $loaded;
     private $envScanDir;
     private $version;
@@ -28,9 +29,12 @@ class XdebugHandler
 
     /**
      * Constructor
+     *
+     * @param $colorOption string Command-line long option to force color output
      */
-    public function __construct()
+    public function __construct($colorOption = '')
     {
+        $this->colorOption = $colorOption;
         $this->loaded = extension_loaded('xdebug');
         $this->envScanDir = getenv('PHP_INI_SCAN_DIR');
 
@@ -59,7 +63,7 @@ class XdebugHandler
 
         if ($this->needsRestart($args[0])) {
             if ($this->prepareRestart()) {
-                $command = $this->getCommand();
+                $command = $this->getCommand($_SERVER['argv']);
                 $this->restart($command);
             }
 
@@ -219,14 +223,19 @@ class XdebugHandler
     /**
      * Returns the restart command line
      *
+     * @param array $args The argv array
+     *
      * @return string
      */
-    private function getCommand()
+    private function getCommand(array $args)
     {
         $phpArgs = array(PHP_BINARY, '-c', $this->tmpIni);
-        $params = array_merge($phpArgs, $this->getScriptArgs($_SERVER['argv']));
 
-        return implode(' ', array_map(array($this, 'escape'), $params));
+        if ($this->hasColorOutput(STDOUT)) {
+            $args = $this->addColorOption($args, $this->colorOption);
+        }
+
+        return implode(' ', array_map(array($this, 'escape'), array_merge($phpArgs, $args)));
     }
 
     /**
@@ -260,26 +269,37 @@ class XdebugHandler
     }
 
     /**
-     * Returns the restart script arguments, adding --ansi if required
+     * Returns the restart arguments, appending a color option if required
      *
-     * If we are a terminal with color support we must ensure that the --ansi
-     * option is set, because the restarted output is piped.
+     * We are running in a terminal with color support, but the restarted
+     * process cannot know this because its output is piped. Providing a color
+     * option signifies that color output is supported.
      *
      * @param array $args The argv array
+     * @param $colorOption The long option to force color output
      *
      * @return array
      */
-    private function getScriptArgs(array $args)
+    private function addColorOption(array $args, $colorOption)
     {
-        if (in_array('--no-ansi', $args) || in_array('--ansi', $args)) {
+        if (in_array($colorOption, $args)
+            || !preg_match('/^--([a-z]+$)|(^--[a-z]+=)/', $colorOption, $matches)) {
             return $args;
         }
 
-        if ($this->hasColorOutput(STDOUT)) {
-            $offset = count($args) > 1 ? 2 : 1;
-            array_splice($args, $offset, 0, '--ansi');
+        if (isset($matches[2])) {
+            // Handle --color(s)= options. Note args[0] is the script name
+            if ($index = array_search($matches[2].'auto', $args)) {
+                $args[$index] = $colorOption;
+                return $args;
+            } elseif (preg_grep('/^'.$matches[2].'/', $args)) {
+                return $args;
+            }
+        } elseif (in_array('--no-'.$matches[1], $args)) {
+            return $args;
         }
 
+        $args[] = $colorOption;
         return $args;
     }
 
