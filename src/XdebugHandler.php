@@ -31,12 +31,12 @@ class XdebugHandler
      */
     public function __construct()
     {
-        $this->loaded = extension_loaded('xdebug');
+        $this->loaded = \extension_loaded('xdebug');
         $this->envScanDir = getenv('PHP_INI_SCAN_DIR');
 
         if ($this->loaded) {
             $ext = new \ReflectionExtension('xdebug');
-            $this->version = strval($ext->getVersion());
+            $this->version = \strval($ext->getVersion());
         }
     }
 
@@ -102,7 +102,7 @@ class XdebugHandler
             return explode(PATH_SEPARATOR, $env);
         }
 
-        $paths = array(strval(php_ini_loaded_file()));
+        $paths = array(\strval(php_ini_loaded_file()));
 
         if ($scanned = php_ini_scanned_files()) {
             $paths = array_merge($paths, array_map('trim', explode(',', $scanned)));
@@ -118,7 +118,7 @@ class XdebugHandler
      */
     public static function getSkippedVersion()
     {
-        return strval(self::$skipped);
+        return \strval(self::$skipped);
     }
 
     /**
@@ -146,7 +146,7 @@ class XdebugHandler
      */
     private function needsRestart($allow)
     {
-        if (PHP_SAPI !== 'cli' || !defined('PHP_BINARY')) {
+        if (\PHP_SAPI !== 'cli' || !\defined('PHP_BINARY')) {
             return false;
         }
 
@@ -208,7 +208,7 @@ class XdebugHandler
         $content .= 'disable_functions="'.ini_get('disable_functions').'"'.PHP_EOL;
         $content .= 'memory_limit='.ini_get('memory_limit').PHP_EOL;
 
-        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
+        if (\defined('PHP_WINDOWS_VERSION_BUILD')) {
             // Work-around for PHP windows bug, see issue #6052
             $content .= 'opcache.enable_cli=0'.PHP_EOL;
         }
@@ -223,7 +223,7 @@ class XdebugHandler
      */
     private function getCommand()
     {
-        $phpArgs = array(PHP_BINARY, '-c', $this->tmpIni);
+        $phpArgs = array(\PHP_BINARY, '-c', $this->tmpIni);
         $params = array_merge($phpArgs, $this->getScriptArgs($_SERVER['argv']));
 
         return implode(' ', array_map(array($this, 'escape'), $params));
@@ -252,7 +252,7 @@ class XdebugHandler
         // Flag restarted process and save scan dir and version
         $args = array(
             self::RESTART_ID,
-            strval($this->envScanDir),
+            \strval($this->envScanDir),
             $this->version,
         );
 
@@ -276,7 +276,7 @@ class XdebugHandler
         }
 
         if ($this->hasColorOutput(STDOUT)) {
-            $offset = count($args) > 1 ? 2 : 1;
+            $offset = \count($args) > 1 ? 2 : 1;
             array_splice($args, $offset, 0, '--ansi');
         }
 
@@ -296,7 +296,7 @@ class XdebugHandler
      */
     private function escape($arg, $meta = true)
     {
-        if (!defined('PHP_WINDOWS_VERSION_BUILD')) {
+        if (!\defined('PHP_WINDOWS_VERSION_BUILD')) {
             return escapeshellarg($arg);
         }
 
@@ -332,9 +332,9 @@ class XdebugHandler
      */
     private function hasColorOutput($output)
     {
-        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
+        if (\defined('PHP_WINDOWS_VERSION_BUILD')) {
             // Switch on vt100 support if we can
-            if (function_exists('sapi_windows_vt100_output')) {
+            if (\function_exists('sapi_windows_vt100_output')) {
                 return sapi_windows_vt100_support($output, true);
             }
 
@@ -349,6 +349,6 @@ class XdebugHandler
                 || 'cygwin' === getenv('TERM'));
         }
 
-        return function_exists('posix_isatty') && posix_isatty($output);
+        return \function_exists('posix_isatty') && posix_isatty($output);
     }
 }
