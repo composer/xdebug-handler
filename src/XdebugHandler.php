@@ -231,7 +231,7 @@ class XdebugHandler
     {
         $phpArgs = array(PHP_BINARY, '-c', $this->tmpIni);
 
-        if ($this->hasColorOutput(STDOUT)) {
+        if ($this->outputSupportsColor(STDOUT)) {
             $args = $this->addColorOption($args, $this->colorOption);
         }
 
@@ -346,29 +346,35 @@ class XdebugHandler
     /**
      * Returns true if the output stream supports colors
      *
+     * This is tricky on Windows, because Cgywin, Msys2 etc emulate pseudo
+     * terminals via named pipes, so we can only check the environment.
+     *
      * @param mixed $output A valid output stream
      *
      * @return bool
      */
-    private function hasColorOutput($output)
+    private function outputSupportsColor($output)
     {
         if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             // Switch on vt100 support if we can
-            if (function_exists('sapi_windows_vt100_output')) {
-                return sapi_windows_vt100_support($output, true);
+            if (function_exists('sapi_windows_vt100_support')
+                && sapi_windows_vt100_support($output, true)) {
+                return true;
             }
 
-            $stat = fstat($output);
-            // Check if formatted mode is S_IFCHR
-            $isatty = $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
-
-            return $isatty
-                && (false !== getenv('ANSICON')
+            return (false !== getenv('ANSICON')
                 || 'ON' === getenv('ConEmuANSI')
-                || 'xterm' === getenv('TERM')
-                || 'cygwin' === getenv('TERM'));
+                || 'xterm' === getenv('TERM'));
         }
 
-        return function_exists('posix_isatty') && posix_isatty($output);
+        if (function_exists('stream_isatty')) {
+            return stream_isatty($output);
+        } elseif (function_exists('posix_isatty')) {
+            return posix_isatty($output);
+        } else {
+            $stat = fstat($output);
+            // Check if formatted mode is S_IFCHR
+            return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
+        }
     }
 }
