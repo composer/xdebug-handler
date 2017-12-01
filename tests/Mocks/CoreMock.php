@@ -14,10 +14,11 @@ namespace Composer\XdebugHandler\Mocks;
 use Composer\XdebugHandler\XdebugHandler;
 
 /**
- * CoreMock provides base functionality for mocking XdebugHandler. It provides
- * it own restart method that mocks a restart by creating a new instance of
- * itself and setting the CoreMock::restarted property to true. Extend this
- * class to provide further capabilities.
+ * CoreMock provides base functionality for mocking XdebugHandler, providing its
+ * own restart method that mocks a restart by creating a new instance of itself
+ * and setting the CoreMock::restarted property to true, and a public
+ * getProperty method that accesses private properties. Extend this class to
+ * provide further capabilities.
  *
  * It does not matter whether xdebug is loaded, because this value is overriden
  * in the constructor.
@@ -35,9 +36,9 @@ class CoreMock extends XdebugHandler
     protected $childProcess;
     protected $refClass;
 
-    public static function createAndCheck($loaded, $colorOption = '', $parentProcess = null)
+    public static function createAndCheck($loaded, $parentProcess = null)
     {
-        $xdebug = new static($loaded, strval($colorOption));
+        $xdebug = new static($loaded);
 
         if ($parentProcess) {
             // This is a restart, so set restarted on this instance
@@ -49,27 +50,26 @@ class CoreMock extends XdebugHandler
         return $xdebug->childProcess ?: $xdebug;
     }
 
-    public function __construct($loaded, $colorOption)
+    public function __construct($loaded)
     {
-        parent::__construct('mock', $colorOption);
+        parent::__construct('mock');
 
         $this->refClass = new \ReflectionClass('Composer\XdebugHandler\XdebugHandler');
 
         // Set private loaded
         $prop = $this->refClass->getProperty('loaded');
         $prop->setAccessible(true);
-        $prop->setValue($this, $loaded);
-
-        // Set private version, based on loaded
-        $prop = $this->refClass->getProperty('version');
-        $prop->setAccessible(true);
-        $version = $loaded ? static::TEST_VERSION : null;
-        $prop->setValue($this, $version);
+        $prop->setValue($this, $loaded ? static::TEST_VERSION : null);
 
         // Ensure static private skipped is unset
         $prop = $this->refClass->getProperty('skipped');
         $prop->setAccessible(true);
         $prop->setValue($this, null);
+
+        // Call initStatusWriter again so it uses the updated loaded property
+        $method = $this->refClass->getMethod('initStatusWriter');
+        $method->setAccessible(true);
+        $method->invoke($this);
 
         $this->restarted = false;
     }
@@ -77,20 +77,20 @@ class CoreMock extends XdebugHandler
     public function __destruct()
     {
         // Delete the tmpIni if one has been created
-        if ($tmpIni = $this->getTmpIni()) {
+        if ($tmpIni = $this->getProperty('tmpIni')) {
             @unlink($tmpIni);
         }
     }
 
-    protected function restart($command)
+    public function getProperty($name)
     {
-        static::createAndCheck(false, null, $this);
-    }
-
-    protected function getTmpIni()
-    {
-        $prop = $this->refClass->getProperty('tmpIni');
+        $prop = $this->refClass->getProperty($name);
         $prop->setAccessible(true);
         return $prop->getValue($this);
+    }
+
+    protected function restart($command)
+    {
+        static::createAndCheck(false, $this);
     }
 }

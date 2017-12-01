@@ -22,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 abstract class BaseTestCase extends TestCase
 {
     private static $env = array();
+    private static $argv = array();
 
     private static $names = array(
         CoreMock::ALLOW_XDEBUG,
@@ -30,17 +31,19 @@ abstract class BaseTestCase extends TestCase
     );
 
     /**
-     * Saves the current environment state
+     * Saves the current environment and argv state
      */
     public static function setUpBeforeClass()
     {
         foreach (self::$names as $name) {
             self::$env[$name] = getenv($name);
         }
+
+        self::$argv = $_SERVER['argv'];
     }
 
     /**
-     * Restores the original environment state
+     * Restores the original environment and argv state
      */
     public static function tearDownAfterClass()
     {
@@ -51,10 +54,12 @@ abstract class BaseTestCase extends TestCase
                 putenv($name);
             }
         }
+
+        $_SERVER['argv'] = self::$argv;
     }
 
     /**
-     * Unsets environment variables for each test
+     * Unsets environment variables for each test and restores argv
      *
      */
     protected function setUp()
@@ -62,6 +67,8 @@ abstract class BaseTestCase extends TestCase
         foreach (self::$names as $name) {
             putenv($name);
         }
+
+        $_SERVER['argv'] = self::$argv;
     }
 
     /**

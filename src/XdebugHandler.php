@@ -23,13 +23,13 @@ class XdebugHandler
     private static $name;
     private static $skipped;
 
+    private $cli;
     private $colorOption;
-    private $loaded;
     private $envAllowXdebug;
     private $envOriginalInis;
-    private $envScanDir;
-    private $version;
+    private $loaded;
     private $tmpIni;
+    private $writer;
 
     /**
      * Constructor
@@ -53,13 +53,14 @@ class XdebugHandler
         $this->envOriginalInis = self::$name.self::SUFFIX_INIS;
 
         $this->colorOption = $colorOption;
-        $this->loaded = extension_loaded('xdebug');
-        $this->envScanDir = getenv('PHP_INI_SCAN_DIR');
+        $this->cli = PHP_SAPI === 'cli';
 
-        if ($this->loaded) {
+        if (extension_loaded('xdebug')) {
             $ext = new \ReflectionExtension('xdebug');
-            $this->version = $ext->getVersion() ?: 'unknown';
+            $this->loaded = $ext->getVersion() ?: 'unknown';
         }
+
+        $this->initStatusWriter();
     }
 
     /**
@@ -78,19 +79,27 @@ class XdebugHandler
      */
     public function check()
     {
+        if (!$this->cli) {
+            return;
+        }
+
         $envArgs = explode('|', strval(getenv($this->envAllowXdebug)), 4);
 
-        if ($this->needsRestart($envArgs[0])) {
+        if ($this->loaded && empty($envArgs[0])) {
+            // Restart required
+            $this->write(Status::RESTART);
+
             if ($this->prepareRestart()) {
                 $command = $this->getCommand($_SERVER['argv']);
                 $this->restart($command);
             }
-
             return;
         }
 
         if (self::RESTART_ID === $envArgs[0] && count($envArgs) >= 3) {
             // Restarting, so unset environment variable and extract saved values
+            $this->write(Status::RESTARTED);
+
             putenv($this->envAllowXdebug);
             $version = $envArgs[1];
             $scannedInis = $envArgs[2];
@@ -108,7 +117,10 @@ class XdebugHandler
                     putenv('PHP_INI_SCAN_DIR');
                 }
             }
+            return;
         }
+
+        $this->write(Status::NORESTART);
     }
 
     /**
@@ -155,6 +167,7 @@ class XdebugHandler
      */
     protected function restart($command)
     {
+        $this->write(Status::RESTARTING);
         passthru($command, $exitCode);
 
         if (!empty($this->tmpIni)) {
@@ -162,22 +175,6 @@ class XdebugHandler
         }
 
         exit($exitCode);
-    }
-
-    /**
-     * Returns true if a restart is needed
-     *
-     * @param string $allow Environment value
-     *
-     * @return bool
-     */
-    private function needsRestart($allow)
-    {
-        if (PHP_SAPI !== 'cli' || !defined('PHP_BINARY')) {
-            return false;
-        }
-
-        return empty($allow) && $this->loaded;
     }
 
     /**
@@ -192,15 +189,24 @@ class XdebugHandler
      */
     private function prepareRestart()
     {
-        $this->tmpIni = '';
+        $error = '';
         $iniFiles = self::getAllIniFiles();
         $scannedInis = count($iniFiles) > 1;
+        $scanDir = getenv('PHP_INI_SCAN_DIR');
 
-        if ($this->writeTmpIni($iniFiles)) {
-            return $this->setEnvironment($scannedInis, $iniFiles);
+        if (!defined('PHP_BINARY')) {
+            $error = 'PHP version is too old: '.PHP_VERSION;
+        } elseif (!$this->writeTmpIni($iniFiles)) {
+            $error = 'Unable to create tmp ini file';
+        } elseif (!$this->setEnvironment($scannedInis, $scanDir, $iniFiles)) {
+            $error = 'Unable to set environment variables';
         }
 
-        return false;
+        if ($error) {
+            $this->write(Status::ERROR, $error);
+        }
+
+        return empty($error);
     }
 
     /**
@@ -252,15 +258,15 @@ class XdebugHandler
      */
     private function getCommand(array $args)
     {
-        if ($this->outputSupportsColor(STDOUT)) {
-            $args = $this->addColorOption($args, $this->colorOption);
+        if (Process::supportsColor(STDOUT)) {
+            $args = Process::addColorOption($args, $this->colorOption);
         }
 
         $args = array_merge(array(PHP_BINARY, '-c', $this->tmpIni), $args);
 
-        $cmd = $this->escape(array_shift($args), true, true);
+        $cmd = Process::escape(array_shift($args), true, true);
         foreach ($args as $arg) {
-            $cmd .= ' '.$this->escape($arg);
+            $cmd .= ' '.Process::escape($arg);
         }
 
         return $cmd;
@@ -270,13 +276,14 @@ class XdebugHandler
      * Returns true if the restart environment variables were set
      *
      * @param bool  $scannedInis Whether there were scanned ini files
+     * @param false|string $scanDir PHP_INI_SCAN_DIR environment variable
      * @param array $iniFiles All ini files used in the current process
      *
      * @return bool
      */
-    private function setEnvironment($scannedInis, array $iniFiles)
+    private function setEnvironment($scannedInis, $scanDir, array $iniFiles)
     {
-        // Set scan dir to an empty value if there were any scanned ini files
+        // Set scan dir env to an empty value if there were scanned ini files
         if ($scannedInis && !putenv('PHP_INI_SCAN_DIR=')) {
             return false;
         }
@@ -289,128 +296,45 @@ class XdebugHandler
         // Flag restarted process and save values for it to use
         $envArgs = array(
             self::RESTART_ID,
-            $this->version,
+            $this->loaded,
             intval($scannedInis),
         );
 
-        if ($scannedInis && false !== $this->envScanDir) {
+        if ($scannedInis && false !== $scanDir) {
             // Only add original scan dir if it was set
-            $envArgs[] = $this->envScanDir;
+            $envArgs[] = $scanDir;
         }
 
         return putenv($this->envAllowXdebug.'='.implode('|', $envArgs));
     }
 
     /**
-     * Returns the restart arguments, appending a color option if required
+     * Creates a Status instance if one is required
      *
-     * We are running in a terminal with color support, but the restarted
-     * process cannot know this because its output is piped. Providing a color
-     * option signifies that color output is supported.
-     *
-     * @param array $args The argv array
-     * @param $colorOption The long option to force color output
-     *
-     * @return array
      */
-    private function addColorOption(array $args, $colorOption)
+    private function initStatusWriter()
     {
-        if (in_array($colorOption, $args)
-            || !preg_match('/^--([a-z]+$)|(^--[a-z]+=)/', $colorOption, $matches)) {
-            return $args;
+        if (!$this->cli || !in_array('-vvv', $_SERVER['argv'])) {
+            return;
         }
 
-        if (isset($matches[2])) {
-            // Handle --color(s)= options. Note args[0] is the script name
-            if ($index = array_search($matches[2].'auto', $args)) {
-                $args[$index] = $colorOption;
-                return $args;
-            } elseif (preg_grep('/^'.$matches[2].'/', $args)) {
-                return $args;
-            }
-        } elseif (in_array('--no-'.$matches[1], $args)) {
-            return $args;
-        }
+        $start = getenv(Status::ENV_RESTART);
+        $time = $start ? round((microtime(true) - $start) * 1000) : 0;
+        putenv(Status::ENV_RESTART);
 
-        $args[] = $colorOption;
-        return $args;
+        $this->writer = new Status($this->loaded, $this->envAllowXdebug, $time);
     }
 
     /**
-     * Escapes a string to be used as a shell argument.
+     * Prints verbose status messages
      *
-     * From https://github.com/johnstevenson/winbox-args
-     * MIT Licensed (c) John Stevenson <john-stevenson@blueyonder.co.uk>
-     *
-     * @param string $arg  The argument to be escaped
-     * @param bool   $meta Additionally escape cmd.exe meta characters
-     * @param bool $module The argument is the module to invoke
-     *
-     * @return string The escaped argument
+     * @param string $op Status handler constant
+     * @param null|string $data Optional data
      */
-    private function escape($arg, $meta = true, $module = false)
+    private function write($op, $data = null)
     {
-        if (!defined('PHP_WINDOWS_VERSION_BUILD')) {
-            return escapeshellarg($arg);
+        if ($this->writer) {
+            $this->writer->report($op, $data);
         }
-
-        $quote = strpbrk($arg, " \t") !== false || $arg === '';
-        $arg = preg_replace('/(\\\\*)"/', '$1$1\\"', $arg, -1, $dquotes);
-
-        if ($meta) {
-            $meta = $dquotes || preg_match('/%[^%]+%/', $arg);
-
-            if (!$meta) {
-                $quote = $quote || strpbrk($arg, '^&|<>()') !== false;
-            } elseif ($module && !$dquotes && $quote) {
-                $meta = false;
-            }
-        }
-
-        if ($quote) {
-            $arg = preg_replace('/(\\\\*)$/', '$1$1', $arg);
-            $arg = '"'.$arg.'"';
-        }
-
-        if ($meta) {
-            $arg = preg_replace('/(["^&|<>()%])/', '^$1', $arg);
-        }
-
-        return $arg;
-    }
-
-    /**
-     * Returns true if the output stream supports colors
-     *
-     * This is tricky on Windows, because Cygwin, Msys2 etc emulate pseudo
-     * terminals via named pipes, so we can only check the environment.
-     *
-     * @param mixed $output A valid output stream
-     *
-     * @return bool
-     */
-    private function outputSupportsColor($output)
-    {
-        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
-            // Switch on vt100 support if we can
-            if (function_exists('sapi_windows_vt100_support')
-                && sapi_windows_vt100_support($output, true)) {
-                return true;
-            }
-
-            return (false !== getenv('ANSICON')
-                || 'ON' === getenv('ConEmuANSI')
-                || 'xterm' === getenv('TERM'));
-        }
-
-        if (function_exists('stream_isatty')) {
-            return stream_isatty($output);
-        } elseif (function_exists('posix_isatty')) {
-            return posix_isatty($output);
-        }
-
-        $stat = fstat($output);
-        // Check if formatted mode is S_IFCHR
-        return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
     }
 }

@@ -14,7 +14,7 @@ namespace Composer\XdebugHandler;
 use Composer\XdebugHandler\Helpers\BaseTestCase;
 use Composer\XdebugHandler\Helpers\IniHelper;
 use Composer\XdebugHandler\Mocks\CoreMock;
-use Composer\XdebugHandler\Mocks\IniFileMock;
+use Composer\XdebugHandler\Mocks\PartialMock;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4
@@ -68,9 +68,9 @@ class IniFilesTest extends BaseTestCase
         call_user_func(array($ini, $iniFunc));
 
         $loaded = true;
-        $xdebug = IniFileMock::createAndCheck($loaded);
+        $xdebug = PartialMock::createAndCheck($loaded);
 
-        if (!$tmpIni = $xdebug->restartIni) {
+        if (!$tmpIni = $xdebug->getProperty('tmpIni')) {
             $this->fail('The tmpIni file was not created');
         }
 
