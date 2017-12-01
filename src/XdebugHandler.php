@@ -346,7 +346,7 @@ class XdebugHandler
     /**
      * Returns true if the output stream supports colors
      *
-     * This is tricky on Windows, because Cgywin, Msys2 etc emulate pseudo
+     * This is tricky on Windows, because Cygwin, Msys2 etc emulate pseudo
      * terminals via named pipes, so we can only check the environment.
      *
      * @param mixed $output A valid output stream
