@@ -12,8 +12,9 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\XdebugHandler;
+use PHPUnit\Framework\TestCase;
 
-class IniHelperTest extends \PHPUnit\Framework\TestCase
+class IniHelperTest extends TestCase
 {
     public static $envOriginal;
 
