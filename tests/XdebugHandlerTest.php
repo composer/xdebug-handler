@@ -12,13 +12,14 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\XdebugHandlerMock;
+use PHPUnit\Framework\TestCase;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4
  *
  * @requires PHP 5.4
  */
-class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
+class XdebugHandlerTest extends TestCase
 {
     public static $env = array();
 
@@ -117,11 +118,10 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
         $expected = implode('|', $params);
         $this->assertEquals($expected, getenv(XdebugHandlerMock::ENV_ALLOW));
 
-        // Unset scan dir and mimic restart
-        putenv('PHP_INI_SCAN_DIR');
+        // Mimic restart
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals('', getenv('PHP_INI_SCAN_DIR'));
+        $this->assertSame('', getenv('PHP_INI_SCAN_DIR'));
     }
 
     public function testSkippedVersionWhenLoaded()
@@ -130,7 +130,7 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals('', XdebugHandlerMock::getSkippedVersion());
+        $this->assertSame('', XdebugHandlerMock::getSkippedVersion());
 
         // Mimic successful restart
         $loaded = false;
@@ -145,7 +145,7 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
 
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals('', XdebugHandlerMock::getSkippedVersion());
+        $this->assertSame('', XdebugHandlerMock::getSkippedVersion());
     }
 
     public function testSkippedVersionWhenRestartFails()
@@ -158,7 +158,7 @@ class XdebugHandlerTest extends \PHPUnit\Framework\TestCase
         // Mimic failed restart
         $xdebug = new XdebugHandlerMock($loaded);
         $xdebug->check();
-        $this->assertEquals('', XdebugHandlerMock::getSkippedVersion());
+        $this->assertSame('', XdebugHandlerMock::getSkippedVersion());
     }
 
     public static function setUpBeforeClass()
