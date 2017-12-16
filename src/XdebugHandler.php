@@ -371,10 +371,10 @@ class XdebugHandler
             return stream_isatty($output);
         } elseif (function_exists('posix_isatty')) {
             return posix_isatty($output);
-        } else {
-            $stat = fstat($output);
-            // Check if formatted mode is S_IFCHR
-            return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
         }
+
+        $stat = fstat($output);
+        // Check if formatted mode is S_IFCHR
+        return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
     }
 }
