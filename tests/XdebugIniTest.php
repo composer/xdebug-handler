@@ -11,7 +11,7 @@
 
 namespace Composer\XdebugHandler;
 
-use Composer\XdebugHandler\XdebugHandler;
+use Composer\XdebugHandler\XdebugHandlerMock;
 use PHPUnit\Framework\TestCase;
 
 class IniHelperTest extends TestCase
@@ -25,7 +25,7 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandler::getAllIniFiles());
+        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
     }
 
     public function testWithLoadedIniOnly()
@@ -35,7 +35,7 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandler::getAllIniFiles());
+        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
     }
 
     public function testWithLoadedIniAndAdditional()
@@ -47,7 +47,7 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandler::getAllIniFiles());
+        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
     }
 
     public function testWithoutLoadedIniAndAdditional()
@@ -59,27 +59,30 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandler::getAllIniFiles());
+        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
     }
 
     public static function setUpBeforeClass()
     {
         // Save current state
-        self::$envOriginal = getenv(XdebugHandler::ENV_ORIGINAL);
+        self::$envOriginal = getenv(XdebugHandlerMock::ORIGINAL_INIS);
+
+        // Create a new mock object so that the static $name variable is set
+        $xdebug = new XdebugHandlerMock(true);
     }
 
     public static function tearDownAfterClass()
     {
         // Restore original state
         if (false !== self::$envOriginal) {
-            putenv(XdebugHandler::ENV_ORIGINAL.'='.self::$envOriginal);
+            putenv(XdebugHandlerMock::ORIGINAL_INIS.'='.self::$envOriginal);
         } else {
-            putenv(XdebugHandler::ENV_ORIGINAL);
+            putenv(XdebugHandlerMock::ORIGINAL_INIS);
         }
     }
 
     protected function setEnv(array $paths)
     {
-        putenv(XdebugHandler::ENV_ORIGINAL.'='.implode(PATH_SEPARATOR, $paths));
+        putenv(XdebugHandlerMock::ORIGINAL_INIS.'='.implode(PATH_SEPARATOR, $paths));
     }
 }
