@@ -1,6 +1,6 @@
 # composer/xdebug-handler
 
-Restart a CLI process without loading the Xdebug extension.
+Restart a CLI process without loading the xdebug extension.
 
 Originally written as part of [composer/composer](https://github.com/composer/composer),
 now extracted and made available as a stand-alone library.
@@ -34,7 +34,7 @@ The constructor takes two parameters:
 #### _$envPrefix_
 This is used to create distinct environment variables and is upper-cased and prepended to default base values. The above example enables the use of:
 
-- `MYAPP_ALLOW_XDEBUG=1` to skip the restart if xdebug is loaded
+- `MYAPP_ALLOW_XDEBUG=1` to override automatic restart and allow xdebug
 - `MYAPP_ORIGINAL_INIS` to obtain ini file locations in a restarted process
 
 #### _$colorOption_
@@ -45,6 +45,8 @@ If the original command-line contains an argument that pattern-matches this valu
 Do not use this parameter if the input handler cannot cope with an option as the last argument.
 
 ## Advanced Usage
+
+### Ini files
 If the application does anything with ini files, then functions like `php_ini_loaded_file` and `php_ini_scanned_files` will not work correctly in a restarted process.
 
 To make the original locations available, they are saved to the environment variable suffixed `_ORIGINAL_INIS`. This is a path-separated string comprising the location returned from `php_ini_loaded_file`, which could be empty, followed by locations parsed from calling `php_ini_scanned_files`.
@@ -59,6 +61,16 @@ $files = XdebugHandler::getAllIniFiles();
 // $files[0] always exists, it could be an empty string
 $loadedIni = array_shift($files);
 $scannedInis = $files;
+```
+
+### Restarted process
+To determine if the process has been restarted, `XdebugHandler::getSkippedVersion` returns either the xdebug version string that triggered the restart, or an empty value.
+
+```php
+use Composer\XdebugHandler\XdebugHandler;
+
+$version = XdebugHandler::getSkippedVersion();
+// $version: '2.6.0' for example, or '' if no restart
 ```
 
 ## License

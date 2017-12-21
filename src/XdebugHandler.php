@@ -58,7 +58,7 @@ class XdebugHandler
 
         if ($this->loaded) {
             $ext = new \ReflectionExtension('xdebug');
-            $this->version = strval($ext->getVersion());
+            $this->version = $ext->getVersion() ?: 'unknown';
         }
     }
 
