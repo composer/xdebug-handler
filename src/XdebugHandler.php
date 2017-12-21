@@ -35,8 +35,8 @@ class XdebugHandler
      * Constructor
      *
      * The $envPrefix is used to create distinct environment variables. It is
-     * uppercased and prepended to the default base values. For example 'app'
-     * would result in APP_ALLOW_XDEBUG and APP_ORIGINAL_INIS.
+     * uppercased and prepended to the default base values. For example 'myapp'
+     * would result in MYAPP_ALLOW_XDEBUG and MYAPP_ORIGINAL_INIS.
      *
      * @param string $envPrefix Value used in environment variables
      * @param string $colorOption Command-line long option to force color output
@@ -68,10 +68,10 @@ class XdebugHandler
      * If so, then a tmp ini is created with the xdebug ini entry commented out.
      * If additional inis have been loaded, these are combined into the tmp ini
      * and PHP_INI_SCAN_DIR is set to an empty value. Current ini locations are
-     * are stored in APP_ORIGINAL_INIS (where 'APP' is the prefix passed in the
+     * are stored in MYAPP_ORIGINAL_INIS (where 'MYAPP' is the prefix passed in the
      * constructor) for use in the restarted process.
      *
-     * This behaviour can be disabled by setting the APP_ALLOW_XDEBUG
+     * This behaviour can be disabled by setting the MYAPP_ALLOW_XDEBUG
      * environment variable to 1. This variable is used internally so that the
      * restarted process is created only once and PHP_INI_SCAN_DIR can be
      * restored to its original value.
