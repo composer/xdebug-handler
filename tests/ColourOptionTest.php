@@ -14,7 +14,10 @@ namespace Composer\XdebugHandler;
 use Composer\XdebugHandler\XdebugHandler;
 use PHPUnit\Framework\TestCase;
 
-class XdebugColorsTest extends TestCase
+/**
+ * This class does not need to extend Helpers\TestCase
+ */
+class ColorOptionTest extends TestCase
 {
     private $method;
     private $xdebug;

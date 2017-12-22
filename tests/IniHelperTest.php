@@ -11,13 +11,11 @@
 
 namespace Composer\XdebugHandler;
 
-use Composer\XdebugHandler\XdebugHandlerMock;
-use PHPUnit\Framework\TestCase;
+use Composer\XdebugHandler\Helpers\CoreMock;
+use Composer\XdebugHandler\Helpers\TestCase;
 
 class IniHelperTest extends TestCase
 {
-    public static $envOriginal;
-
     public function testWithNoIni()
     {
         $paths = array(
@@ -25,7 +23,7 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
+        $this->assertEquals($paths, CoreMock::getAllIniFiles());
     }
 
     public function testWithLoadedIniOnly()
@@ -35,7 +33,7 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
+        $this->assertEquals($paths, CoreMock::getAllIniFiles());
     }
 
     public function testWithLoadedIniAndAdditional()
@@ -47,7 +45,7 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
+        $this->assertEquals($paths, CoreMock::getAllIniFiles());
     }
 
     public function testWithoutLoadedIniAndAdditional()
@@ -59,30 +57,18 @@ class IniHelperTest extends TestCase
         );
 
         $this->setEnv($paths);
-        $this->assertEquals($paths, XdebugHandlerMock::getAllIniFiles());
+        $this->assertEquals($paths, CoreMock::getAllIniFiles());
     }
 
     public static function setUpBeforeClass()
     {
-        // Save current state
-        self::$envOriginal = getenv(XdebugHandlerMock::ORIGINAL_INIS);
-
+        parent::setUpBeforeClass();
         // Create a new mock object so that the static $name variable is set
-        $xdebug = new XdebugHandlerMock(true);
-    }
-
-    public static function tearDownAfterClass()
-    {
-        // Restore original state
-        if (false !== self::$envOriginal) {
-            putenv(XdebugHandlerMock::ORIGINAL_INIS.'='.self::$envOriginal);
-        } else {
-            putenv(XdebugHandlerMock::ORIGINAL_INIS);
-        }
+        $xdebug = CoreMock::createAndCheck(true);
     }
 
     protected function setEnv(array $paths)
     {
-        putenv(XdebugHandlerMock::ORIGINAL_INIS.'='.implode(PATH_SEPARATOR, $paths));
+        putenv(CoreMock::ORIGINAL_INIS.'='.implode(PATH_SEPARATOR, $paths));
     }
 }
