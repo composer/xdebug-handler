@@ -44,8 +44,8 @@ class XdebugHandler
      */
     public function __construct($envPrefix, $colorOption = '')
     {
-        if (!is_string($envPrefix) || empty($envPrefix)) {
-            throw new \RuntimeException('$envPrefix must be a non-empty string');
+        if (!is_string($envPrefix) || empty($envPrefix) || !is_string($colorOption)) {
+            throw new \RuntimeException('Invalid constructor parameter');
         }
 
         self::$name = strtoupper($envPrefix);

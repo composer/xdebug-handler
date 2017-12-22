@@ -131,6 +131,15 @@ class MainTest extends TestCase
         $xdebug = new XdebugHandler(array('name'));
     }
 
+    /**
+     * @expectedException RuntimeException
+     *
+     */
+    public function testThrowsOnInvalidColorOption()
+    {
+        $xdebug = new XdebugHandler('test', false);
+    }
+
     private function checkRestart($xdebug)
     {
         // We must have been restarted
