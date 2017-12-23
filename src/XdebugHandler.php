@@ -250,13 +250,18 @@ class XdebugHandler
      */
     private function getCommand(array $args)
     {
-        $phpArgs = array(PHP_BINARY, '-c', $this->tmpIni);
-
         if ($this->outputSupportsColor(STDOUT)) {
             $args = $this->addColorOption($args, $this->colorOption);
         }
 
-        return implode(' ', array_map(array($this, 'escape'), array_merge($phpArgs, $args)));
+        $args = array_merge(array(PHP_BINARY, '-c', $this->tmpIni), $args);
+
+        $cmd = $this->escape(array_shift($args), true, true);
+        foreach ($args as $arg) {
+            $cmd .= ' '.$this->escape($arg);
+        }
+
+        return $cmd;
     }
 
     /**
@@ -332,10 +337,11 @@ class XdebugHandler
      *
      * @param string $arg  The argument to be escaped
      * @param bool   $meta Additionally escape cmd.exe meta characters
+     * @param bool $module The argument is the module to invoke
      *
      * @return string The escaped argument
      */
-    private function escape($arg, $meta = true)
+    private function escape($arg, $meta = true, $module = false)
     {
         if (!defined('PHP_WINDOWS_VERSION_BUILD')) {
             return escapeshellarg($arg);
@@ -347,8 +353,10 @@ class XdebugHandler
         if ($meta) {
             $meta = $dquotes || preg_match('/%[^%]+%/', $arg);
 
-            if (!$meta && !$quote) {
-                $quote = strpbrk($arg, '^&|<>()') !== false;
+            if (!$meta) {
+                $quote = $quote || strpbrk($arg, '^&|<>()') !== false;
+            } elseif ($module && !$dquotes && $quote) {
+                $meta = false;
             }
         }
 
