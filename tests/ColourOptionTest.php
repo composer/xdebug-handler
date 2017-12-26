@@ -15,7 +15,7 @@ use Composer\XdebugHandler\XdebugHandler;
 use PHPUnit\Framework\TestCase;
 
 /**
- * This class does not need to extend Helpers\TestCase
+ * This class does not need to extend Helpers\BaseTestCase
  */
 class ColorOptionTest extends TestCase
 {
@@ -37,26 +37,25 @@ class ColorOptionTest extends TestCase
 
     public function testOptionReplaced()
     {
-        $args = array('script.php', 'param');
-        $args[] = '--color=auto';
+        $args = array('script.php', 'param', '--color=auto');
 
         $result = $this->addColorOption($args, '--color=always');
-        $this->assertNotContains('--color=auto', $result);
         $this->assertContains('--color=always', $result);
+        $this->assertNotContains('--color=auto', $result);
     }
 
     public function testOptionNotNeeded()
     {
-        $args = array('script.php', 'param');
-        $args[] = '--no-ansi';
+        $args = array('script.php', 'param', '--no-ansi');
 
         $result = $this->addColorOption($args, '--ansi');
+        $this->assertContains('--no-ansi', $result);
         $this->assertNotContains('--ansi', $result);
 
-        $args = array('script.php', 'param');
-        $args[] = '--colors=something';
+        $args = array('script.php', 'param', '--colors=something');
 
         $result = $this->addColorOption($args, '--colors=always');
+        $this->assertContains('--colors=something', $result);
         $this->assertNotContains('--colors=always', $result);
     }
 

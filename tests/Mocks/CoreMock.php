@@ -9,7 +9,7 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler\Helpers;
+namespace Composer\XdebugHandler\Mocks;
 
 use Composer\XdebugHandler\XdebugHandler;
 
@@ -22,7 +22,7 @@ use Composer\XdebugHandler\XdebugHandler;
  * It does not matter whether xdebug is loaded, because this value is overriden
  * in the constructor.
  *
- * If a temp ini file is created, it is deleted in the destructor.
+ * The tmpIni file is deleted in the destructor.
  */
 class CoreMock extends XdebugHandler
 {
@@ -77,10 +77,7 @@ class CoreMock extends XdebugHandler
     public function __destruct()
     {
         // Delete the tmpIni if one has been created
-        $prop = $this->refClass->getProperty('tmpIni');
-        $prop->setAccessible(true);
-
-        if ($tmpIni = $prop->getValue($this)) {
+        if ($tmpIni = $this->getTmpIni()) {
             @unlink($tmpIni);
         }
     }
@@ -88,5 +85,12 @@ class CoreMock extends XdebugHandler
     protected function restart($command)
     {
         static::createAndCheck(false, null, $this);
+    }
+
+    protected function getTmpIni()
+    {
+        $prop = $this->refClass->getProperty('tmpIni');
+        $prop->setAccessible(true);
+        return $prop->getValue($this);
     }
 }
