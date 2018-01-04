@@ -6,7 +6,7 @@ Originally written as part of [composer/composer](https://github.com/composer/co
 now extracted and made available as a stand-alone library.
 
 [![Build Status](https://travis-ci.org/composer/xdebug-handler.svg?branch=master)](https://travis-ci.org/composer/xdebug-handler)
-[![Build status](https://ci.appveyor.com/api/projects/status/token?svg=true)](https://ci.appveyor.com/project/Seldaek/xdebug-handler)
+[![Build status](https://ci.appveyor.com/api/projects/status/a5eb3gm7arlfdhso?svg=true)](https://ci.appveyor.com/project/Seldaek/xdebug-handler)
 
 ## Installation
 
