@@ -73,5 +73,8 @@ $version = XdebugHandler::getSkippedVersion();
 // $version: '2.6.0' for example, or '' if no restart
 ```
 
+### Output
+The library is silent unless the `-vvv` command-line option is present, which results in the output of simple status messages.
+
 ## License
 composer/xdebug-handler is licensed under the MIT License, see the LICENSE file for details.

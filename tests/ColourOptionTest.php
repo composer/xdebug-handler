@@ -11,7 +11,7 @@
 
 namespace Composer\XdebugHandler;
 
-use Composer\XdebugHandler\XdebugHandler;
+use Composer\XdebugHandler\Process;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,69 +19,90 @@ use PHPUnit\Framework\TestCase;
  */
 class ColorOptionTest extends TestCase
 {
-    private $method;
-    private $xdebug;
-
-    public function testOptionNeeded()
+    /**
+     * Tests that a colorOption is added to the arguments
+     *
+     * @dataProvider neededProvider
+     */
+    public function testOptionNeeded($colorOption)
     {
         $args = array('script.php', 'param');
 
-        $result = $this->addColorOption($args, '--colors');
-        $this->assertContains('--colors', $result);
-
-        $args = array('script.php', 'param');
-
-        $result = $this->addColorOption($args, '--colors=always');
-        $this->assertContains('--colors=always', $result);
+        $result = Process::addColorOption($args, $colorOption);
+        $this->assertContains($colorOption, $result);
     }
 
+    public function neededProvider()
+    {
+        // $colorOption
+        return array(
+            'simple' => array('--xxx'),
+            'complex' => array('--xxx=yyy'),
+        );
+    }
+
+    /**
+     * Tests that a colorOption is not added to the arguments because it matches
+     * an existing argument.
+     *
+     * @dataProvider notNeededProvider
+     */
+    public function testOptionNotNeeded($existing, $colorOption)
+    {
+        $args = array('script.php', 'param');
+        $args[] = $existing;
+
+        $result = Process::addColorOption($args, $colorOption);
+        $this->assertContains($existing, $result);
+        $this->assertNotContains($colorOption, $result);
+    }
+
+    public function notNeededProvider()
+    {
+        // $existing, $colorOption
+        return array(
+            'simple' => array('--no-xxx', '--xxx'),
+            'complex' => array('--xxx=zzz', '--xxx=yyy'),
+        );
+    }
+
+    /**
+     * Tests that a colorOption is not added to the arguments because it does
+     * not match the required format.
+     *
+     * @dataProvider notMatchedProvider
+     */
+    public function testOptionNotMatched($colorOption)
+    {
+        $args = array('script.php', 'param');
+
+        $result = Process::addColorOption($args, $colorOption);
+        $this->assertNotContains($colorOption, $result);
+    }
+
+    public function notMatchedProvider()
+    {
+        // $colorOption
+        return array(
+            'simple1' => array('xxx'),
+            'simple2' => array('-xxx'),
+            'complex1' => array('xxx=yyy'),
+            'complex2' => array('-xxx=yyy'),
+        );
+    }
+
+    /**
+     * Tests that a colorOption matching xxx=auto is replaced.
+     */
     public function testOptionReplaced()
     {
-        $args = array('script.php', 'param', '--color=auto');
-
-        $result = $this->addColorOption($args, '--color=always');
-        $this->assertContains('--color=always', $result);
-        $this->assertNotContains('--color=auto', $result);
-    }
-
-    public function testOptionNotNeeded()
-    {
-        $args = array('script.php', 'param', '--no-ansi');
-
-        $result = $this->addColorOption($args, '--ansi');
-        $this->assertContains('--no-ansi', $result);
-        $this->assertNotContains('--ansi', $result);
-
-        $args = array('script.php', 'param', '--colors=something');
-
-        $result = $this->addColorOption($args, '--colors=always');
-        $this->assertContains('--colors=something', $result);
-        $this->assertNotContains('--colors=always', $result);
-    }
-
-    public function testOptionNotMatched()
-    {
         $args = array('script.php', 'param');
+        $existing = '--xxx=auto';
+        $colorOption = '--xxx=always';
+        $args[] = $existing;
 
-        $result = $this->addColorOption($args, '---ansi');
-        $this->assertNotContains('---ansi', $result);
-
-        $args = array('script.php', 'param');
-
-        $result = $this->addColorOption($args, '---colors=always');
-        $this->assertNotContains('---colors=always', $result);
-    }
-
-    protected function setUp()
-    {
-        $this->xdebug = new XdebugHandler('test');
-        $class = new \ReflectionClass($this->xdebug);
-        $this->method = $class->getMethod('addColorOption');
-        $this->method->setAccessible(true);
-    }
-
-    private function addColorOption(array $args, $colorOption)
-    {
-        return $this->method->invoke($this->xdebug, $args, $colorOption);
+        $result = Process::addColorOption($args, $colorOption);
+        $this->assertContains($colorOption, $result);
+        $this->assertNotContains($existing, $result);
     }
 }

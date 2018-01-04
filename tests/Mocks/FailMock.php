@@ -19,6 +19,6 @@ class FailMock extends CoreMock
 {
     protected function restart($command)
     {
-        static::createAndCheck(true, null, $this);
+        static::createAndCheck(true, $this);
     }
 }
