@@ -74,7 +74,18 @@ $version = XdebugHandler::getSkippedVersion();
 ```
 
 ### Output
-The library is silent unless the `-vvv` command-line option is present, which results in the output of simple status messages.
+The `setLogger` method enables the output of status messages to an external PSR3 logger, with either `DEBUG` or `WARNING` log levels. Alternatively, a CLI logger is available that writes these messages to `stdout` when running in a CLI process.
+
+```php
+use Composer\XdebugHandler\XdebugHandler;
+
+$xdebug = new XdebugHandler('myapp');
+// Provide a PSR3 logger
+$xdebug->setLogger($myLogger);
+
+// Or use the CLI logger if appropriate
+$xdebug->setLogger(new Composer\XdebugHandler\CliLogger);
+```
 
 ## License
 composer/xdebug-handler is licensed under the MIT License, see the LICENSE file for details.

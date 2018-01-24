@@ -21,25 +21,15 @@ use Composer\XdebugHandler\Mocks\CoreMock;
  */
 class StatusTest extends BaseTestCase
 {
-    public function testVerboseOptionLoaded()
+    public function testSetLoggerProvidesOutput()
     {
         $loaded = true;
-        $_SERVER['argv'][] = '-vvv';
 
-        $xdebug = CoreMock::createAndCheck($loaded);
+        $logger = new CliLogger();
+        $settings = array('setLogger' => array($logger));
+
+        $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
-
-        $output = $this->getActualOutput();
-        $this->assertNotEmpty($output);
-    }
-
-    public function testVerboseOptionNotLoaded()
-    {
-        $loaded = false;
-        $_SERVER['argv'][] = '-vvv';
-
-        $xdebug = CoreMock::createAndCheck($loaded);
-        $this->checkNoRestart($xdebug);
 
         $output = $this->getActualOutput();
         $this->assertNotEmpty($output);
@@ -53,5 +43,6 @@ class StatusTest extends BaseTestCase
 
     protected function emptyOutputCallback()
     {
+        // Noop - needed to suppress the output in PHPUnit
     }
 }
