@@ -18,8 +18,6 @@ namespace Composer\XdebugHandler;
  */
 class Process
 {
-    private static $colorSupport;
-
     /**
      * Returns the process arguments, appending a color option if required
      *

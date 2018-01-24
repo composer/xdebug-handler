@@ -12,6 +12,7 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Helpers\Logger;
 use Composer\XdebugHandler\Mocks\CoreMock;
 
 /**
@@ -21,7 +22,18 @@ use Composer\XdebugHandler\Mocks\CoreMock;
  */
 class StatusTest extends BaseTestCase
 {
-    public function testVerboseOptionLoaded()
+    public function testNoDefaultOutput()
+    {
+        $loaded = true;
+
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkRestart($xdebug);
+
+        $output = $this->getActualOutput();
+        $this->assertEmpty($output);
+    }
+
+    public function testVerboseOptionShowsOutput()
     {
         $loaded = true;
         $_SERVER['argv'][] = '-vvv';
@@ -33,16 +45,33 @@ class StatusTest extends BaseTestCase
         $this->assertNotEmpty($output);
     }
 
-    public function testVerboseOptionNotLoaded()
+    public function testSetLoggerOverridesOutput()
     {
-        $loaded = false;
+        $loaded = true;
         $_SERVER['argv'][] = '-vvv';
 
-        $xdebug = CoreMock::createAndCheck($loaded);
-        $this->checkNoRestart($xdebug);
+        $logger = new Logger();
+        $settings = array('setLogger' => array($logger));
+
+        $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
+        $this->checkRestart($xdebug);
+
+        $this->assertNotEmpty($logger->getOutput());
+        $output = $this->getActualOutput();
+        $this->assertEmpty($output);
+    }
+
+    public function testSetLoggerNullDisablesOutput()
+    {
+        $loaded = true;
+        $_SERVER['argv'][] = '-vvv';
+
+        $settings = array('setLogger' => array(null));
+        $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
+        $this->checkRestart($xdebug);
 
         $output = $this->getActualOutput();
-        $this->assertNotEmpty($output);
+        $this->assertEmpty($output);
     }
 
     protected function setUp()

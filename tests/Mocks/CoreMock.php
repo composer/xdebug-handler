@@ -35,8 +35,9 @@ class CoreMock extends XdebugHandler
 
     protected $childProcess;
     protected $refClass;
+    protected static $settings;
 
-    public static function createAndCheck($loaded, $parentProcess = null)
+    public static function createAndCheck($loaded, $parentProcess = null, $settings = array())
     {
         $xdebug = new static($loaded);
 
@@ -45,6 +46,12 @@ class CoreMock extends XdebugHandler
             $xdebug->restarted = true;
             $parentProcess->childProcess = $xdebug;
         }
+
+        foreach ($settings as $method => $args) {
+            call_user_func_array(array($xdebug, $method), $args);
+        }
+
+        static::$settings = $settings;
 
         $xdebug->check();
         return $xdebug->childProcess ?: $xdebug;
@@ -91,6 +98,6 @@ class CoreMock extends XdebugHandler
 
     protected function restart($command)
     {
-        static::createAndCheck(false, $this);
+        static::createAndCheck(false, $this, static::$settings);
     }
 }
