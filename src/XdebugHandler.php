@@ -237,12 +237,12 @@ class XdebugHandler
             $content .= $data.PHP_EOL;
         }
 
-        $content .= 'allow_url_fopen='.ini_get('allow_url_fopen').PHP_EOL;
-        $content .= 'disable_functions="'.ini_get('disable_functions').'"'.PHP_EOL;
-        $content .= 'memory_limit='.ini_get('memory_limit').PHP_EOL;
+        $loaded = ini_get_all(null, false);
+        $config = parse_ini_string($content);
+        $content .= $this->mergeLoadedConfig($loaded, $config);
 
         if (defined('PHP_WINDOWS_VERSION_BUILD')) {
-            // Work-around for PHP windows bug, see issue #6052
+            // Work-around for PHP windows bug, see composer issue #6052
             $content .= 'opcache.enable_cli=0'.PHP_EOL;
         }
 
@@ -336,5 +336,39 @@ class XdebugHandler
         if ($this->writer) {
             $this->writer->report($op, $data);
         }
+    }
+
+    /**
+     * Returns default or changed settings for the tmp ini
+     *
+     * Ini settings can be passed on the command line using the -d option. To
+     * preserve these, all loaded settings that are either not present or
+     * different from those in the ini files are added at the end of the tmp ini.
+     *
+     * @param array $loadedConfig All current ini settings
+     * @param array $iniConfig Settings from user ini files
+     *
+     * @return string
+     */
+    private function mergeLoadedConfig(array $loadedConfig, array $iniConfig)
+    {
+        $content = '';
+
+        foreach ($loadedConfig as $name => $value) {
+            // Values will either be null, string or array (HHVM only)
+            if (!is_string($value) || strpos($name, 'xdebug') === 0) {
+                continue;
+            }
+
+            if (!isset($iniConfig[$name]) || $iniConfig[$name] !== $value) {
+                // Based on main -d option handling in php-src/sapi/cli/php_cli.c
+                if ($value && !ctype_alnum($value)) {
+                    $value = '"'.str_replace('"', '\\"', $value).'"';
+                }
+                $content .= $name.'='.$value.PHP_EOL;
+            }
+        }
+
+        return $content;
     }
 }

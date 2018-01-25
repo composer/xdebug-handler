@@ -70,15 +70,7 @@ class IniFilesTest extends BaseTestCase
         $loaded = true;
         $xdebug = PartialMock::createAndCheck($loaded);
 
-        if (!$tmpIni = $xdebug->getProperty('tmpIni')) {
-            $this->fail('The tmpIni file was not created');
-        }
-
-        if (!file_exists($tmpIni)) {
-            $this->fail($tmpIni.' does not exist');
-        }
-
-        $content = file_get_contents($tmpIni);
+        $content = $this->getTmpIniContent($xdebug);
         $regex = '/^\s*;zend_extension\s*=.*xdebug.*$/mi';
         $result = preg_match_all($regex, $content);
         $this->assertSame($result, $matches);
@@ -93,5 +85,50 @@ class IniFilesTest extends BaseTestCase
             'scanned-inis' => array('setScannedInis', 1),
             'all-inis' => array('setAllInis', 2),
         );
+    }
+
+    /**
+     * Tests that default and changed values are present in the tmp ini
+     *
+     */
+    public function testMergeInis()
+    {
+        $ini = new IniHelper();
+        $ini->setAllInis();
+
+        // Mock user -d setting
+        $timezone = 'Antarctica/McMurdo';
+        ini_set('date.timezone', $timezone);
+
+        $loaded = true;
+        $xdebug = PartialMock::createAndCheck($loaded);
+
+        $content = $this->getTmpIniContent($xdebug);
+        $config = parse_ini_string($content);
+        $this->assertArrayHasKey('date.timezone', $config);
+        $this->assertEquals($timezone, $config['date.timezone']);
+
+        // Check a default value
+        $this->assertArrayHasKey('date.sunrise_zenith', $config);
+    }
+
+    /**
+     * Common method to get mocked tmp ini content
+     *
+     * @param mixed $xdebug
+     */
+    private function getTmpIniContent(PartialMock $xdebug)
+    {
+        $tmpIni = $xdebug->getProperty('tmpIni');
+
+        if (!$tmpIni = $xdebug->getProperty('tmpIni')) {
+            $this->fail('The tmpIni file was not created');
+        }
+
+        if (!file_exists($tmpIni)) {
+            $this->fail($tmpIni.' does not exist');
+        }
+
+        return file_get_contents($tmpIni);
     }
 }
