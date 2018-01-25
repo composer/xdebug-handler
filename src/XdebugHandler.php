@@ -11,6 +11,8 @@
 
 namespace Composer\XdebugHandler;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
  */
@@ -28,6 +30,7 @@ class XdebugHandler
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    private $time;
     private $tmpIni;
     private $writer;
 
@@ -64,6 +67,21 @@ class XdebugHandler
     }
 
     /**
+     * Sets a Psr3 logger or disables output
+     *
+     * @param LoggerInterface|null $logger
+     */
+    public function setLogger($logger)
+    {
+        if ($logger) {
+            $this->initStatusWriter($logger);
+        } else {
+            // Can only be unset here, not in initStatusWriter
+            $this->writer = null;
+        }
+    }
+
+    /**
      * Checks if xdebug is loaded and composer needs to be restarted
      *
      * If so, then a tmp ini is created with the xdebug ini entry commented out.
@@ -79,10 +97,7 @@ class XdebugHandler
      */
     public function check()
     {
-        if (!$this->cli) {
-            return;
-        }
-
+        $this->write(Status::CHECK);
         $envArgs = explode('|', strval(getenv($this->envAllowXdebug)), 4);
 
         if ($this->loaded && empty($envArgs[0])) {
@@ -91,6 +106,7 @@ class XdebugHandler
 
             if ($this->prepareRestart()) {
                 $command = $this->getCommand($_SERVER['argv']);
+                $this->write(Status::RESTARTING);
                 $this->restart($command);
             }
             return;
@@ -167,7 +183,6 @@ class XdebugHandler
      */
     protected function restart($command)
     {
-        $this->write(Status::RESTARTING);
         passthru($command, $exitCode);
 
         if (!empty($this->tmpIni)) {
@@ -194,10 +209,13 @@ class XdebugHandler
         $scannedInis = count($iniFiles) > 1;
         $scanDir = getenv('PHP_INI_SCAN_DIR');
 
-        if (!defined('PHP_BINARY')) {
+        if (!$this->cli) {
+            // Will only be output to a logger
+            $error = 'Unsupported SAPI: '.PHP_SAPI;
+        } elseif (!defined('PHP_BINARY')) {
             $error = 'PHP version is too old: '.PHP_VERSION;
         } elseif (!$this->writeTmpIni($iniFiles)) {
-            $error = 'Unable to create tmp ini file';
+            $error = 'Unable to create temporary ini file';
         } elseif (!$this->setEnvironment($scannedInis, $scanDir, $iniFiles)) {
             $error = 'Unable to set environment variables';
         }
@@ -309,20 +327,25 @@ class XdebugHandler
     }
 
     /**
-     * Creates a Status instance if one is required
+     * Creates a Status writer instance if one is required
      *
+     * @param LoggerInterface $logger Output to logger instead of stdout
      */
-    private function initStatusWriter()
+    private function initStatusWriter(LoggerInterface $logger = null)
     {
-        if (!$this->cli || !in_array('-vvv', $_SERVER['argv'])) {
+        if (null === $this->time) {
+            $start = getenv(Status::ENV_RESTART);
+            putenv(Status::ENV_RESTART);
+            $this->time = $start ? round((microtime(true) - $start) * 1000) : 0;
+        }
+
+        if ((!$this->cli && !$logger)
+            || !(in_array('-vvv', $_SERVER['argv']) || $logger)) {
+            $this->writer = null;
             return;
         }
 
-        $start = getenv(Status::ENV_RESTART);
-        $time = $start ? round((microtime(true) - $start) * 1000) : 0;
-        putenv(Status::ENV_RESTART);
-
-        $this->writer = new Status($this->loaded, $this->envAllowXdebug, $time);
+        $this->writer = new Status($this->loaded, $this->envAllowXdebug, $this->time, $logger);
     }
 
     /**

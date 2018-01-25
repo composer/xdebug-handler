@@ -11,12 +11,16 @@
 
 namespace Composer\XdebugHandler;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+
 /**
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
  */
 class Status
 {
     const ENV_RESTART = 'XDEBUG_HANDLER_RESTART';
+    const CHECK = 'Check';
     const ERROR = 'Error';
     const NORESTART = 'NoRestart';
     const RESTART = 'Restart';
@@ -25,6 +29,7 @@ class Status
 
     private $envAllowXdebug;
     private $loaded;
+    private $logger;
     private $time;
 
     /**
@@ -33,12 +38,14 @@ class Status
      * @param string $loaded The loaded xdebug version
      * @param string $envAllowXdebug Prefixed _ALLOW_XDEBUG name
      * @param integer $time Elapsed restart time
+     * @param LoggerInterface $logger Optional logger to replace stdout output
      */
-    public function __construct($loaded, $envAllowXdebug, $time)
+    public function __construct($loaded, $envAllowXdebug, $time, LoggerInterface $logger = null)
     {
         $this->loaded = $loaded;
         $this->envAllowXdebug = $envAllowXdebug;
         $this->time = $time;
+        $this->logger = $logger;
     }
 
     /**
@@ -54,19 +61,31 @@ class Status
     }
 
     /**
-     * Prints a status message line
+     * Prints or logs a status message
      *
      * @param string $text
+     * @param string $level
      */
-    private function output($text)
+    private function output($text, $level = null)
     {
-        $format = 'xdebug-handler: %s%s';
-        printf($format, $text, PHP_EOL);
+        $text = sprintf('xdebug-handler: %s', $text);
+
+        if ($this->logger) {
+            $level = $level ?: LogLevel::INFO;
+            $this->logger->log($level, $text);
+        } else {
+            print($text.PHP_EOL);
+        }
+    }
+
+    private function reportCheck()
+    {
+        $this->output('Checking '.$this->envAllowXdebug);
     }
 
     private function reportError($error)
     {
-        $this->output(sprintf("No restart (%s)", $error));
+        $this->output(sprintf("No restart (%s)", $error), LogLevel::ERROR);
     }
 
     private function reportNoRestart()
@@ -81,15 +100,16 @@ class Status
 
     private function reportRestart()
     {
-        putenv(self::ENV_RESTART.'='.strval(microtime(true)));
         $this->output($this->getLoadedMessage());
+        putenv(self::ENV_RESTART.'='.strval(microtime(true)));
     }
 
     private function reportRestarted()
     {
         $loaded = $this->getLoadedMessage();
         $text = sprintf('Restarted (%d ms). %s', $this->time, $loaded);
-        $this->output($text);
+        $level = $this->loaded ? LogLevel::ERROR : null;
+        $this->output($text, $level);
     }
 
     private function reportRestarting()
