@@ -11,7 +11,9 @@
 
 namespace Composer\XdebugHandler;
 
+use Psr\Log\LogLevel;
 use Composer\XdebugHandler\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Helpers\Logger;
 use Composer\XdebugHandler\Mocks\CoreMock;
 
 /**
@@ -25,24 +27,31 @@ class StatusTest extends BaseTestCase
     {
         $loaded = true;
 
-        $logger = new CliLogger();
+        $logger = new Logger();
         $settings = array('setLogger' => array($logger));
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
 
-        $output = $this->getActualOutput();
+        $output = $logger->getOutput();
         $this->assertNotEmpty($output);
+        $this->checkStatusOutput($output);
     }
 
-    protected function setUp()
+    /**
+     * Assertions to check the status message and logging formats
+     *
+     * @param array $output
+     */
+    protected function checkStatusOutput(array $output)
     {
-        parent::setUp();
-        $this->setOutputCallback(array($this, 'emptyOutputCallback'));
-    }
+        $levels = array(LogLevel::DEBUG, LogLevel::WARNING);
 
-    protected function emptyOutputCallback()
-    {
-        // Noop - needed to suppress the output in PHPUnit
+        foreach ($output as $record) {
+            $this->assertCount(3, $record);
+            $this->assertContains($record[0], $levels);
+            $this->assertStringStartsWith('xdebug-handler: ', $record[1]);
+            $this->assertCount(0, $record[2]);
+        }
     }
 }

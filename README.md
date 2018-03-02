@@ -74,7 +74,7 @@ $version = XdebugHandler::getSkippedVersion();
 ```
 
 ### Output
-The `setLogger` method enables the output of status messages to an external PSR3 logger, with either `DEBUG` or `WARNING` log levels. Alternatively, a CLI logger is available that writes these messages to `stdout` when running in a CLI process.
+The `setLogger` method enables the output of status messages to an external PSR3 logger.
 
 ```php
 use Composer\XdebugHandler\XdebugHandler;
@@ -82,9 +82,20 @@ use Composer\XdebugHandler\XdebugHandler;
 $xdebug = new XdebugHandler('myapp');
 // Provide a PSR3 logger
 $xdebug->setLogger($myLogger);
+```
 
-// Or use the CLI logger if appropriate
-$xdebug->setLogger(new Composer\XdebugHandler\CliLogger);
+All messages are prefixed `xdebug-handler:` and are reported with either `DEBUG` or `WARNING` log levels. No context data is provided. For example:
+
+```
+// Restart overridden
+DEBUG    xdebug-handler: Checking MYAPP_ALLOW_XDEBUG
+DEBUG    xdebug-handler: The xdebug extension is loaded (2.5.0)
+DEBUG    xdebug-handler: No restart (MYAPP_ALLOW_XDEBUG=1)
+
+// Failed restart
+DEBUG    xdebug-handler: Checking MYAPP_ALLOW_XDEBUG
+DEBUG    xdebug-handler: The xdebug extension is loaded (2.5.0)
+WARNING  xdebug-handler: No restart (Unable to create temporary ini file)
 ```
 
 ## License
