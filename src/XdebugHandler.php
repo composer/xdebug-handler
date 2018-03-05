@@ -250,10 +250,8 @@ class XdebugHandler
         $config = parse_ini_string($content);
         $content .= $this->mergeLoadedConfig($loaded, $config);
 
-        if (defined('PHP_WINDOWS_VERSION_BUILD')) {
-            // Work-around for PHP windows bug, see composer issue #6052
-            $content .= 'opcache.enable_cli=0'.PHP_EOL;
-        }
+        // Work-around for https://bugs.php.net/bug.php?id=75932
+        $content .= 'opcache.enable_cli=0'.PHP_EOL;
 
         return @file_put_contents($this->tmpIni, $content);
     }
