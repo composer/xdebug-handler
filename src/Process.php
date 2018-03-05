@@ -18,8 +18,6 @@ namespace Composer\XdebugHandler;
  */
 class Process
 {
-    private static $colorSupport;
-
     /**
      * Returns the process arguments, appending a color option if required
      *
@@ -104,22 +102,18 @@ class Process
      * This is tricky on Windows, because Cygwin, Msys2 etc emulate pseudo
      * terminals via named pipes, so we can only check the environment.
      *
-     * @param mixed $output A valid output stream
+     * @param mixed $output A valid CLI output stream
      *
      * @return bool
      */
     public static function supportsColor($output)
     {
         if (defined('PHP_WINDOWS_VERSION_BUILD')) {
-            // Switch on vt100 support if we can
-            if (function_exists('sapi_windows_vt100_support')
-                && sapi_windows_vt100_support($output, true)) {
-                return true;
-            }
-
-            return (false !== getenv('ANSICON')
+            return (function_exists('sapi_windows_vt100_support')
+                && sapi_windows_vt100_support($output))
+                || false !== getenv('ANSICON')
                 || 'ON' === getenv('ConEmuANSI')
-                || 'xterm' === getenv('TERM'));
+                || 'xterm' === getenv('TERM');
         }
 
         if (function_exists('stream_isatty')) {
