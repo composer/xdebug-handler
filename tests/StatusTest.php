@@ -50,7 +50,6 @@ class StatusTest extends BaseTestCase
         foreach ($output as $record) {
             $this->assertCount(3, $record);
             $this->assertContains($record[0], $levels);
-            $this->assertStringStartsWith('xdebug-handler: ', $record[1]);
             $this->assertCount(0, $record[2]);
         }
     }
