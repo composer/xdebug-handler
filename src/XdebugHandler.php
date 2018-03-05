@@ -11,6 +11,8 @@
 
 namespace Composer\XdebugHandler;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
  */
@@ -28,8 +30,8 @@ class XdebugHandler
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    private $statusWriter;
     private $tmpIni;
-    private $writer;
 
     /**
      * Constructor
@@ -40,7 +42,7 @@ class XdebugHandler
      *
      * @param string $envPrefix Value used in environment variables
      * @param string $colorOption Command-line long option to force color output
-     * @throws RuntimeException If $envPrefix is not a non-empty string
+     * @throws RuntimeException If a parameter is invalid
      */
     public function __construct($envPrefix, $colorOption = '')
     {
@@ -59,8 +61,16 @@ class XdebugHandler
             $ext = new \ReflectionExtension('xdebug');
             $this->loaded = $ext->getVersion() ?: 'unknown';
         }
+    }
 
-        $this->initStatusWriter();
+    /**
+     * Activates status message output to a PSR3 logger
+     *
+     * @param LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->statusWriter = new Status($logger, $this->loaded, $this->envAllowXdebug);
     }
 
     /**
@@ -79,18 +89,16 @@ class XdebugHandler
      */
     public function check()
     {
-        if (!$this->cli) {
-            return;
-        }
-
+        $this->notify(Status::CHECK);
         $envArgs = explode('|', strval(getenv($this->envAllowXdebug)), 4);
 
         if ($this->loaded && empty($envArgs[0])) {
             // Restart required
-            $this->write(Status::RESTART);
+            $this->notify(Status::RESTART);
 
             if ($this->prepareRestart()) {
                 $command = $this->getCommand($_SERVER['argv']);
+                $this->notify(Status::RESTARTING);
                 $this->restart($command);
             }
             return;
@@ -98,7 +106,7 @@ class XdebugHandler
 
         if (self::RESTART_ID === $envArgs[0] && count($envArgs) >= 3) {
             // Restarting, so unset environment variable and extract saved values
-            $this->write(Status::RESTARTED);
+            $this->notify(Status::RESTARTED);
 
             putenv($this->envAllowXdebug);
             $version = $envArgs[1];
@@ -120,7 +128,7 @@ class XdebugHandler
             return;
         }
 
-        $this->write(Status::NORESTART);
+        $this->notify(Status::NORESTART);
     }
 
     /**
@@ -167,7 +175,6 @@ class XdebugHandler
      */
     protected function restart($command)
     {
-        $this->write(Status::RESTARTING);
         passthru($command, $exitCode);
 
         if (!empty($this->tmpIni)) {
@@ -194,16 +201,18 @@ class XdebugHandler
         $scannedInis = count($iniFiles) > 1;
         $scanDir = getenv('PHP_INI_SCAN_DIR');
 
-        if (!defined('PHP_BINARY')) {
+        if (!$this->cli) {
+            $error = 'Unsupported SAPI: '.PHP_SAPI;
+        } elseif (!defined('PHP_BINARY')) {
             $error = 'PHP version is too old: '.PHP_VERSION;
         } elseif (!$this->writeTmpIni($iniFiles)) {
-            $error = 'Unable to create tmp ini file';
+            $error = 'Unable to create temporary ini file';
         } elseif (!$this->setEnvironment($scannedInis, $scanDir, $iniFiles)) {
             $error = 'Unable to set environment variables';
         }
 
         if ($error) {
-            $this->write(Status::ERROR, $error);
+            $this->notify(Status::ERROR, $error);
         }
 
         return empty($error);
@@ -275,7 +284,7 @@ class XdebugHandler
     /**
      * Returns true if the restart environment variables were set
      *
-     * @param bool  $scannedInis Whether there were scanned ini files
+     * @param bool $scannedInis Whether there were scanned ini files
      * @param false|string $scanDir PHP_INI_SCAN_DIR environment variable
      * @param array $iniFiles All ini files used in the current process
      *
@@ -309,32 +318,15 @@ class XdebugHandler
     }
 
     /**
-     * Creates a Status instance if one is required
-     *
-     */
-    private function initStatusWriter()
-    {
-        if (!$this->cli || !in_array('-vvv', $_SERVER['argv'])) {
-            return;
-        }
-
-        $start = getenv(Status::ENV_RESTART);
-        $time = $start ? round((microtime(true) - $start) * 1000) : 0;
-        putenv(Status::ENV_RESTART);
-
-        $this->writer = new Status($this->loaded, $this->envAllowXdebug, $time);
-    }
-
-    /**
-     * Prints verbose status messages
+     * Logs status messages
      *
      * @param string $op Status handler constant
      * @param null|string $data Optional data
      */
-    private function write($op, $data = null)
+    private function notify($op, $data = null)
     {
-        if ($this->writer) {
-            $this->writer->report($op, $data);
+        if ($this->statusWriter) {
+            $this->statusWriter->report($op, $data);
         }
     }
 

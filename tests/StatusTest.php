@@ -11,7 +11,9 @@
 
 namespace Composer\XdebugHandler;
 
+use Psr\Log\LogLevel;
 use Composer\XdebugHandler\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Helpers\Logger;
 use Composer\XdebugHandler\Mocks\CoreMock;
 
 /**
@@ -21,37 +23,35 @@ use Composer\XdebugHandler\Mocks\CoreMock;
  */
 class StatusTest extends BaseTestCase
 {
-    public function testVerboseOptionLoaded()
+    public function testSetLoggerProvidesOutput()
     {
         $loaded = true;
-        $_SERVER['argv'][] = '-vvv';
 
-        $xdebug = CoreMock::createAndCheck($loaded);
+        $logger = new Logger();
+        $settings = array('setLogger' => array($logger));
+
+        $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
 
-        $output = $this->getActualOutput();
+        $output = $logger->getOutput();
         $this->assertNotEmpty($output);
+        $this->checkStatusOutput($output);
     }
 
-    public function testVerboseOptionNotLoaded()
+    /**
+     * Assertions to check the status message and logging formats
+     *
+     * @param array $output
+     */
+    protected function checkStatusOutput(array $output)
     {
-        $loaded = false;
-        $_SERVER['argv'][] = '-vvv';
+        $levels = array(LogLevel::DEBUG, LogLevel::WARNING);
 
-        $xdebug = CoreMock::createAndCheck($loaded);
-        $this->checkNoRestart($xdebug);
-
-        $output = $this->getActualOutput();
-        $this->assertNotEmpty($output);
-    }
-
-    protected function setUp()
-    {
-        parent::setUp();
-        $this->setOutputCallback(array($this, 'emptyOutputCallback'));
-    }
-
-    protected function emptyOutputCallback()
-    {
+        foreach ($output as $record) {
+            $this->assertCount(3, $record);
+            $this->assertContains($record[0], $levels);
+            $this->assertStringStartsWith('xdebug-handler: ', $record[1]);
+            $this->assertCount(0, $record[2]);
+        }
     }
 }

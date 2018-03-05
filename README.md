@@ -74,7 +74,29 @@ $version = XdebugHandler::getSkippedVersion();
 ```
 
 ### Output
-The library is silent unless the `-vvv` command-line option is present, which results in the output of simple status messages.
+The `setLogger` method enables the output of status messages to an external PSR3 logger.
+
+```php
+use Composer\XdebugHandler\XdebugHandler;
+
+$xdebug = new XdebugHandler('myapp');
+// Provide a PSR3 logger
+$xdebug->setLogger($myLogger);
+```
+
+All messages are prefixed `xdebug-handler:` and are reported with either `DEBUG` or `WARNING` log levels. No context data is provided. For example:
+
+```
+// Restart overridden
+DEBUG    xdebug-handler: Checking MYAPP_ALLOW_XDEBUG
+DEBUG    xdebug-handler: The xdebug extension is loaded (2.5.0)
+DEBUG    xdebug-handler: No restart (MYAPP_ALLOW_XDEBUG=1)
+
+// Failed restart
+DEBUG    xdebug-handler: Checking MYAPP_ALLOW_XDEBUG
+DEBUG    xdebug-handler: The xdebug extension is loaded (2.5.0)
+WARNING  xdebug-handler: No restart (Unable to create temporary ini file)
+```
 
 ## License
 composer/xdebug-handler is licensed under the MIT License, see the LICENSE file for details.
