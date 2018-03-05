@@ -18,7 +18,7 @@
 
     <filter>
         <whitelist>
-            <directory>./src/Composer/</directory>
+            <directory>src</directory>
         </whitelist>
     </filter>
 </phpunit>
