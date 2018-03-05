@@ -70,7 +70,6 @@ class Status
      */
     private function output($text, $level = null)
     {
-        $text = sprintf('xdebug-handler: %s', $text);
         $this->logger->log($level ?: LogLevel::DEBUG, $text);
     }
 

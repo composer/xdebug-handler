@@ -84,18 +84,18 @@ $xdebug = new XdebugHandler('myapp');
 $xdebug->setLogger($myLogger);
 ```
 
-All messages are prefixed `xdebug-handler:` and are reported with either `DEBUG` or `WARNING` log levels. No context data is provided. For example:
+All messages are reported with either `DEBUG` or `WARNING` log levels. For example:
 
 ```
 // Restart overridden
-DEBUG    xdebug-handler: Checking MYAPP_ALLOW_XDEBUG
-DEBUG    xdebug-handler: The xdebug extension is loaded (2.5.0)
-DEBUG    xdebug-handler: No restart (MYAPP_ALLOW_XDEBUG=1)
+DEBUG    Checking MYAPP_ALLOW_XDEBUG
+DEBUG    The xdebug extension is loaded (2.5.0)
+DEBUG    No restart (MYAPP_ALLOW_XDEBUG=1)
 
 // Failed restart
-DEBUG    xdebug-handler: Checking MYAPP_ALLOW_XDEBUG
-DEBUG    xdebug-handler: The xdebug extension is loaded (2.5.0)
-WARNING  xdebug-handler: No restart (Unable to create temporary ini file)
+DEBUG    Checking MYAPP_ALLOW_XDEBUG
+DEBUG    The xdebug extension is loaded (2.5.0)
+WARNING  No restart (Unable to create temporary ini file)
 ```
 
 ## License
