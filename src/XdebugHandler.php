@@ -74,7 +74,7 @@ class XdebugHandler
     }
 
     /**
-     * Checks if xdebug is loaded and composer needs to be restarted
+     * Checks if xdebug is loaded and the process needs to be restarted
      *
      * If so, then a tmp ini is created with the xdebug ini entry commented out.
      * If scanned inis have been loaded, these are combined into the tmp ini
