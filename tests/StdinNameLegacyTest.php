@@ -11,16 +11,16 @@ class StdinNameLegacyTest extends TestCase
 {
     public function testReplacesStdin()
     {
-        $args = ['php://stdin', 'asd'];
+        $args = array('php://stdin', 'asd');
         $this->assertEquals(
-            ['--', 'asd'],
+            array('--', 'asd'),
             Process::fixStdinName($args)
         );
     }
 
     public function testScriptFilenameIsLeftIntact()
     {
-        $args = ['script.php', 'asd'];
+        $args = array('script.php', 'asd');
         $this->assertEquals($args, Process::fixStdinName($args));
     }
 }
