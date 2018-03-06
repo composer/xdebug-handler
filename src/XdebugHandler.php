@@ -205,6 +205,8 @@ class XdebugHandler
             $error = 'Unsupported SAPI: '.PHP_SAPI;
         } elseif (!defined('PHP_BINARY')) {
             $error = 'PHP version is too old: '.PHP_VERSION;
+        } elseif (!file_exists($_SERVER['argv'][0])) {
+            $error = 'Directly executed code is not supported';
         } elseif (!$this->writeTmpIni($iniFiles)) {
             $error = 'Unable to create temporary ini file';
         } elseif (!$this->setEnvironment($scannedInis, $scanDir, $iniFiles)) {

@@ -54,4 +54,13 @@ class RestartTest extends BaseTestCase
         $xdebug = FailMock::createAndCheck($loaded);
         $this->checkRestart($xdebug);
     }
+
+    public function testNoRestartWhenLoadedAndNoScript()
+    {
+        $loaded = true;
+        $_SERVER['argv'][0] = '-';
+
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkNoRestart($xdebug);
+    }
 }
