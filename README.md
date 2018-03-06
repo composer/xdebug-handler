@@ -1,12 +1,15 @@
 # composer/xdebug-handler
 
+[![packagist](https://img.shields.io/packagist/v/composer/xdebug-handler.svg)](https://packagist.org/packages/composer/xdebug-handler)
+[![linux build](https://img.shields.io/travis/composer/xdebug-handler/master.svg?label=linux+build)](https://travis-ci.org/composer/xdebug-handler)
+[![windows build](https://img.shields.io/appveyor/ci/Seldaek/xdebug-handler/master.svg?label=windows+build)](https://ci.appveyor.com/project/Seldaek/xdebug-handler)
+![license](https://img.shields.io/github/license/composer/xdebug-handler.svg)
+![php](https://img.shields.io/packagist/php-v/composer/xdebug-handler.svg?colorB=8892BF&label=php)
+
 Restart a CLI process without loading the xdebug extension.
 
 Originally written as part of [composer/composer](https://github.com/composer/composer),
 now extracted and made available as a stand-alone library.
-
-[![Build Status](https://travis-ci.org/composer/xdebug-handler.svg?branch=master)](https://travis-ci.org/composer/xdebug-handler)
-[![Build status](https://ci.appveyor.com/api/projects/status/a5eb3gm7arlfdhso?svg=true)](https://ci.appveyor.com/project/Seldaek/xdebug-handler)
 
 ## Installation
 
