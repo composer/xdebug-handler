@@ -13,6 +13,12 @@
     <testsuites>
         <testsuite name="XdebugHandler Test Suite">
             <directory>tests</directory>
+            <exclude>tests/StdinName72Test.php</exclude>
+            <exclude>tests/StdinNameLegacyTest.php</exclude>
+        </testsuite>
+        <testsuite name="XDebugHandler version-dependent test suite">
+            <file phpVersion="7.2.0">tests/StdinName72Test.php</file>
+            <file phpVersion="7.2.0" phpVersionOperator="&lt;">tests/StdinNameLegacyTest.php</file>
         </testsuite>
     </testsuites>
 

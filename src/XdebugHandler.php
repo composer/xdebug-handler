@@ -271,6 +271,8 @@ class XdebugHandler
             $args = Process::addColorOption($args, $this->colorOption);
         }
 
+        $args = Process::fixStdinName($args);
+
         $args = array_merge(array(PHP_BINARY, '-c', $this->tmpIni), $args);
 
         $cmd = Process::escape(array_shift($args), true, true);

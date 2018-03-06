@@ -126,4 +126,29 @@ class Process
         // Check if formatted mode is S_IFCHR
         return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
     }
+
+    /**
+     * Fixes stdin filename when php is interpreting code on stdin
+     *
+     * Replaces stdin "filename" (which depends on PHP version ) with '--'
+     * to prevent interpreting it and subsequent arguments as script file name.
+     *
+     * @param array $args The argv array
+     * @return array
+     */
+    public static function fixStdinName(array $args)
+    {
+        // before 7.2 stdin input file was named php://stdin
+        // it's named 'Standard input code' since 7.2
+        // see github.com/php/php-src/commit/3ed8b7a87b5383f9ba99a0bbcea6e9fe7a070946
+        $stdinName = PHP_VERSION_ID < 70200
+            ? 'php://stdin'
+            : 'Standard input code';
+
+        if ($args[0] === $stdinName) {
+            $args[0] = '--';
+        }
+
+        return $args;
+    }
 }
