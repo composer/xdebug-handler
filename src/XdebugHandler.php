@@ -22,6 +22,7 @@ class XdebugHandler
     const SUFFIX_INIS = '_ORIGINAL_INIS';
     const RESTART_ID = 'internal';
     const RESTART_SETTINGS = 'XDEBUG_HANDLER_SETTINGS';
+    const DEBUG = 'XDEBUG_HANDLER_DEBUG';
 
     /** @var string|null */
     protected $tmpIni;
@@ -32,6 +33,7 @@ class XdebugHandler
 
     private $cli;
     private $colorOption;
+    private $debug;
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
@@ -61,12 +63,17 @@ class XdebugHandler
         $this->envOriginalInis = self::$name.self::SUFFIX_INIS;
 
         $this->colorOption = $colorOption;
-        $this->cli = PHP_SAPI === 'cli';
 
         if (extension_loaded('xdebug')) {
             $ext = new \ReflectionExtension('xdebug');
             $this->loaded = $ext->getVersion() ?: 'unknown';
         }
+
+        if ($this->cli = PHP_SAPI === 'cli') {
+            $this->debug = getenv(self::DEBUG);
+        }
+
+        $this->statusWriter = new Status($this->envAllowXdebug, (bool) $this->debug);
     }
 
     /**
@@ -78,7 +85,7 @@ class XdebugHandler
      */
     public function setLogger(LoggerInterface $logger)
     {
-        $this->statusWriter = new Status($logger, $this->envAllowXdebug);
+        $this->statusWriter->setLogger($logger);
         return $this;
     }
 
@@ -240,7 +247,9 @@ class XdebugHandler
         passthru($command, $exitCode);
         $this->notify(Status::INFO, 'Restarted process exited '.$exitCode);
 
-        if (!empty($this->tmpIni)) {
+        if ($this->debug === '2') {
+            $this->notify(Status::INFO, 'Temp ini saved: '.$this->tmpIni);
+        } else {
             @unlink($this->tmpIni);
         }
 
@@ -384,9 +393,7 @@ class XdebugHandler
      */
     private function notify($op, $data = null)
     {
-        if ($this->statusWriter) {
-            $this->statusWriter->report($op, $data);
-        }
+        $this->statusWriter->report($op, $data);
     }
 
     /**

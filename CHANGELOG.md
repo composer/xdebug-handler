@@ -1,4 +1,5 @@
 ## [Unreleased]
+  * Added: debug information using `XDEBUG_HANDLER_DEBUG`.
   * Added: fluent interface for setters.
   * Added: `PhpConfig` helper class for calling PHP sub-processes.
   * Added: `PHPRC` original value to restart stettings, for use in a restarted process.

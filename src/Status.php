@@ -29,6 +29,7 @@ class Status
     const RESTARTING = 'Restarting';
     const RESTARTED = 'Restarted';
 
+    private $debug;
     private $envAllowXdebug;
     private $loaded;
     private $logger;
@@ -37,17 +38,25 @@ class Status
     /**
      * Constructor
      *
-     * @param LoggerInterface $logger
      * @param string $envAllowXdebug Prefixed _ALLOW_XDEBUG name
+     * @param bool $debug Whether debug output is required
      */
-    public function __construct(LoggerInterface $logger, $envAllowXdebug)
+    public function __construct($envAllowXdebug, $debug)
     {
         $start = getenv(self::ENV_RESTART);
         Process::setEnv(self::ENV_RESTART);
         $this->time = $start ? round((microtime(true) - $start) * 1000) : 0;
 
-        $this->logger = $logger;
         $this->envAllowXdebug = $envAllowXdebug;
+        $this->debug = $debug;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
     }
 
     /**
@@ -58,19 +67,26 @@ class Status
      */
     public function report($op, $data)
     {
-        $func = array($this, 'report'.$op);
-        call_user_func($func, $data);
+        if ($this->logger || $this->debug) {
+            call_user_func(array($this, 'report'.$op), $data);
+        }
     }
 
     /**
-     * Sends a status message to the logger
+     * Outputs a status message
      *
      * @param string $text
      * @param string $level
      */
     private function output($text, $level = null)
     {
-        $this->logger->log($level ?: LogLevel::DEBUG, $text);
+        if ($this->logger) {
+            $this->logger->log($level ?: LogLevel::DEBUG, $text);
+        }
+
+        if ($this->debug) {
+            printf('xdebug-handler[%d] %s%s', getmypid(), $text, PHP_EOL);
+        }
     }
 
     private function reportCheck($loaded)
