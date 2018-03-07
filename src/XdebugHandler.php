@@ -176,6 +176,7 @@ class XdebugHandler
     protected function restart($command)
     {
         passthru($command, $exitCode);
+        $this->notify(Status::INFO, sprintf('Restarted process exited: %d', $exitCode));
 
         if (!empty($this->tmpIni)) {
             @unlink($this->tmpIni);
@@ -205,8 +206,6 @@ class XdebugHandler
             $error = 'Unsupported SAPI: '.PHP_SAPI;
         } elseif (!defined('PHP_BINARY')) {
             $error = 'PHP version is too old: '.PHP_VERSION;
-        } elseif (!file_exists($_SERVER['argv'][0])) {
-            $error = 'Directly executed code is not supported';
         } elseif (!$this->writeTmpIni($iniFiles)) {
             $error = 'Unable to create temporary ini file';
         } elseif (!$this->setEnvironment($scannedInis, $scanDir, $iniFiles)) {
@@ -267,8 +266,16 @@ class XdebugHandler
      */
     private function getCommand(array $args)
     {
-        if (Process::supportsColor(STDOUT)) {
+        $output = defined('STDOUT') ? STDOUT : fopen('php://stdout', 'w');
+
+        if (Process::supportsColor($output)) {
             $args = Process::addColorOption($args, $this->colorOption);
+        }
+
+        if (!file_exists($args[0])) {
+            // If we are auto-prepended stdin can be used.
+            $args[0] = '--';
+            $this->notify(Status::INFO, 'Directly executed code is being used');
         }
 
         $args = array_merge(array(PHP_BINARY, '-c', $this->tmpIni), $args);
