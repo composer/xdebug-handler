@@ -22,6 +22,7 @@ class Status
     const ENV_RESTART = 'XDEBUG_HANDLER_RESTART';
     const CHECK = 'Check';
     const ERROR = 'Error';
+    const INFO = 'Info';
     const NORESTART = 'NoRestart';
     const RESTART = 'Restart';
     const RESTARTING = 'Restarting';
@@ -81,6 +82,11 @@ class Status
     private function reportError($error)
     {
         $this->output(sprintf("No restart (%s)", $error), LogLevel::WARNING);
+    }
+
+    private function reportInfo($info)
+    {
+        $this->output($info);
     }
 
     private function reportNoRestart()
