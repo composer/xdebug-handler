@@ -266,9 +266,7 @@ class XdebugHandler
      */
     private function getCommand(array $args)
     {
-        $output = defined('STDOUT') ? STDOUT : fopen('php://stdout', 'w');
-
-        if (Process::supportsColor($output)) {
+        if (defined('STDOUT') && Process::supportsColor(STDOUT)) {
             $args = Process::addColorOption($args, $this->colorOption);
         }
 
