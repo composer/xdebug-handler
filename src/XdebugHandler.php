@@ -66,6 +66,14 @@ class XdebugHandler
     }
 
     /**
+     * @return bool
+     */
+    protected function needRestart()
+    {
+        return null !== $this->loaded;
+    }
+
+    /**
      * Activates status message output to a PSR3 logger
      *
      * @param LoggerInterface $logger
@@ -104,7 +112,7 @@ class XdebugHandler
         $this->notify(Status::CHECK);
         $envArgs = explode('|', strval(getenv($this->envAllowXdebug)), 4);
 
-        if ($this->loaded && empty($envArgs[0])) {
+        if ($this->needRestart() && empty($envArgs[0])) {
             // Restart required
             $this->notify(Status::RESTART);
 
