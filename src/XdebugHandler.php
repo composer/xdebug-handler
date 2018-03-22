@@ -30,6 +30,7 @@ class XdebugHandler
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    private $restart;
     private $statusWriter;
     private $tmpIni;
 
@@ -61,6 +62,24 @@ class XdebugHandler
             $ext = new \ReflectionExtension('xdebug');
             $this->loaded = $ext->getVersion() ?: 'unknown';
         }
+
+        $this->restart = $this->needRestart();
+    }
+
+    /**
+     * @return bool
+     */
+    protected function needRestart()
+    {
+        return null !== $this->loaded;
+    }
+
+    /**
+     * @return array All current ini settings
+     */
+    protected function getIniSettings()
+    {
+        return ini_get_all(null, false);
     }
 
     /**
@@ -92,7 +111,7 @@ class XdebugHandler
         $this->notify(Status::CHECK);
         $envArgs = explode('|', strval(getenv($this->envAllowXdebug)), 4);
 
-        if ($this->loaded && empty($envArgs[0])) {
+        if ($this->restart && empty($envArgs[0])) {
             // Restart required
             $this->notify(Status::RESTART);
 
@@ -112,7 +131,7 @@ class XdebugHandler
             $version = $envArgs[1];
             $scannedInis = $envArgs[2];
 
-            if (!$this->loaded) {
+            if (!$this->restart) {
                 // Version is only set if restart is successful
                 self::$skipped = $version;
             }
@@ -247,7 +266,7 @@ class XdebugHandler
             $content .= $data.PHP_EOL;
         }
 
-        $loaded = ini_get_all(null, false);
+        $loaded = $this->getIniSettings();
         $config = parse_ini_string($content);
         $content .= $this->mergeLoadedConfig($loaded, $config);
 
