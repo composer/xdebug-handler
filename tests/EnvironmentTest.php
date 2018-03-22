@@ -45,7 +45,7 @@ class EnvironmentTest extends BaseTestCase
         }
 
         $loaded = true;
-        $xdebug = PartialMock::createAndCheck($loaded);
+        PartialMock::createAndCheck($loaded);
         $this->assertSame($expected, getenv(CoreMock::ALLOW_XDEBUG));
     }
 
@@ -84,7 +84,7 @@ class EnvironmentTest extends BaseTestCase
         }
 
         $loaded = true;
-        $xdebug = PartialMock::createAndCheck($loaded);
+        PartialMock::createAndCheck($loaded);
         $this->assertSame($expected, getenv('PHP_INI_SCAN_DIR'));
     }
 

@@ -113,9 +113,11 @@ class Status
         $this->output($text, $level);
     }
 
-    private function reportRestarting()
+    private function reportRestarting($command)
     {
         $text = sprintf("Process restarting (%s)", $this->getEnvAllow());
+        $this->output($text);
+        $text = sprintf("Running %s", $command);
         $this->output($text);
     }
 
