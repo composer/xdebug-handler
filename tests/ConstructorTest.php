@@ -19,29 +19,29 @@ use PHPUnit\Framework\TestCase;
 class ConstructorTest extends TestCase
 {
     /**
-     * @expectedException RuntimeException
+     * @expectedException \RuntimeException
      *
      */
     public function testThrowsOnEmptyEnvPrefix()
     {
-        $xdebug = new XdebugHandler('');
+        new XdebugHandler('');
     }
 
     /**
-     * @expectedException RuntimeException
+     * @expectedException \RuntimeException
      *
      */
     public function testThrowsOnInvalidEnvPrefix()
     {
-        $xdebug = new XdebugHandler(array('name'));
+        new XdebugHandler(array('name'));
     }
 
     /**
-     * @expectedException RuntimeException
+     * @expectedException \RuntimeException
      *
      */
     public function testThrowsOnInvalidColorOption()
     {
-        $xdebug = new XdebugHandler('test', false);
+        new XdebugHandler('test', false);
     }
 }

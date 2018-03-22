@@ -99,7 +99,7 @@ class Status
         }
     }
 
-    private function reportRestart()
+    private function reportRestart($info)
     {
         $this->output($this->getLoadedMessage());
         putenv(self::ENV_RESTART.'='.strval(microtime(true)));
@@ -113,9 +113,9 @@ class Status
         $this->output($text, $level);
     }
 
-    private function reportRestarting()
+    private function reportRestarting($info)
     {
-        $text = sprintf("Process restarting (%s)", $this->getEnvAllow());
+        $text = sprintf("Process restarting (%s): %s", $this->getEnvAllow(), $info);
         $this->output($text);
     }
 
