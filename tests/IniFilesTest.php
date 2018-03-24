@@ -121,7 +121,7 @@ class IniFilesTest extends BaseTestCase
     {
         $tmpIni = $xdebug->getProperty('tmpIni');
 
-        if (!$tmpIni = $xdebug->getProperty('tmpIni')) {
+        if (!$tmpIni) {
             $this->fail('The tmpIni file was not created');
         }
 

@@ -30,6 +30,7 @@ class XdebugHandler
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    /** @var Status|null */
     private $statusWriter;
     private $tmpIni;
 
@@ -42,7 +43,7 @@ class XdebugHandler
      *
      * @param string $envPrefix Value used in environment variables
      * @param string $colorOption Command-line long option to force color output
-     * @throws RuntimeException If a parameter is invalid
+     * @throws \RuntimeException If a parameter is invalid
      */
     public function __construct($envPrefix, $colorOption = '')
     {
@@ -98,7 +99,7 @@ class XdebugHandler
 
             if ($this->prepareRestart()) {
                 $command = $this->getCommand($_SERVER['argv']);
-                $this->notify(Status::RESTARTING);
+                $this->notify(Status::RESTARTING, $command);
                 $this->restart($command);
             }
             return;

@@ -23,8 +23,8 @@ class Process
      *
      * A color option is needed because child process output is piped.
      *
-     * @param array $args The argv array
-     * @param $colorOption The long option to force color output
+     * @param array  $args        The argv array
+     * @param string $colorOption The long option to force color output
      *
      * @return array
      */
