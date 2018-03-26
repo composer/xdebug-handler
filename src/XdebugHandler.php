@@ -30,6 +30,7 @@ class XdebugHandler
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    private $script;
     /** @var Status|null */
     private $statusWriter;
     private $tmpIni;
@@ -75,6 +76,16 @@ class XdebugHandler
     }
 
     /**
+     * Sets the main script location if the working directory has changed
+     *
+     * @param string $script
+     */
+    public function setMainScript($script)
+    {
+        $this->script = $script;
+    }
+
+    /**
      * Checks if xdebug is loaded and the process needs to be restarted
      *
      * If so, then a tmp ini is created with the xdebug ini entry commented out.
@@ -98,7 +109,7 @@ class XdebugHandler
             $this->notify(Status::RESTART);
 
             if ($this->prepareRestart()) {
-                $command = $this->getCommand($_SERVER['argv']);
+                $command = $this->getCommand();
                 $this->notify(Status::RESTARTING, $command);
                 $this->restart($command);
             }
@@ -207,6 +218,8 @@ class XdebugHandler
             $error = 'Unsupported SAPI: '.PHP_SAPI;
         } elseif (!defined('PHP_BINARY')) {
             $error = 'PHP version is too old: '.PHP_VERSION;
+        } elseif (!$this->checkMainScript()) {
+            $error = 'Unable to access main script: '.$this->script;
         } elseif (!$this->writeTmpIni($iniFiles)) {
             $error = 'Unable to create temporary ini file';
         } elseif (!$this->setEnvironment($scannedInis, $scanDir, $iniFiles)) {
@@ -261,23 +274,18 @@ class XdebugHandler
     /**
      * Returns the restart command line
      *
-     * @param array $args The argv array
-     *
      * @return string
      */
-    private function getCommand(array $args)
+    private function getCommand()
     {
+        $args = array_slice($_SERVER['argv'], 1);
+
         if (defined('STDOUT') && Process::supportsColor(STDOUT)) {
             $args = Process::addColorOption($args, $this->colorOption);
         }
 
-        if (!file_exists($args[0])) {
-            // If we are auto-prepended stdin can be used.
-            $args[0] = '--';
-            $this->notify(Status::INFO, 'Directly executed code is being used');
-        }
-
-        $args = array_merge(array(PHP_BINARY, '-c', $this->tmpIni), $args);
+        $executable = array(PHP_BINARY, '-c', $this->tmpIni, $this->script);
+        $args = array_merge($executable, $args);
 
         $cmd = Process::escape(array_shift($args), true, true);
         foreach ($args as $arg) {
@@ -368,5 +376,34 @@ class XdebugHandler
         }
 
         return $content;
+    }
+
+    /**
+     * Returns true if the script name can be used
+     *
+     * @return bool
+     */
+    private function checkMainScript()
+    {
+        if (null === $this->script) {
+            $this->script = $_SERVER['argv'][0];
+        }
+
+        if (file_exists($this->script)) {
+            return true;
+        }
+
+        // Phar::interceptFileFuncs causes issues
+        if ($archive = \Phar::running(false)) {
+            $this->script = $archive;
+            return true;
+        }
+
+        if (in_array($this->script, array('php://stdin', 'Standard input code'))) {
+            $this->script === '--';
+            return true;
+        }
+
+        return false;
     }
 }

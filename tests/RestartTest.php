@@ -55,12 +55,42 @@ class RestartTest extends BaseTestCase
         $this->checkRestart($xdebug);
     }
 
-    public function testRestartWhenLoadedAndNoScript()
+    public function testRestartWithStdIn()
+    {
+        $loaded = true;
+        $_SERVER['argv'][0] = 'Standard input code';
+
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkRestart($xdebug);
+    }
+
+    public function testNoRestartWithCommandLineCode()
     {
         $loaded = true;
         $_SERVER['argv'][0] = '-';
 
         $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkNoRestart($xdebug);
+    }
+
+    public function testNoRestartWithUnreachableScript()
+    {
+        $loaded = true;
+        $_SERVER['argv'][0] = 'nonexistent.php';
+
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkNoRestart($xdebug);
+    }
+
+    public function testRestartWithScriptSetter()
+    {
+        $loaded = true;
+        $script = realpath($_SERVER['argv'][0]);
+        $_SERVER['argv'][0] = 'nonexistent.php';
+
+        $settings = array('setMainScript' => array($script));
+
+        $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
     }
 }
