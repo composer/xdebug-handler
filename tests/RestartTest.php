@@ -14,6 +14,7 @@ namespace Composer\XdebugHandler;
 use Composer\XdebugHandler\Helpers\BaseTestCase;
 use Composer\XdebugHandler\Mocks\CoreMock;
 use Composer\XdebugHandler\Mocks\FailMock;
+use Composer\XdebugHandler\Mocks\RequiredMock;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4
@@ -92,5 +93,24 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
+    }
+
+    public function testNoRestartWhenNotRequired()
+    {
+        $loaded = true;
+        $required = false;
+
+        $xdebug = RequiredMock::runCoreMock($loaded, $required);
+        $this->checkNoRestart($xdebug);
+    }
+
+    public function testNoRestartWhenRequiredAndAllowed()
+    {
+        $loaded = true;
+        putenv(CoreMock::ALLOW_XDEBUG.'=1');
+        $required = true;
+
+        $xdebug = RequiredMock::runCoreMock($loaded, $required);
+        $this->checkNoRestart($xdebug);
     }
 }

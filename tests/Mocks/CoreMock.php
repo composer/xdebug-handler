@@ -32,6 +32,7 @@ class CoreMock extends XdebugHandler
     const TEST_VERSION = '2.5.0';
 
     public $restarted;
+    public $parentLoaded;
 
     protected $childProcess;
     protected $refClass;
@@ -44,6 +45,8 @@ class CoreMock extends XdebugHandler
         if ($parentProcess) {
             // This is a restart, so set restarted on this instance
             $xdebug->restarted = true;
+            // Set parentLoaded on this instance
+            $xdebug->parentLoaded = $parentProcess->parentLoaded;
             $parentProcess->childProcess = $xdebug;
             // Ensure $_SERVER has our environment changes
             static::updateServerEnvironment();
@@ -64,14 +67,21 @@ class CoreMock extends XdebugHandler
         parent::__construct('mock');
 
         $this->refClass = new \ReflectionClass('Composer\XdebugHandler\XdebugHandler');
+        $this->parentLoaded = $loaded ? static::TEST_VERSION : null;
 
         // Set private loaded
         $prop = $this->refClass->getProperty('loaded');
         $prop->setAccessible(true);
-        $prop->setValue($this, $loaded ? static::TEST_VERSION : null);
+        $prop->setValue($this, $this->parentLoaded);
 
         // Ensure static private skipped is unset
         $prop = $this->refClass->getProperty('skipped');
+        $prop->setAccessible(true);
+        $prop->setValue($this, null);
+
+
+        // Ensure static private inRestart is unset
+        $prop = $this->refClass->getProperty('inRestart');
         $prop->setAccessible(true);
         $prop->setValue($this, null);
 
@@ -81,8 +91,8 @@ class CoreMock extends XdebugHandler
     public function __destruct()
     {
         // Delete the tmpIni if one has been created
-        if ($tmpIni = $this->getProperty('tmpIni')) {
-            @unlink($tmpIni);
+        if (!empty($this->tmpIni)) {
+            @unlink($this->tmpIni);
         }
     }
 

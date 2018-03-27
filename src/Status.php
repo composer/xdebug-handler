@@ -17,6 +17,7 @@ use Psr\Log\LogLevel;
 
 /**
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
+ * @internal
  */
 class Status
 {
@@ -96,6 +97,9 @@ class Status
 
         if ($this->loaded) {
             $text = sprintf("No restart (%s)", $this->getEnvAllow());
+            if (!getenv($this->envAllowXdebug)) {
+                $text .= ' Allowed by application';
+            }
             $this->output($text);
         }
     }

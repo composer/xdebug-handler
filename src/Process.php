@@ -16,6 +16,7 @@ namespace Composer\XdebugHandler;
  * environment variables in that process.
  *
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
+ * @internal
  */
 class Process
 {
