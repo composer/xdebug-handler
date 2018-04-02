@@ -37,6 +37,7 @@ abstract class BaseTestCase extends TestCase
     {
         foreach (self::$names as $name) {
             self::$env[$name] = getenv($name);
+            // Note $_SERVER will already match
         }
 
         self::$argv = $_SERVER['argv'];
@@ -50,8 +51,10 @@ abstract class BaseTestCase extends TestCase
         foreach (self::$env as $name => $value) {
             if (false !== $value) {
                 putenv($name.'='.$value);
+                $_SERVER[$name] = $value;
             } else {
                 putenv($name);
+                unset($_SERVER[$name]);
             }
         }
 
@@ -66,6 +69,7 @@ abstract class BaseTestCase extends TestCase
     {
         foreach (self::$names as $name) {
             putenv($name);
+            unset($_SERVER[$name]);
         }
 
         $_SERVER['argv'] = self::$argv;
@@ -83,9 +87,11 @@ abstract class BaseTestCase extends TestCase
 
         // Env ALLOW_XDEBUG must be unset
         $this->assertSame(false, getenv(CoreMock::ALLOW_XDEBUG));
+        $this->assertSame(false, isset($_SERVER[CoreMock::ALLOW_XDEBUG]));
 
         // Env ORIGINAL_INIS must be set and be a string
         $this->assertInternalType('string', getenv(CoreMock::ORIGINAL_INIS));
+        $this->assertSame(true, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
 
         // Skipped version must match xdebug version, or '' if restart fails
         $class = get_class($xdebug);

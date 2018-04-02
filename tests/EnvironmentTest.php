@@ -37,12 +37,7 @@ class EnvironmentTest extends BaseTestCase
     {
         $ini = new IniHelper();
         call_user_func(array($ini, $iniFunc));
-
-        if (false !== $scandir) {
-            putenv('PHP_INI_SCAN_DIR='.$scandir);
-        } else {
-            putenv('PHP_INI_SCAN_DIR');
-        }
+        $this->setScanDir($scandir);
 
         $loaded = true;
         PartialMock::createAndCheck($loaded);
@@ -76,12 +71,7 @@ class EnvironmentTest extends BaseTestCase
     {
         $ini = new IniHelper();
         call_user_func(array($ini, $iniFunc));
-
-        if (false !== $scandir) {
-            putenv('PHP_INI_SCAN_DIR='.$scandir);
-        } else {
-            putenv('PHP_INI_SCAN_DIR');
-        }
+        $this->setScanDir($scandir);
 
         $loaded = true;
         PartialMock::createAndCheck($loaded);
@@ -90,7 +80,7 @@ class EnvironmentTest extends BaseTestCase
 
     public function scanDirProvider()
     {
-        // $iniFunc, $scandir, $expected (PHP_INI_SCAN_DIR value for reatart)
+        // $iniFunc, $scandir, $expected (PHP_INI_SCAN_DIR value for restart)
         return array(
             'loaded-ini false' => array('setLoadedIni', false, false),
             'loaded-ini empty' => array('setLoadedIni', '', ''),
@@ -112,17 +102,29 @@ class EnvironmentTest extends BaseTestCase
     {
         $ini = new IniHelper();
         call_user_func(array($ini, $iniFunc));
-
-        if (false !== $scandir) {
-            putenv('PHP_INI_SCAN_DIR='.$scandir);
-        } else {
-            putenv('PHP_INI_SCAN_DIR');
-        }
+        $this->setScanDir($scandir);
 
         $loaded = true;
         $xdebug = CoreMock::createAndCheck($loaded);
 
         $this->checkRestart($xdebug);
         $this->assertSame($scandir, getenv('PHP_INI_SCAN_DIR'));
+
+        if (false !== $scandir) {
+            $this->assertSame($scandir, $_SERVER['PHP_INI_SCAN_DIR']);
+        } else {
+            $this->assertSame(false, isset($_SERVER['PHP_INI_SCAN_DIR']));
+        }
+    }
+
+    private function setScanDir($value)
+    {
+        if (false !== $value) {
+            putenv('PHP_INI_SCAN_DIR='.$value);
+            $_SERVER['PHP_INI_SCAN_DIR'] = $value;
+        } else {
+            putenv('PHP_INI_SCAN_DIR');
+            unset($_SERVER['PHP_INI_SCAN_DIR']);
+        }
     }
 }
