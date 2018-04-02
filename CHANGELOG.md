@@ -1,6 +1,7 @@
 ## [Unreleased]
   * Added: `setMainScript` method for applications that change the working directory.
-  * Fixed: relative path problems caused by  Phar::interceptFileFuncs - [composer/xdebug-handler#46](https://github.com/composer/xdebug-handler/issues/46).
+  * Fixed: environment variables not available in $_SERVER when restored in the restart.
+  * Fixed: relative path problems caused by Phar::interceptFileFuncs - [composer/xdebug-handler#46](https://github.com/composer/xdebug-handler/issues/46).
   * Fixed: incorrect handling when script file cannot be found.
 
 ## [1.0.0] - 2018-03-08
