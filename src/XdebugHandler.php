@@ -120,7 +120,7 @@ class XdebugHandler
             // Restarting, so unset environment variable and extract saved values
             $this->notify(Status::RESTARTED);
 
-            putenv($this->envAllowXdebug);
+            Process::setEnv($this->envAllowXdebug);
             $version = $envArgs[1];
             $scannedInis = $envArgs[2];
 
@@ -132,9 +132,9 @@ class XdebugHandler
             if ($scannedInis) {
                 // Scan dir will have been changed, so restore it
                 if (isset($envArgs[3])) {
-                    putenv('PHP_INI_SCAN_DIR='.$envArgs[3]);
+                    Process::setEnv('PHP_INI_SCAN_DIR', $envArgs[3]);
                 } else {
-                    putenv('PHP_INI_SCAN_DIR');
+                    Process::setEnv('PHP_INI_SCAN_DIR');
                 }
             }
             return;
@@ -297,6 +297,8 @@ class XdebugHandler
 
     /**
      * Returns true if the restart environment variables were set
+     *
+     * No need to update $_SERVER since this is set in the restarted process.
      *
      * @param bool $scannedInis Whether there were scanned ini files
      * @param false|string $scanDir PHP_INI_SCAN_DIR environment variable

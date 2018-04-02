@@ -11,6 +11,7 @@
 
 namespace Composer\XdebugHandler;
 
+use Composer\XdebugHandler\Process;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
@@ -43,7 +44,7 @@ class Status
     public function __construct(LoggerInterface $logger, $loaded, $envAllowXdebug)
     {
         $start = getenv(self::ENV_RESTART);
-        putenv(self::ENV_RESTART);
+        Process::setEnv(self::ENV_RESTART);
         $this->time = $start ? round((microtime(true) - $start) * 1000) : 0;
 
         $this->logger = $logger;
@@ -102,7 +103,7 @@ class Status
     private function reportRestart()
     {
         $this->output($this->getLoadedMessage());
-        putenv(self::ENV_RESTART.'='.strval(microtime(true)));
+        Process::setEnv(self::ENV_RESTART, strval(microtime(true)));
     }
 
     private function reportRestarted()

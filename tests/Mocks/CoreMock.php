@@ -45,6 +45,8 @@ class CoreMock extends XdebugHandler
             // This is a restart, so set restarted on this instance
             $xdebug->restarted = true;
             $parentProcess->childProcess = $xdebug;
+            // Ensure $_SERVER has our environment changes
+            static::updateServerEnvironment();
         }
 
         foreach ($settings as $method => $args) {
@@ -94,5 +96,23 @@ class CoreMock extends XdebugHandler
     protected function restart($command)
     {
         static::createAndCheck(false, $this, static::$settings);
+    }
+
+    private static function updateServerEnvironment()
+    {
+        $names = array(
+            CoreMock::ALLOW_XDEBUG,
+            CoreMock::ORIGINAL_INIS,
+            'PHP_INI_SCAN_DIR',
+        );
+
+        foreach ($names as $name) {
+            $value = getenv($name);
+            if (false === $value) {
+                unset($_SERVER[$name]);
+            } else {
+                $_SERVER[$name] = $value;
+            }
+        }
     }
 }

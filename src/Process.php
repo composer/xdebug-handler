@@ -12,7 +12,8 @@
 namespace Composer\XdebugHandler;
 
 /**
- * Provides utility functions to prepare a child process command-line.
+ * Provides utility functions to prepare a child process command-line and set
+ * environment variables in that process.
  *
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
  */
@@ -125,5 +126,29 @@ class Process
         $stat = fstat($output);
         // Check if formatted mode is S_IFCHR
         return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
+    }
+
+    /**
+     * Makes putenv environment changes available in $_SERVER
+     *
+     * @param string $name
+     * @param string|false $value A false value unsets the variable
+     *
+     * @return bool Whether the environment variable was set
+     */
+    public static function setEnv($name, $value = false)
+    {
+        $unset = false === $value;
+
+        if (!putenv($unset ? $name : $name.'='.$value)) {
+            return false;
+        }
+
+        if ($unset) {
+            unset($_SERVER[$name]);
+        } else {
+            $_SERVER[$name] = $value;
+        }
+        return true;
     }
 }
