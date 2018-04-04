@@ -1,5 +1,8 @@
 ## [Unreleased]
+  * Added: API definition and @internal class annotations.
+  * Added: protected `requiresRestart` method for extending classes.
   * Added: `setMainScript` method for applications that change the working directory.
+  * Changed: private `tmpIni` variable to protected for extending classes.
   * Fixed: environment variables not available in $_SERVER when restored in the restart.
   * Fixed: relative path problems caused by Phar::interceptFileFuncs - [composer/xdebug-handler#46](https://github.com/composer/xdebug-handler/issues/46).
   * Fixed: incorrect handling when script file cannot be found.
