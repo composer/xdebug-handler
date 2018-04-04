@@ -85,6 +85,9 @@ abstract class BaseTestCase extends TestCase
         // We must have been restarted
         $this->assertTrue($xdebug->restarted);
 
+        // We must be in a restarted process
+        $this->assertTrue(CoreMock::inRestartedProcess());
+
         // Env ALLOW_XDEBUG must be unset
         $this->assertSame(false, getenv(CoreMock::ALLOW_XDEBUG));
         $this->assertSame(false, isset($_SERVER[CoreMock::ALLOW_XDEBUG]));
@@ -93,10 +96,14 @@ abstract class BaseTestCase extends TestCase
         $this->assertInternalType('string', getenv(CoreMock::ORIGINAL_INIS));
         $this->assertSame(true, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
 
-        // Skipped version must match xdebug version, or '' if restart fails
-        $class = get_class($xdebug);
-        $version = !strpos($class, 'Fail') ? CoreMock::TEST_VERSION : '';
-        $this->assertSame($version, $class::getSkippedVersion());
+        // Skipped version must only be reported if it was unloaded in the restart
+        if (!$xdebug->parentLoaded || $xdebug->getProperty('loaded')) {
+            $version = '';
+        } else {
+            $version = CoreMock::TEST_VERSION;
+        }
+
+        $this->assertSame($version, CoreMock::getSkippedVersion());
     }
 
     /**
@@ -108,6 +115,9 @@ abstract class BaseTestCase extends TestCase
     {
         // We must not have been restarted
         $this->assertFalse($xdebug->restarted);
+
+        // We must not be in a restarted process
+        $this->assertFalse(CoreMock::inRestartedProcess());
 
         // Env ORIGINAL_INIS must not be set
         $this->assertSame(false, getenv(CoreMock::ORIGINAL_INIS));

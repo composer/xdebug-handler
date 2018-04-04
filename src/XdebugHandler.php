@@ -22,6 +22,10 @@ class XdebugHandler
     const SUFFIX_INIS = '_ORIGINAL_INIS';
     const RESTART_ID = 'internal';
 
+    /** @var string|null */
+    protected $tmpIni;
+
+    private static $inRestart;
     private static $name;
     private static $skipped;
 
@@ -33,7 +37,6 @@ class XdebugHandler
     private $script;
     /** @var Status|null */
     private $statusWriter;
-    private $tmpIni;
 
     /**
      * Constructor
@@ -104,7 +107,7 @@ class XdebugHandler
         $this->notify(Status::CHECK);
         $envArgs = explode('|', strval(getenv($this->envAllowXdebug)), 4);
 
-        if ($this->loaded && empty($envArgs[0])) {
+        if (empty($envArgs[0]) && $this->requiresRestart((bool) $this->loaded)) {
             // Restart required
             $this->notify(Status::RESTART);
 
@@ -121,6 +124,7 @@ class XdebugHandler
             $this->notify(Status::RESTARTED);
 
             Process::setEnv($this->envAllowXdebug);
+            self::$inRestart = true;
             $version = $envArgs[1];
             $scannedInis = $envArgs[2];
 
@@ -181,11 +185,43 @@ class XdebugHandler
     }
 
     /**
-     * Executes the restarted command then deletes the tmp ini
+     * Returns true if this is a restarted process
+     *
+     * @return bool
+     */
+    public static function inRestartedProcess()
+    {
+        return !empty(self::$inRestart);
+    }
+
+    /**
+     * Returns true if xdebug is loaded, or as directed by an extending class
+     *
+     * @param bool $isLoaded Whether xdebug is loaded
+     *
+     * @return bool
+     */
+    protected function requiresRestart($isLoaded)
+    {
+        return $isLoaded;
+    }
+
+    /**
+     * Allows an extending class to access the tmpIni
      *
      * @param string $command
      */
     protected function restart($command)
+    {
+        $this->doRestart($command);
+    }
+
+    /**
+     * Executes the restarted command then deletes the tmp ini
+     *
+     * @param string $command
+     */
+    private function doRestart($command)
     {
         passthru($command, $exitCode);
         $this->notify(Status::INFO, sprintf('Restarted process exited: %d', $exitCode));
