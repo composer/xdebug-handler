@@ -375,7 +375,7 @@ class XdebugHandler
      * @param string $op Status handler constant
      * @param null|string $data Optional data
      */
-    private function notify($op, $data = null)
+    final protected function notify($op, $data = null)
     {
         if ($this->statusWriter) {
             $this->statusWriter->report($op, $data);
