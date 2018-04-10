@@ -63,7 +63,7 @@ class EnvironmentTest extends BaseTestCase
      *
      * @param callable $iniFunc IniHelper method to use
      * @param mixed $scandir Initial value for PHP_INI_SCAN_DIR
-     * @param string $expected The required PHP_INI_SCAN_DIR value
+     * @param mixed $expected The required PHP_INI_SCAN_DIR value
      *
      * @dataProvider scanDirProvider
      */
@@ -91,7 +91,8 @@ class EnvironmentTest extends BaseTestCase
 
     /**
      * Tests that PHP_INI_SCAN_DIR is restored to its original value after the
-     * process has been restarted.
+     * process has been restarted. Also tests that getRestartSettings reports
+     * correct values.
      *
      * @param callable $iniFunc IniHelper method to use
      * @param mixed $scandir Initial value for PHP_INI_SCAN_DIR
@@ -110,11 +111,20 @@ class EnvironmentTest extends BaseTestCase
         $this->checkRestart($xdebug);
         $this->assertSame($scandir, getenv('PHP_INI_SCAN_DIR'));
 
+        // Check that $_SERVER has been updated
         if (false !== $scandir) {
             $this->assertSame($scandir, $_SERVER['PHP_INI_SCAN_DIR']);
         } else {
             $this->assertSame(false, isset($_SERVER['PHP_INI_SCAN_DIR']));
         }
+
+        // Check that restart settings reports original scan dir
+        $settings = CoreMock::getRestartSettings();
+        $this->assertSame($scandir, $settings['scanDir']);
+
+        // Check that restart settings reports scannedInis
+        $scannedInis = $iniFunc === 'setScannedInis';
+        $this->assertSame($scannedInis, $settings['scannedInis']);
     }
 
     private function setScanDir($value)

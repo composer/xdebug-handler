@@ -57,7 +57,7 @@ A temporary ini file is created from the loaded (and scanned) ini files, with an
 * The temporary ini is added to the command-line with the `-c` option.
 * The application is restarted in a new process using `passthru`.
     * `MYAPP_ALLOW_XDEBUG` is unset.
-    * `PHP_INI_SCAN_DIR` is restored to its original value if it was changed.
+    * `PHP_INI_SCAN_DIR` is restored to its original value (if it was changed).
     * The application runs and exits.
 * The main process exits with the exit code from the restarted process.
 
@@ -79,20 +79,44 @@ $scannedInis = $files;
 ```
 
 ### Restarted process
-Other static helper methods are available to get information about the current process, which may or may not have been restarted:
+Other static helper methods provide information about the current process, which may or may not have been restarted:
 
-* `XdebugHandler::inRestartedProcess` - if this process was restarted.
 * `XdebugHandler::getSkippedVersion` - the xdebug version string that was skipped by the restart, or an empty value.
+* `XdebugHandler::getRestartSettings` - an array of settings to use with PHP sub-processes, or null.
 
 ```php
 use Composer\XdebugHandler\XdebugHandler;
 
-$inRestart = XdebugHandler::inRestartedProcess();
-// $inRestart: true/false
-
 $version = XdebugHandler::getSkippedVersion();
 // $version: '2.6.0' (for example), or an empty string
+
+$settings = XdebugHandler::getRestartSettings();
+/**
+ * $settings: array (if the current process was restarted,
+ * or called with the settings from a previous restart), or null
+ *
+ *    'tmpIni'      => the temporary ini file used in the restart (string)
+ *    'scannedInis' => if there were any scanned inis (bool)
+ *    'scanDir'     => the original PHP_INI_SCAN_DIR value (false|string)
+  *   'inis'        => the original inis from getAllIniFiles (array)
+ *    'skipped'     => the skipped version from getSkippedVersion (string)
+ */
 ```
+
+#### Sub-processes
+Calling a PHP process from a restarted process will result in xdebug being loaded in that process, or another restart if xdebug-handler is implemented.
+
+The `XdebugHandler::getRestartSettings()` method is provided so that an application can call a PHP process with the same settings that were used in a restart:
+
+* If `scannedInis` is true, set `PHP_INI_SCAN_DIR` to an empty string.
+* Add `tmpIni`to the command-line with the `-c` option.
+* Run the process.
+    * If xdebug-handler is implemented, `PHP_INI_SCAN_DIR` is restored to its original value (if it was changed).
+* If `PHP_INI_SCAN_DIR` was changed, restore it using `scanDir`.
+
+This solution is not without its pitfalls. In addition to the ini files issue outlined above, `PHP_INI_SCAN_DIR` is not restored in the sub-process (unless xdebug-hander is implemented). This will cause problems if it was changed and the sub-process calls another PHP process.
+
+However, an application can safely spawn itself, or other scripts that it controls, or other applications that implement xdebug-handler.
 
 ### Output
 The `setLogger` method enables the output of status messages to an external PSR3 logger.
