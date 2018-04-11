@@ -12,6 +12,7 @@
 namespace Composer\XdebugHandler\Helpers;
 
 use Composer\XdebugHandler\Mocks\CoreMock;
+use Composer\XdebugHandler\XdebugHandler;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -28,6 +29,7 @@ abstract class BaseTestCase extends TestCase
         CoreMock::ALLOW_XDEBUG,
         CoreMock::ORIGINAL_INIS,
         'PHP_INI_SCAN_DIR',
+        XdebugHandler::RESTART_SETTINGS,
     );
 
     /**
@@ -85,9 +87,6 @@ abstract class BaseTestCase extends TestCase
         // We must have been restarted
         $this->assertTrue($xdebug->restarted);
 
-        // We must be in a restarted process
-        $this->assertTrue(CoreMock::inRestartedProcess());
-
         // Env ALLOW_XDEBUG must be unset
         $this->assertSame(false, getenv(CoreMock::ALLOW_XDEBUG));
         $this->assertSame(false, isset($_SERVER[CoreMock::ALLOW_XDEBUG]));
@@ -103,7 +102,14 @@ abstract class BaseTestCase extends TestCase
             $version = CoreMock::TEST_VERSION;
         }
 
-        $this->assertSame($version, CoreMock::getSkippedVersion());
+        $this->assertSame($version, $xdebug::getSkippedVersion());
+
+        // Env RESTART_SETTINGS must be set and be a string
+        $this->assertInternalType('string', getenv(CoreMock::RESTART_SETTINGS));
+        $this->assertSame(true, isset($_SERVER[CoreMock::RESTART_SETTINGS]));
+
+        // Restart settings must be an array
+        $this->assertInternalType('array', $xdebug::getRestartSettings());
     }
 
     /**
@@ -116,14 +122,18 @@ abstract class BaseTestCase extends TestCase
         // We must not have been restarted
         $this->assertFalse($xdebug->restarted);
 
-        // We must not be in a restarted process
-        $this->assertFalse(CoreMock::inRestartedProcess());
-
         // Env ORIGINAL_INIS must not be set
         $this->assertSame(false, getenv(CoreMock::ORIGINAL_INIS));
+        $this->assertSame(false, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
 
         // Skipped version must be an empty string
-        $class = get_class($xdebug);
-        $this->assertSame('', $class::getSkippedVersion());
+        $this->assertSame('', $xdebug::getSkippedVersion());
+
+        // Env RESTART_SETTINGS must not be set
+        $this->assertSame(false, getenv(CoreMock::RESTART_SETTINGS));
+        $this->assertSame(false, isset($_SERVER[CoreMock::RESTART_SETTINGS]));
+
+        // Restart settings must be null
+        $this->assertNull($xdebug::getRestartSettings());
     }
 }

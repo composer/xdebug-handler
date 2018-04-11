@@ -21,6 +21,7 @@ class XdebugHandler
     const SUFFIX_ALLOW = '_ALLOW_XDEBUG';
     const SUFFIX_INIS = '_ORIGINAL_INIS';
     const RESTART_ID = 'internal';
+    const RESTART_SETTINGS = 'XDEBUG_HANDLER_SETTINGS';
 
     /** @var string|null */
     protected $tmpIni;
@@ -126,10 +127,10 @@ class XdebugHandler
             Process::setEnv($this->envAllowXdebug);
             self::$inRestart = true;
             $version = $envArgs[1];
-            $scannedInis = $envArgs[2];
+            $scannedInis = (bool) $envArgs[2];
 
             if (!$this->loaded) {
-                // Version is only set if restart is successful
+                // Skipped version is only set if xdebug is not loaded
                 self::$skipped = $version;
             }
 
@@ -141,10 +142,18 @@ class XdebugHandler
                     Process::setEnv('PHP_INI_SCAN_DIR');
                 }
             }
+
+            // Put restart settings in the environment
+            $this->setEnvRestartSettings($scannedInis);
             return;
         }
 
         $this->notify(Status::NORESTART);
+
+        if ($settings = self::getRestartSettings()) {
+            // Called with existing settings, so sync our settings
+            $this->syncSettings($settings);
+        }
     }
 
     /**
@@ -175,6 +184,35 @@ class XdebugHandler
     }
 
     /**
+     * Returns an array of restart settings or null
+     *
+     * Settings will be available if the current process was restarted, or
+     * called with the settings from an existing restart.
+     *
+     * @return array|null
+     */
+    public static function getRestartSettings()
+    {
+        $envArgs = explode('|', strval(getenv(self::RESTART_SETTINGS)), 5);
+
+        if (count($envArgs) === 5) {
+            if (!self::$inRestart
+                && php_ini_loaded_file() !== $envArgs[0]
+                && php_ini_scanned_files()) {
+                return;
+            }
+
+            return array(
+                'tmpIni' => $envArgs[0],
+                'scannedInis' => (bool) $envArgs[1],
+                'scanDir' => '!' !== $envArgs[2] ? $envArgs[2] : false,
+                'inis' => explode(',', $envArgs[3]),
+                'skipped' => $envArgs[4],
+            );
+        }
+    }
+
+    /**
      * Returns the xdebug version that triggered a successful restart
      *
      * @return string
@@ -182,16 +220,6 @@ class XdebugHandler
     public static function getSkippedVersion()
     {
         return strval(self::$skipped);
-    }
-
-    /**
-     * Returns true if this is a restarted process
-     *
-     * @return bool
-     */
-    public static function inRestartedProcess()
-    {
-        return !empty(self::$inRestart);
     }
 
     /**
@@ -443,5 +471,45 @@ class XdebugHandler
         }
 
         return false;
+    }
+
+    /**
+     * Adds restart settings to the environment
+     *
+     * @param bool $scannedInis
+     */
+    private function setEnvRestartSettings($scannedInis)
+    {
+        $scanDir = getenv('PHP_INI_SCAN_DIR');
+
+        $settings = array(
+            php_ini_loaded_file(),
+            intval($scannedInis),
+            false === $scanDir ? '!' : $scanDir,
+            implode(',', self::getAllIniFiles()),
+            self::$skipped,
+        );
+
+        Process::setEnv(self::RESTART_SETTINGS, implode('|', $settings));
+    }
+
+    /**
+     * Syncs settings and the environment if called with existing settings
+     *
+     * @param array $settings
+     */
+    private function syncSettings(array $settings)
+    {
+        if ($settings['scannedInis']) {
+            Process::setEnv('PHP_INI_SCAN_DIR', $settings['scanDir']);
+        }
+
+        if (false === getenv($this->envOriginalInis)) {
+            // Called by another app, so make original inis available
+            Process::setEnv($this->envOriginalInis, implode('|', $settings['inis']));
+        }
+
+        self::$skipped = $settings['skipped'];
+        $this->notify(Status::INFO, 'Process called with existing restart settings');
     }
 }

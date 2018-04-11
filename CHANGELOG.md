@@ -1,4 +1,5 @@
 ## [Unreleased]
+  * Added: static `getRestartSettings` method for calling PHP processes.
   * Added: API definition and @internal class annotations.
   * Added: protected `requiresRestart` method for extending classes.
   * Added: `setMainScript` method for applications that change the working directory.

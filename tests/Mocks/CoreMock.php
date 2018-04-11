@@ -79,7 +79,6 @@ class CoreMock extends XdebugHandler
         $prop->setAccessible(true);
         $prop->setValue($this, null);
 
-
         // Ensure static private inRestart is unset
         $prop = $this->refClass->getProperty('inRestart');
         $prop->setAccessible(true);
