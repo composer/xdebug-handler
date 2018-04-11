@@ -111,7 +111,7 @@ The `XdebugHandler::getRestartSettings()` method is provided so that an applicat
 * If `scannedInis` is true, set `PHP_INI_SCAN_DIR` to an empty string.
 * Add `tmpIni`to the command-line with the `-c` option.
 * Run the process.
-    * If xdebug-handler is implemented, `PHP_INI_SCAN_DIR` is restored to its original value (if it was changed).
+    * If xdebug-handler is implemented, its internal settings are synced and `PHP_INI_SCAN_DIR` is restored to its original value (if it was changed).
 * If `PHP_INI_SCAN_DIR` was changed, restore it using `scanDir`.
 
 This solution is not without its pitfalls. In addition to the ini files issue outlined above, `PHP_INI_SCAN_DIR` is not restored in the sub-process (unless xdebug-hander is implemented). This will cause problems if it was changed and the sub-process calls another PHP process.

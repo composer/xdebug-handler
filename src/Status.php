@@ -83,7 +83,7 @@ class Status
 
     private function reportError($error)
     {
-        $this->output(sprintf("No restart (%s)", $error), LogLevel::WARNING);
+        $this->output(sprintf('No restart (%s)', $error), LogLevel::WARNING);
     }
 
     private function reportInfo($info)
@@ -96,7 +96,7 @@ class Status
         $this->output($this->getLoadedMessage());
 
         if ($this->loaded) {
-            $text = sprintf("No restart (%s)", $this->getEnvAllow());
+            $text = sprintf('No restart (%s)', $this->getEnvAllow());
             if (!getenv($this->envAllowXdebug)) {
                 $text .= ' Allowed by application';
             }
@@ -107,7 +107,7 @@ class Status
     private function reportRestart()
     {
         $this->output($this->getLoadedMessage());
-        Process::setEnv(self::ENV_RESTART, strval(microtime(true)));
+        Process::setEnv(self::ENV_RESTART, (string) microtime(true));
     }
 
     private function reportRestarted()
@@ -120,9 +120,9 @@ class Status
 
     private function reportRestarting($command)
     {
-        $text = sprintf("Process restarting (%s)", $this->getEnvAllow());
+        $text = sprintf('Process restarting (%s)', $this->getEnvAllow());
         $this->output($text);
-        $text = sprintf("Running %s", $command);
+        $text = 'Running '.$command;
         $this->output($text);
     }
 
