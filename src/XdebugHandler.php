@@ -76,7 +76,7 @@ class XdebugHandler
      */
     public function setLogger(LoggerInterface $logger)
     {
-        $this->statusWriter = new Status($logger, $this->loaded, $this->envAllowXdebug);
+        $this->statusWriter = new Status($logger, $this->envAllowXdebug);
     }
 
     /**
@@ -105,7 +105,7 @@ class XdebugHandler
      */
     public function check()
     {
-        $this->notify(Status::CHECK);
+        $this->notify(Status::CHECK, $this->loaded);
         $envArgs = explode('|', (string) getenv($this->envAllowXdebug), 4);
 
         if (empty($envArgs[0]) && $this->requiresRestart((bool) $this->loaded)) {
