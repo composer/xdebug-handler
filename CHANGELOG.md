@@ -1,5 +1,7 @@
 ## [Unreleased]
-  * Added: static `getRestartSettings` method for calling PHP processes.
+
+## [1.1.0] - 2018-04-11
+  * Added: `getRestartSettings` method for calling PHP processes in a restart process.
   * Added: API definition and @internal class annotations.
   * Added: protected `requiresRestart` method for extending classes.
   * Added: `setMainScript` method for applications that change the working directory.
@@ -15,5 +17,6 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/composer/xdebug-handler/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/composer/xdebug-handler/compare/d66f0d15cb57...1.0.0
