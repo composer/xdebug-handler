@@ -39,17 +39,15 @@ class Status
      * Constructor
      *
      * @param LoggerInterface $logger
-     * @param string $loaded The loaded xdebug version
      * @param string $envAllowXdebug Prefixed _ALLOW_XDEBUG name
      */
-    public function __construct(LoggerInterface $logger, $loaded, $envAllowXdebug)
+    public function __construct(LoggerInterface $logger, $envAllowXdebug)
     {
         $start = getenv(self::ENV_RESTART);
         Process::setEnv(self::ENV_RESTART);
         $this->time = $start ? round((microtime(true) - $start) * 1000) : 0;
 
         $this->logger = $logger;
-        $this->loaded = $loaded;
         $this->envAllowXdebug = $envAllowXdebug;
     }
 
@@ -76,8 +74,9 @@ class Status
         $this->logger->log($level ?: LogLevel::DEBUG, $text);
     }
 
-    private function reportCheck()
+    private function reportCheck($loaded)
     {
+        $this->loaded = $loaded;
         $this->output('Checking '.$this->envAllowXdebug);
     }
 
