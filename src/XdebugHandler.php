@@ -106,7 +106,7 @@ class XdebugHandler
     public function check()
     {
         $this->notify(Status::CHECK);
-        $envArgs = explode('|', strval(getenv($this->envAllowXdebug)), 4);
+        $envArgs = explode('|', (string) getenv($this->envAllowXdebug), 4);
 
         if (empty($envArgs[0]) && $this->requiresRestart((bool) $this->loaded)) {
             // Restart required
@@ -174,7 +174,7 @@ class XdebugHandler
             }
         }
 
-        $paths = array(strval(php_ini_loaded_file()));
+        $paths = array((string) php_ini_loaded_file());
 
         if ($scanned = php_ini_scanned_files()) {
             $paths = array_merge($paths, array_map('trim', explode(',', $scanned)));
@@ -193,7 +193,7 @@ class XdebugHandler
      */
     public static function getRestartSettings()
     {
-        $envArgs = explode('|', strval(getenv(self::RESTART_SETTINGS)), 5);
+        $envArgs = explode('|', (string) getenv(self::RESTART_SETTINGS), 5);
 
         if (count($envArgs) === 5) {
             if (!self::$inRestart
@@ -219,7 +219,7 @@ class XdebugHandler
      */
     public static function getSkippedVersion()
     {
-        return strval(self::$skipped);
+        return (string) self::$skipped;
     }
 
     /**
@@ -252,7 +252,7 @@ class XdebugHandler
     private function doRestart($command)
     {
         passthru($command, $exitCode);
-        $this->notify(Status::INFO, sprintf('Restarted process exited: %d', $exitCode));
+        $this->notify(Status::INFO, 'Restarted process exited '.$exitCode);
 
         if (!empty($this->tmpIni)) {
             @unlink($this->tmpIni);
@@ -386,7 +386,7 @@ class XdebugHandler
         $envArgs = array(
             self::RESTART_ID,
             $this->loaded,
-            intval($scannedInis),
+            (int) $scannedInis,
         );
 
         if ($scannedInis && false !== $scanDir) {
@@ -484,7 +484,7 @@ class XdebugHandler
 
         $settings = array(
             php_ini_loaded_file(),
-            intval($scannedInis),
+            (int) $scannedInis,
             false === $scanDir ? '!' : $scanDir,
             implode(',', self::getAllIniFiles()),
             self::$skipped,
