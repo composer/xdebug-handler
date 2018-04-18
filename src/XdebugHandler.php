@@ -434,14 +434,31 @@ class XdebugHandler
 
             if (!isset($iniConfig[$name]) || $iniConfig[$name] !== $value) {
                 // Based on main -d option handling in php-src/sapi/cli/php_cli.c
-                if ($value && !ctype_alnum($value)) {
+                if ($value && !$this->hasAlphanumericCharsOnly($value)) {
                     $value = '"'.str_replace('"', '\\"', $value).'"';
                 }
+
                 $content .= $name.'='.$value.PHP_EOL;
             }
         }
 
         return $content;
+    }
+
+    /**
+     * Check that value contains letters and digits only.
+     *
+     * @param string $value
+     *
+     * @return bool
+     */
+    private function hasAlphanumericCharsOnly($value)
+    {
+        if (extension_loaded('ctype')) {
+            return ctype_alnum($value);
+        }
+
+        return !preg_match('/[^A-Za-z0-9]+/', $value);
     }
 
     /**
