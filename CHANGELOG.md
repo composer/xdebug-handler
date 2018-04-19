@@ -1,4 +1,5 @@
 ## [Unreleased]
+  * Fixed: fatal error when ctype extension is not available.
 
 ## [1.1.0] - 2018-04-11
   * Added: `getRestartSettings` method for calling PHP processes in a restart process.
