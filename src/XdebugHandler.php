@@ -470,7 +470,7 @@ class XdebugHandler
         }
 
         if (in_array($this->script, array('php://stdin', 'Standard input code'))) {
-            $this->script === '--';
+            $this->script = '--';
             return true;
         }
 
