@@ -489,8 +489,8 @@ class XdebugHandler
             return true;
         }
 
-        if (in_array($this->script, array('php://stdin', 'Standard input code'))) {
-            $this->script === '--';
+        if (in_array($this->script, array('php://stdin', 'Standard input code', '-'))) {
+            $this->script = '--';
             return true;
         }
 
