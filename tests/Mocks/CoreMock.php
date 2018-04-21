@@ -43,10 +43,17 @@ class CoreMock extends XdebugHandler
         $xdebug = new static($loaded);
 
         if ($parentProcess) {
-            // This is a restart, so set restarted on this instance
-            $xdebug->restarted = true;
-            // Set parentLoaded on this instance
-            $xdebug->parentLoaded = $parentProcess->parentLoaded;
+            // This is a restart, so set restarted on parent so it is copied
+            $parentProcess->restarted = true;
+
+            // Copy all public properties
+            $refClass = new \ReflectionClass($parentProcess);
+            $props = $refClass->getProperties(\ReflectionProperty::IS_PUBLIC);
+
+            foreach ($props as $prop) {
+                $xdebug->{$prop->name} = $parentProcess->{$prop->name};
+            }
+
             $parentProcess->childProcess = $xdebug;
             // Ensure $_SERVER has our environment changes
             static::updateServerEnvironment();

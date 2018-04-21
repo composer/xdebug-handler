@@ -1,4 +1,6 @@
 ## [Unreleased]
+  * Fixed: improved handling when checking main script.
+  * Fixed: handling for standard input, that never actually did anything.
   * Fixed: fatal error when ctype extension is not available.
 
 ## [1.1.0] - 2018-04-11

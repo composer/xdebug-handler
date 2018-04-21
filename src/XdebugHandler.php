@@ -80,7 +80,7 @@ class XdebugHandler
     }
 
     /**
-     * Sets the main script location if the working directory has changed
+     * Sets the main script location if it cannot be called from argv
      *
      * @param string $script
      */
@@ -455,23 +455,21 @@ class XdebugHandler
      */
     private function checkMainScript()
     {
-        if (null === $this->script) {
-            $this->script = $_SERVER['argv'][0];
+        if (null !== $this->script) {
+            // Allow an application to set -- for standard input
+            return file_exists($this->script) || '--' === $this->script;
         }
 
-        if (file_exists($this->script)) {
+        if (file_exists($this->script = $_SERVER['argv'][0])) {
             return true;
         }
 
-        // Phar::interceptFileFuncs causes issues
-        if ($archive = \Phar::running(false)) {
-            $this->script = $archive;
-            return true;
-        }
+        // Use a backtrace to resolve Phar and chdir issues
+        $options = PHP_VERSION_ID >= 50306 ? DEBUG_BACKTRACE_IGNORE_ARGS : false;
+        $trace = debug_backtrace($options);
 
-        if (in_array($this->script, array('php://stdin', 'Standard input code'))) {
-            $this->script = '--';
-            return true;
+        if (($main = end($trace)) && isset($main['file'])) {
+            return file_exists($this->script = $main['file']);
         }
 
         return false;
