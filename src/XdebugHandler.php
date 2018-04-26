@@ -325,9 +325,11 @@ class XdebugHandler
             $content .= $data.PHP_EOL;
         }
 
-        $loaded = ini_get_all(null, false);
-        $config = parse_ini_string($content);
-        $content .= $this->mergeLoadedConfig($loaded, $config);
+        // Merge loaded settings into our ini content, if it is valid
+        if ($config = parse_ini_string($content)) {
+            $loaded = ini_get_all(null, false);
+            $content .= $this->mergeLoadedConfig($loaded, $config);
+        }
 
         // Work-around for https://bugs.php.net/bug.php?id=75932
         $content .= 'opcache.enable_cli=0'.PHP_EOL;
@@ -416,6 +418,7 @@ class XdebugHandler
      * Ini settings can be passed on the command line using the -d option. To
      * preserve these, all loaded settings that are either not present or
      * different from those in the ini files are added at the end of the tmp ini.
+     * Note that any extensions loaded like this will not be included.
      *
      * @param array $loadedConfig All current ini settings
      * @param array $iniConfig Settings from user ini files
@@ -427,45 +430,22 @@ class XdebugHandler
         $content = '';
 
         foreach ($loadedConfig as $name => $value) {
-            // Values will either be null, string or array (HHVM only)
+            // Value will either be null, string or array (HHVM only)
             if (!is_string($value) || strpos($name, 'xdebug') === 0) {
                 continue;
             }
 
             if (!isset($iniConfig[$name]) || $iniConfig[$name] !== $value) {
-                // Based on main -d option handling in php-src/sapi/cli/php_cli.c
-                if ($value && !$this->isAlnum($value)) {
-                    $value = '"'.str_replace('"', '\\"', $value).'"';
+                // It is fastest to double-quote escape each value
+                if (false !== strpos($value, '"')) {
+                    $value = str_replace('"', '\\"', $value);
                 }
 
-                $content .= $name.'='.$value.PHP_EOL;
+                $content .= $name.'="'.$value.'"'.PHP_EOL;
             }
         }
 
         return $content;
-    }
-
-    /**
-     * Returns true if all characters are alphanumeric
-     *
-     * @param string $value
-     *
-     * @return bool
-     */
-    private function isAlnum($value)
-    {
-        static $ctype;
-
-        if (null === $ctype) {
-            // PHP can be configured with --disable-ctype
-            $ctype = function_exists('ctype_alnum');
-        }
-
-        if ($ctype) {
-            return ctype_alnum($value);
-        }
-
-        return !preg_match('/[^A-Za-z0-9]/', $value);
     }
 
     /**
