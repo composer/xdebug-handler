@@ -12,9 +12,11 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Mocks\CommandMock;
 use Composer\XdebugHandler\Mocks\CoreMock;
 use Composer\XdebugHandler\Mocks\FailMock;
 use Composer\XdebugHandler\Mocks\RequiredMock;
+use Composer\XdebugHandler\Process;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4
@@ -56,43 +58,49 @@ class RestartTest extends BaseTestCase
         $this->checkRestart($xdebug);
     }
 
-    public function testRestartWithStdIn()
+    /**
+     * @dataProvider unreachableScriptProvider
+     */
+    public function testNoRestartWithUnreachableScript($script)
     {
         $loaded = true;
-        $_SERVER['argv'][0] = 'Standard input code';
-
-        $xdebug = CoreMock::createAndCheck($loaded);
-        $this->checkRestart($xdebug);
-    }
-
-    public function testNoRestartWithCommandLineCode()
-    {
-        $loaded = true;
-        $_SERVER['argv'][0] = '-';
-
-        $xdebug = CoreMock::createAndCheck($loaded);
-        $this->checkNoRestart($xdebug);
-    }
-
-    public function testNoRestartWithUnreachableScript()
-    {
-        $loaded = true;
-        $_SERVER['argv'][0] = 'nonexistent.php';
-
-        $xdebug = CoreMock::createAndCheck($loaded);
-        $this->checkNoRestart($xdebug);
-    }
-
-    public function testRestartWithScriptSetter()
-    {
-        $loaded = true;
-        $script = realpath($_SERVER['argv'][0]);
-        $_SERVER['argv'][0] = 'nonexistent.php';
-
+        // We can only check this by setting a script
         $settings = array('setMainScript' => array($script));
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
+        $this->checkNoRestart($xdebug);
+    }
+
+    public function unreachableScriptProvider()
+    {
+        return array(
+            array('nonexistent.php'),
+            array('-'),
+            array('Standard input code'),
+        );
+    }
+
+    /**
+     * @dataProvider scriptSetterProvider
+     */
+    public function testRestartWithScriptSetter($script)
+    {
+        $loaded = true;
+        $settings = array('setMainScript' => array($script));
+
+        $xdebug = CommandMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
+
+        $escaped = Process::escape($script);
+        $this->assertContains(" {$escaped} ", " {$xdebug->command} ");
+    }
+
+    public function scriptSetterProvider()
+    {
+        return array(
+            array(realpath($_SERVER['argv'][0])),
+            array('--'),
+        );
     }
 
     public function testNoRestartWhenNotRequired()

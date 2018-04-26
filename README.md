@@ -144,7 +144,7 @@ WARNING  No restart (Unable to create temporary ini file)
 ```
 
 ### Main script
-The process will not be restarted if the location of the main script is inaccessible. This may occur if the working directory has been changed and can be fixed by using the `setMainScript` method.
+The process will not be restarted if the `argv` location of the main script is inaccessible. This is only likely in more esoteric use-cases and can be fixed by using the `setMainScript` method.
 
 ```php
 // Save the full path to the invoked script
@@ -155,6 +155,8 @@ use Composer\XdebugHandler\XdebugHandler;
 
 $xdebug = new XdebugHandler('myapp');
 $xdebug->setMainScript($mainScript);
+
+// The script name "--" is also supported (for standard input)
 ```
 
 ### Extending the library
