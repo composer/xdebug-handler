@@ -88,28 +88,40 @@ class IniFilesTest extends BaseTestCase
     }
 
     /**
-     * Tests that default and changed values are present in the tmp ini
+     * Tests that changed values are added correctly in the tmp ini
      *
+     * @param string $name Ini setting name
+     * @param string $value Ini setting value
+     * @dataProvider mergeIniProvider
      */
-    public function testMergeInis()
+    public function testMergeInis($name, $value)
     {
         $ini = new IniHelper();
         $ini->setAllInis();
 
         // Mock user -d setting
-        $timezone = 'Antarctica/McMurdo';
-        ini_set('date.timezone', $timezone);
+        $orig = ini_set($name, $value);
 
         $loaded = true;
         $xdebug = PartialMock::createAndCheck($loaded);
+        ini_set($name, $orig);
 
         $content = $this->getTmpIniContent($xdebug);
         $config = parse_ini_string($content);
-        $this->assertArrayHasKey('date.timezone', $config);
-        $this->assertEquals($timezone, $config['date.timezone']);
+        $this->assertArrayHasKey($name, $config);
+        $this->assertEquals($value, $config[$name]);
+    }
 
-        // Check a default value
-        $this->assertArrayHasKey('date.sunrise_zenith', $config);
+    public function mergeIniProvider()
+    {
+        // $name, $value
+        return array(
+            'simple' => array('date.timezone', 'Antarctica/McMurdo'),
+            'single-quotes' => array('error_append_string', "<'color'>"),
+            'newline' => array('error_append_string', "<color\n>"),
+            'double-quotes' => array('error_append_string', '<style="color">'),
+            'backslashes' => array('error_append_string', '<style=\\\\\\"color\\\\">'),
+        );
     }
 
     /**
