@@ -12,9 +12,9 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\Helpers\BaseTestCase;
-use Composer\XdebugHandler\Mocks\CommandMock;
 use Composer\XdebugHandler\Mocks\CoreMock;
 use Composer\XdebugHandler\Mocks\FailMock;
+use Composer\XdebugHandler\Mocks\PartialMock;
 use Composer\XdebugHandler\Mocks\RequiredMock;
 use Composer\XdebugHandler\Process;
 
@@ -31,6 +31,14 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkRestart($xdebug);
+
+        // Check command
+        $xdebug = PartialMock::createAndCheck($loaded);
+        $command = $xdebug->getCommand();
+
+        $c = Process::escape('-c');
+        $tmpIni = Process::escape($xdebug->getTmpIni());
+        $this->assertContains(" {$c} {$tmpIni} ", " {$command} ");
     }
 
     public function testNoRestartWhenNotLoaded()
@@ -88,11 +96,15 @@ class RestartTest extends BaseTestCase
         $loaded = true;
         $settings = array('setMainScript' => array($script));
 
-        $xdebug = CommandMock::createAndCheck($loaded, null, $settings);
+        $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
 
+        // Check command
+        $xdebug = PartialMock::createAndCheck($loaded, null, $settings);
+        $command = $xdebug->getCommand();
+
         $escaped = Process::escape($script);
-        $this->assertContains(" {$escaped} ", " {$xdebug->command} ");
+        $this->assertContains(" {$escaped} ", " {$command} ");
     }
 
     public function scriptSetterProvider()
