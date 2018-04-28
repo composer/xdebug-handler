@@ -119,7 +119,7 @@ class IniFilesTest extends BaseTestCase
      */
     private function getTmpIniContent(PartialMock $xdebug)
     {
-        $tmpIni = $xdebug->getProperty('tmpIni');
+        $tmpIni = $xdebug->getTmpIni();
 
         if (!$tmpIni) {
             $this->fail('The tmpIni file was not created');
