@@ -19,50 +19,61 @@ use Composer\XdebugHandler\Mocks\CoreMock;
  */
 class IniHelper
 {
-    protected $base;
+    protected $loadedIni;
+    protected $scanDir;
     protected $files;
+    protected $envOptions;
 
-    public function __construct()
+    /**
+     * envOptions is an array of additional environment values to set,
+     * comprising: [PHP_INI_SCAN_DIR]
+     *
+     * @param mixed $envOptions
+     */
+    public function __construct($envOptions = null)
     {
-        $this->base = dirname(__DIR__).DIRECTORY_SEPARATOR.'Fixtures';
+        $this->envOptions = $envOptions ?: array();
+        $base = dirname(__DIR__).DIRECTORY_SEPARATOR.'Fixtures';
+        $this->loadedIni = $base.DIRECTORY_SEPARATOR.'php.ini';
+        $this->scanDir = $base.DIRECTORY_SEPARATOR.'scandir';
     }
 
     public function setNoInis()
     {
         // Must have at least one entry
         $this->files = array('');
-        $this->setEnvIni();
+        $this->setEnvironment();
     }
 
     public function setLoadedIni()
     {
         $this->files = array(
-            $this->base.DIRECTORY_SEPARATOR.'php.ini',
+            $this->loadedIni,
         );
 
-        $this->setEnvIni();
+        $this->setEnvironment();
     }
 
     public function setScannedInis()
     {
         $this->files = array(
             '',
-            $this->base.DIRECTORY_SEPARATOR.'scan-one.ini',
-            $this->base.DIRECTORY_SEPARATOR.'scan-two.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
         );
 
-        $this->setEnvIni();
+        $this->setEnvironment();
     }
 
     public function setAllInis()
     {
         $this->files = array(
-            $this->base.DIRECTORY_SEPARATOR.'php.ini',
-            $this->base.DIRECTORY_SEPARATOR.'scan-one.ini',
-            $this->base.DIRECTORY_SEPARATOR.'scan-two.ini',
+            $this->loadedIni,
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
         );
 
-        $this->setEnvIni();
+        $this->setEnvironment();
     }
 
     public function getIniFiles()
@@ -70,9 +81,37 @@ class IniHelper
         return $this->files;
     }
 
-    private function setEnvIni()
+    public function getLoadedIni()
     {
-        // Values must be path-separated
-        putenv(CoreMock::ORIGINAL_INIS.'='.implode(PATH_SEPARATOR, $this->files));
+        return $this->loadedIni;
+    }
+
+    public function getScanDir()
+    {
+        return $this->scanDir;
+    }
+
+    private function setEnvironment()
+    {
+        // Set ORIGINAL_INIS. Values must be path-separated
+        $this->setEnv(CoreMock::ORIGINAL_INIS, implode(PATH_SEPARATOR, $this->files));
+
+        $options = $this->envOptions ?: array();
+
+        if ($options) {
+            $scanDir = array_shift($options);
+            $this->setEnv('PHP_INI_SCAN_DIR', $scanDir);
+        }
+    }
+
+    private function setEnv($name, $value)
+    {
+        if (false !== $value) {
+            putenv($name.'='.$value);
+            $_SERVER[$name] = $value;
+        } else {
+            putenv($name);
+            unset($_SERVER[$name]);
+        }
     }
 }
