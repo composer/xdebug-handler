@@ -413,12 +413,7 @@ class XdebugHandler
     }
 
     /**
-     * Returns default or changed settings for the tmp ini
-     *
-     * Ini settings can be passed on the command line using the -d option. To
-     * preserve these, all loaded settings that are either not present or
-     * different from those in the ini files are added at the end of the tmp ini.
-     * Note that any extensions loaded like this will not be included.
+     * Returns default, changed and command-line ini settings
      *
      * @param array $loadedConfig All current ini settings
      * @param array $iniConfig Settings from user ini files
@@ -436,12 +431,8 @@ class XdebugHandler
             }
 
             if (!isset($iniConfig[$name]) || $iniConfig[$name] !== $value) {
-                // It is fastest to double-quote escape each value
-                if (false !== strpos($value, '"')) {
-                    $value = str_replace('"', '\\"', $value);
-                }
-
-                $content .= $name.'="'.$value.'"'.PHP_EOL;
+                // Double-quote escape each value
+                $content .= $name.'="'.addcslashes($value, '\\"').'"'.PHP_EOL;
             }
         }
 
