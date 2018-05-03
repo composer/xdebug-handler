@@ -76,7 +76,7 @@ class EnvironmentTest extends BaseTestCase
         PartialMock::createAndCheck($loaded, null, $settings);
 
         if (!$standard) {
-            //$scanDir = $ini->hasScannedInis() ? '' : $scanDir;
+            //$scanDir = '';
             //$phprc = $xdebug->getTmpIni();
         }
 

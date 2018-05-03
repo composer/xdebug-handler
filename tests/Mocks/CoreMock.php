@@ -120,6 +120,7 @@ class CoreMock extends XdebugHandler
             CoreMock::ALLOW_XDEBUG,
             CoreMock::ORIGINAL_INIS,
             'PHP_INI_SCAN_DIR',
+            'PHPRC',
         );
 
         foreach ($names as $name) {
