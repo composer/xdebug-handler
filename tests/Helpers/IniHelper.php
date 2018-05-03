@@ -26,7 +26,7 @@ class IniHelper
 
     /**
      * envOptions is an array of additional environment values to set,
-     * comprising: [PHP_INI_SCAN_DIR]
+     * comprising: [PHP_INI_SCAN_DIR, optional PHPRC]
      *
      * @param mixed $envOptions
      */
@@ -81,6 +81,11 @@ class IniHelper
         return $this->files;
     }
 
+    public function hasScannedInis()
+    {
+        return count($this->files) > 1;
+    }
+
     public function getLoadedIni()
     {
         return $this->loadedIni;
@@ -100,7 +105,13 @@ class IniHelper
 
         if ($options) {
             $scanDir = array_shift($options);
+            $phprc = array_shift($options);
+
             $this->setEnv('PHP_INI_SCAN_DIR', $scanDir);
+
+            if (null !== $phprc) {
+                $this->setEnv('PHPRC', $phprc);
+            }
         }
     }
 

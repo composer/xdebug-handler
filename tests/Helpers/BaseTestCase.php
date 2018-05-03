@@ -29,6 +29,7 @@ abstract class BaseTestCase extends TestCase
         CoreMock::ALLOW_XDEBUG,
         CoreMock::ORIGINAL_INIS,
         'PHP_INI_SCAN_DIR',
+        'PHPRC',
         XdebugHandler::RESTART_SETTINGS,
     );
 

@@ -1,4 +1,6 @@
 ## [Unreleased]
+  * Added: `PHPRC` original value to restart stettings, for use in a restarted process.
+  * Changed: internal procedure to disable ini-scanning, using `-n` command-line option.
   * Fixed: improved handling when checking main script.
   * Fixed: handling for standard input, that never actually did anything.
   * Fixed: fatal error when ctype extension is not available.

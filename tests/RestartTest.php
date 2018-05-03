@@ -36,6 +36,9 @@ class RestartTest extends BaseTestCase
         $xdebug = PartialMock::createAndCheck($loaded);
         $command = $xdebug->getCommand();
 
+        $n = Process::escape('-n');
+        $this->assertContains(" {$n} ", " {$command} ");
+
         $c = Process::escape('-c');
         $tmpIni = Process::escape($xdebug->getTmpIni());
         $this->assertContains(" {$c} {$tmpIni} ", " {$command} ");

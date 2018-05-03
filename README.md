@@ -53,11 +53,10 @@ Do not use this parameter if the input handler cannot cope with an option as the
 A temporary ini file is created from the loaded (and scanned) ini files, with any references to the xdebug extension commented out. Current ini settings are merged, so that settings made on the command-line or by the application are included.
 
 * `MYAPP_ALLOW_XDEBUG` is set with internal data to flag and use in the restart.
-* If any scanned ini files were used, `PHP_INI_SCAN_DIR` is set to an empty string. This tells PHP not to scan for additional inis.
+* The `-n` option is added to the command-line. This tells PHP not to scan for additional inis.
 * The temporary ini is added to the command-line with the `-c` option.
 * The application is restarted in a new process using `passthru`.
     * `MYAPP_ALLOW_XDEBUG` is unset.
-    * `PHP_INI_SCAN_DIR` is restored to its original value (if it was changed).
     * The application runs and exits.
 * The main process exits with the exit code from the restarted process.
 
@@ -98,25 +97,20 @@ $settings = XdebugHandler::getRestartSettings();
  *    'tmpIni'      => the temporary ini file used in the restart (string)
  *    'scannedInis' => if there were any scanned inis (bool)
  *    'scanDir'     => the original PHP_INI_SCAN_DIR value (false|string)
+ *    'phprc'       => the original PHPRC value (false|string)
  *    'inis'        => the original inis from getAllIniFiles (array)
  *    'skipped'     => the skipped version from getSkippedVersion (string)
  */
 ```
 
 #### Sub-processes
-Calling a PHP process from a restarted process will result in xdebug being loaded in that process, or another restart if xdebug-handler is implemented.
+Calling a PHP process from a restarted process will result in one of two possible outcomes:
 
-The `XdebugHandler::getRestartSettings()` method is provided so that an application can call a PHP process with the same settings that were used in a restart:
+1. xdebug will be loaded in the new process.
+2. If the new process implements xdebug-handler, it will restart without loading xdebug.
 
-* If `scannedInis` is true, set `PHP_INI_SCAN_DIR` to an empty string.
-* Add `tmpIni`to the command-line with the `-c` option.
-* Run the process.
-    * If xdebug-handler is implemented, its internal settings are synced and `PHP_INI_SCAN_DIR` is restored to its original value (if it was changed).
-* If `PHP_INI_SCAN_DIR` was changed, restore it using `scanDir`.
+The `XdebugHandler::getRestartSettings()` method provides a range of settings to suit different requirements when calling a PHP sub-process. An external [helper class](https://github.com/johnstevenson/xdebug-handler-opts) is available to make this simple.
 
-This solution is not without its pitfalls. In addition to the ini files issue outlined above, `PHP_INI_SCAN_DIR` is not restored in the sub-process (unless xdebug-hander is implemented). This will cause problems if it was changed and the sub-process calls another PHP process.
-
-However, an application can safely spawn itself, other scripts that it controls, or other applications that implement xdebug-handler. An external [helper class](https://github.com/johnstevenson/xdebug-handler-opts) is available that wraps this procedure into a single method call.
 
 ### Output
 The `setLogger` method enables the output of status messages to an external PSR3 logger.

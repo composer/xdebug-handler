@@ -12,6 +12,7 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Helpers\EnvHelper;
 use Composer\XdebugHandler\Mocks\CoreMock;
 
 /**
@@ -22,22 +23,33 @@ use Composer\XdebugHandler\Mocks\CoreMock;
 class SettingsTest extends BaseTestCase
 {
     /**
-     * Tests that the settings returned from getRestartSettings are correctly
-     * formatted.
+     * Tests that the restart settings are correctly set.
      *
-     * Other tests are performed in BaseTestCase checks, and the EnvironmentTest
-     * method testScanDirAfterRestart.
+     * @param callable $iniFunc IniHelper method to use
+     * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
+     * @param $phprc Initial value for PHPRC
+     * @dataProvider environmentProvider
      */
-    public function testGetRestartSettings()
+    public function testGetRestartSettings($iniFunc, $scanDir, $phprc)
     {
-        $settings = $this->getRestartSettings();
+        $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
+
+        $loaded = true;
+        CoreMock::createAndCheck($loaded);
+
+        $settings = CoreMock::getRestartSettings();
 
         $this->assertInternalType('string', $settings['tmpIni']);
-        $this->assertInternalType('boolean', $settings['scannedInis']);
-        // Note scanDir is checked specifically in Environment tests
-        $this->assertArrayHasKey('scanDir', $settings);
-        $this->assertInternalType('array', $settings['inis']);
-        $this->assertInternalType('string', $settings['skipped']);
+        $this->assertSame($ini->hasScannedInis(), $settings['scannedInis']);
+        $this->assertSame($scanDir, $settings['scanDir']);
+        $this->assertSame($phprc, $settings['phprc']);
+        $this->assertSame(CoreMock::getAllIniFiles(), $settings['inis']);
+        $this->assertSame(CoreMock::TEST_VERSION, $settings['skipped']);
+    }
+
+    public function environmentProvider()
+    {
+        return EnvHelper::dataProvider();
     }
 
     /**
@@ -47,7 +59,8 @@ class SettingsTest extends BaseTestCase
     public function testSyncSettings()
     {
         // Create the settings in the environment
-        $this->getRestartSettings();
+        $loaded = true;
+        CoreMock::createAndCheck($loaded);
 
         // Unset env ORIGINAL_INIS to mock a call by a different application
         putenv(CoreMock::ORIGINAL_INIS);
@@ -55,23 +68,13 @@ class SettingsTest extends BaseTestCase
 
         // Mock not loaded ($inRestart and $skipped statics are unset)
         $loaded = false;
-        $xdebug = CoreMock::createAndCheck($loaded);
+        CoreMock::createAndCheck($loaded);
 
         // Env ORIGINAL_INIS must be set and be a string
         $this->assertInternalType('string', getenv(CoreMock::ORIGINAL_INIS));
         $this->assertSame(true, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
 
         // Skipped version must be set
-        $this->assertSame(CoreMock::TEST_VERSION, $xdebug::getSkippedVersion());
-    }
-
-    /**
-     * Returns restart settings from a mocked restart.
-     */
-    private function getRestartSettings()
-    {
-        $loaded = true;
-        $xdebug = CoreMock::createAndCheck($loaded);
-        return CoreMock::getRestartSettings();
+        $this->assertSame(CoreMock::TEST_VERSION, CoreMock::getSkippedVersion());
     }
 }

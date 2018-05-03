@@ -12,8 +12,7 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\Helpers\BaseTestCase;
-use Composer\XdebugHandler\Helpers\IniHelper;
-use Composer\XdebugHandler\Mocks\CoreMock;
+use Composer\XdebugHandler\Helpers\EnvHelper;
 use Composer\XdebugHandler\Mocks\PartialMock;
 
 /**
@@ -29,103 +28,65 @@ class EnvironmentTest extends BaseTestCase
      *
      * @param callable $iniFunc IniHelper method to use
      * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param string $expected The _ALLOW_XDEBUG env value
+     * @param mixed $phprc Initial value for PHPRC
      *
      * @dataProvider envAllowBeforeProvider
      */
-    public function testEnvAllowBeforeRestart($iniFunc, $scanDir, $expected)
+    public function testEnvAllowBeforeRestart($iniFunc, $scanDir, $phprc)
     {
-        $ini = new IniHelper(array($scanDir));
-        call_user_func(array($ini, $iniFunc));
-
+        $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
+
         PartialMock::createAndCheck($loaded);
-        $this->assertSame($expected, getenv(CoreMock::ALLOW_XDEBUG));
+
+        $args = array(
+            PartialMock::RESTART_ID,
+            PartialMock::TEST_VERSION,
+            $ini->hasScannedInis() ? '1' : '0',
+            false !== $scanDir ? $scanDir : '*',
+            false !== $phprc ? $phprc : '*',
+        );
+
+        $expected = implode('|', $args);
+        $this->assertSame($expected, getenv(PartialMock::ALLOW_XDEBUG));
     }
 
     public function envAllowBeforeProvider()
     {
-        $env = CoreMock::RESTART_ID.'|'.CoreMock::TEST_VERSION.'|';
-        $ini = new IniHelper();
-        $scanDir = $ini->getScanDir();
-
-        // $iniFunc, $scanDir, $expected (_ALLOW_XDEBUG value)
-        return array(
-            'loaded false' => array('setLoadedIni', false, $env.'0'),
-            'loaded empty' => array('setLoadedIni', '', $env.'0'),
-            'scanned false' => array('setScannedInis', false, $env.'1'),
-            'scanned dir' => array('setScannedInis', $scanDir, $env."1|{$scanDir}"),
-        );
+        return EnvHelper::dataProvider();
     }
 
     /**
-     * Tests that PHP_INI_SCAN_DIR is correctly set so that the restarted
-     * process does not scan for additional ini files.
+     * Tests that environment variables are correctly set for a restart.
      *
      * @param callable $iniFunc IniHelper method to use
      * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param mixed $expected The required PHP_INI_SCAN_DIR value
-     *
-     * @dataProvider scanDirProvider
+     * @param $phprc Initial value for PHPRC
+     * @package $standard If this is a standard restart
+     * @dataProvider environmentProvider
      */
-    public function testScanDirBeforeRestart($iniFunc, $scanDir, $expected)
+    public function testEnvironmentBeforeRestart($iniFunc, $scanDir, $phprc, $standard)
     {
-        $ini = new IniHelper(array($scanDir));
-        call_user_func(array($ini, $iniFunc));
-
+        $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
-        PartialMock::createAndCheck($loaded);
-        $this->assertSame($expected, getenv('PHP_INI_SCAN_DIR'));
-    }
 
-    public function scanDirProvider()
-    {
-        $ini = new IniHelper();
-        $scanDir = $ini->getScanDir();
+        // This needs to be implemented
+        $settings = $standard ? array() : array();
 
-        // $iniFunc, $scanDir, $expected (PHP_INI_SCAN_DIR value for restart)
-        return array(
-            'loaded false' => array('setLoadedIni', false, false),
-            'loaded empty' => array('setLoadedIni', '', ''),
-            'scanned false' => array('setScannedInis', false, ''),
-            'scanned dir' => array('setScannedInis', $scanDir, ''),
-        );
-    }
+        PartialMock::createAndCheck($loaded, null, $settings);
 
-    /**
-     * Tests that PHP_INI_SCAN_DIR is restored to its original value after the
-     * process has been restarted. Also tests that getRestartSettings reports
-     * correct values.
-     *
-     * @param callable $iniFunc IniHelper method to use
-     * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     *
-     * @dataProvider scanDirProvider
-     */
-    public function testScanDirAfterRestart($iniFunc, $scanDir)
-    {
-        $ini = new IniHelper(array($scanDir));
-        call_user_func(array($ini, $iniFunc));
-
-        $loaded = true;
-        $xdebug = CoreMock::createAndCheck($loaded);
-
-        $this->checkRestart($xdebug);
-        $this->assertSame($scanDir, getenv('PHP_INI_SCAN_DIR'));
-
-        // Check that $_SERVER has been updated
-        if (false !== $scanDir) {
-            $this->assertSame($scanDir, $_SERVER['PHP_INI_SCAN_DIR']);
-        } else {
-            $this->assertSame(false, isset($_SERVER['PHP_INI_SCAN_DIR']));
+        if (!$standard) {
+            //$scanDir = $ini->hasScannedInis() ? '' : $scanDir;
+            //$phprc = $xdebug->getTmpIni();
         }
 
-        // Check that restart settings reports original scan dir
-        $settings = CoreMock::getRestartSettings();
-        $this->assertSame($scanDir, $settings['scanDir']);
+        $strategy = $standard ? 'standard' : 'persistent';
+        $this->assertSame($scanDir, getenv('PHP_INI_SCAN_DIR'), $strategy.' scanDir');
+        $this->assertSame($phprc, getenv('PHPRC'), $strategy.' phprc');
+    }
 
-        // Check that restart settings reports scannedInis
-        $scannedInis = $iniFunc === 'setScannedInis';
-        $this->assertSame($scannedInis, $settings['scannedInis']);
+    public function environmentProvider()
+    {
+        return EnvHelper::dataProviderEx();
     }
 }
