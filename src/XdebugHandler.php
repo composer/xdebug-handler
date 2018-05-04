@@ -465,7 +465,7 @@ class XdebugHandler
     {
         if (false === getenv($this->envOriginalInis)) {
             // Called by another app, so make original inis available
-            Process::setEnv($this->envOriginalInis, implode('|', $settings['inis']));
+            Process::setEnv($this->envOriginalInis, implode(PATH_SEPARATOR, $settings['inis']));
         }
 
         self::$skipped = $settings['skipped'];

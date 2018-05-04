@@ -87,6 +87,15 @@ class EnvironmentTest extends BaseTestCase
 
     public function environmentProvider()
     {
-        return EnvHelper::dataProviderEx();
+        // $iniFunc, $scanDir, $phprc, $standard (added below)
+        $data = EnvHelper::dataProvider();
+        $result = array();
+
+        foreach ($data as $test => $params) {
+            $result[$test.' standard'] = array_merge($params, array(true));
+            $result[$test.' persistent'] = array_merge($params, array(false));
+        }
+
+        return $result;
     }
 }
