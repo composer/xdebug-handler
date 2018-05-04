@@ -48,18 +48,4 @@ class EnvHelper
             'scanned dir false' => array('setScannedInis', $scanDir, false),
         );
     }
-
-    public static function dataProviderEx()
-    {
-        // $iniFunc, $scanDir, $phprc, $standard
-        $data = self::dataProvider();
-        $result = array();
-
-        foreach ($data as $test => $params) {
-            $result[$test.' standard'] = array_merge($params, array(true));
-            $result[$test.' persistent'] = array_merge($params, array(false));
-        }
-
-        return $result;
-    }
 }

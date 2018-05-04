@@ -58,9 +58,12 @@ class SettingsTest extends BaseTestCase
      */
     public function testSyncSettings()
     {
+        $ini = EnvHelper::setInis('setAllInis', false, false);
+
         // Create the settings in the environment
         $loaded = true;
         CoreMock::createAndCheck($loaded);
+        $originalInis = getenv(CoreMock::ORIGINAL_INIS);
 
         // Unset env ORIGINAL_INIS to mock a call by a different application
         putenv(CoreMock::ORIGINAL_INIS);
@@ -71,8 +74,8 @@ class SettingsTest extends BaseTestCase
         CoreMock::createAndCheck($loaded);
 
         // Env ORIGINAL_INIS must be set and be a string
-        $this->assertInternalType('string', getenv(CoreMock::ORIGINAL_INIS));
-        $this->assertSame(true, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
+        $this->assertSame($originalInis, getenv(CoreMock::ORIGINAL_INIS));
+        $this->assertSame($originalInis, $_SERVER[CoreMock::ORIGINAL_INIS]);
 
         // Skipped version must be set
         $this->assertSame(CoreMock::TEST_VERSION, CoreMock::getSkippedVersion());
