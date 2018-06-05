@@ -79,14 +79,13 @@ class EnvironmentTest extends BaseTestCase
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
 
-        // This needs to be implemented
-        $settings = $standard ? array() : array();
+        $settings = $standard ? array() : array('setPersistent' => array());
 
-        PartialMock::createAndCheck($loaded, null, $settings);
+        $xdebug = PartialMock::createAndCheck($loaded, null, $settings);
 
         if (!$standard) {
-            //$scanDir = '';
-            //$phprc = $xdebug->getTmpIni();
+            $scanDir = '';
+            $phprc = $xdebug->getTmpIni();
         }
 
         $strategy = $standard ? 'standard' : 'persistent';

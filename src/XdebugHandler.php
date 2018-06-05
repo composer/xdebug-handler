@@ -37,6 +37,7 @@ class XdebugHandler
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    private $persistent;
     private $script;
     /** @var Status|null */
     private $statusWriter;
@@ -94,11 +95,22 @@ class XdebugHandler
      *
      * @param string $script
      *
-     * @return $this;
+     * @return $this
      */
     public function setMainScript($script)
     {
         $this->script = $script;
+        return $this;
+    }
+
+    /**
+     * Persist the settings to keep xdebug out of sub-processes
+     *
+     * @return $this
+     */
+    public function setPersistent()
+    {
+        $this->persistent = true;
         return $this;
     }
 
@@ -338,14 +350,19 @@ class XdebugHandler
      */
     private function getCommand()
     {
+        $php = array(PHP_BINARY);
         $args = array_slice($_SERVER['argv'], 1);
+
+        if (!$this->persistent) {
+            // Use command-line options
+            array_push($php, '-n', '-c', $this->tmpIni);
+        }
 
         if (defined('STDOUT') && Process::supportsColor(STDOUT)) {
             $args = Process::addColorOption($args, $this->colorOption);
         }
 
-        $executable = array(PHP_BINARY, '-n', '-c', $this->tmpIni, $this->script);
-        $args = array_merge($executable, $args);
+        $args = array_merge($php, array($this->script), $args);
 
         $cmd = Process::escape(array_shift($args), true, true);
         foreach ($args as $arg) {
@@ -373,6 +390,13 @@ class XdebugHandler
         // Make original inis available to restarted process
         if (!putenv($this->envOriginalInis.'='.implode(PATH_SEPARATOR, $iniFiles))) {
             return false;
+        }
+
+        if ($this->persistent) {
+            // Use the environment to persist the settings
+            if (!putenv('PHP_INI_SCAN_DIR=') || !putenv('PHPRC='.$this->tmpIni)) {
+                return false;
+            }
         }
 
         // Flag restarted process and save values for it to use

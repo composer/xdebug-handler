@@ -117,6 +117,23 @@ class RestartTest extends BaseTestCase
         );
     }
 
+    public function testSetPersistent()
+    {
+        $loaded = true;
+        $this->setArgv();
+        $settings = array('setPersistent' => array());
+
+        // Check command
+        $xdebug = PartialMock::createAndCheck($loaded, null, $settings);
+        $command = $xdebug->getCommand();
+        $tmpIni = $xdebug->getTmpIni();
+
+        foreach (array('-n', '-c', $tmpIni) as $param) {
+            $escaped = Process::escape($param);
+            $this->assertNotContains(" {$escaped} ", " {$command} ");
+        }
+    }
+
     public function testNoRestartWhenNotRequired()
     {
         $loaded = true;
