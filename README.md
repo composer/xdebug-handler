@@ -72,7 +72,7 @@ use Composer\XdebugHandler\XdebugHandler;
 
 $files = XdebugHandler::getAllIniFiles();
 
-// $files[0] always exists, it could be an empty string
+# $files[0] always exists, it could be an empty string
 $loadedIni = array_shift($files);
 $scannedInis = $files;
 ```
@@ -87,7 +87,7 @@ Other static helper methods provide information about the current process, which
 use Composer\XdebugHandler\XdebugHandler;
 
 $version = XdebugHandler::getSkippedVersion();
-// $version: '2.6.0' (for example), or an empty string
+# $version: '2.6.0' (for example), or an empty string
 
 $settings = XdebugHandler::getRestartSettings();
 /**
@@ -104,13 +104,44 @@ $settings = XdebugHandler::getRestartSettings();
 ```
 
 #### Sub-processes
-Calling a PHP process from a restarted process will result in one of two possible outcomes:
+Calling a PHP process from a restarted process using the **original** configuration will result in one of two outcomes:
 
 1. xdebug will be loaded in the new process.
 2. If the new process implements xdebug-handler, it will restart without loading xdebug.
 
-The `XdebugHandler::getRestartSettings()` method provides a range of settings to suit different requirements when calling a PHP sub-process. An external [helper class](https://github.com/johnstevenson/xdebug-handler-opts) is available to make this simple.
+The `XdebugHandler::getRestartSettings()` method provides data that can be used to call a PHP sub-process. For example:
 
+*   Using **standard** restart settings.
+    * Add `-n`, `-c`, `tmpIni` to the command-line.
+    * xdebug will not be loaded, but points 1 and 2 apply to any sub-process.
+
+*   Using **persistent** environment variables.
+    * Set `PHPRC` to `tmpIni`
+    * Set `PHP_INI_SCAN_DIR` to an empty string if `scannedInis` is true.
+    * xdebug will not be loaded in this or any sub-process.
+
+The PhpConfig class can be used to manage these scenarios.
+
+#### PhpConfig
+This helper class provides command-line options and sets up the environment for calling a PHP sub-process. If there was no restart (because it was overriden, or xdebug is not present), an empty options array is returned and the environment is not changed.
+
+```php
+use Composer\XdebugHandler\PhpConfig;
+
+$config = new PhpConfig;
+
+$options = $config->useOriginal();
+# $options:     empty array
+# environment:  restored
+
+$options = $config->useStandard();
+# $options:     [-n, -c, tmpIni]
+# environment:  restored
+
+$options = $config->usePersistent();
+# $options:    empty array
+# environment: sets PHPRC, PHP_INI_SCAN_DIR (if needed)
+```
 
 ### Output
 The `setLogger` method enables the output of status messages to an external PSR3 logger.
