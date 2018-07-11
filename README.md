@@ -45,8 +45,6 @@ This optional value is added to the restart command-line and is needed to force 
 
 If the original command-line contains an argument that pattern-matches this value, for example `--no-ansi` `--colors=never`, then _$colorOption_ is ignored.
 
-Do not use this parameter if the input handler cannot cope with an option as the last argument.
-
 ## Advanced Usage
 ### How it works
 
