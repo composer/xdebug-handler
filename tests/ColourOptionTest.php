@@ -105,4 +105,12 @@ class ColorOptionTest extends TestCase
         $this->assertContains($colorOption, $result);
         $this->assertNotContains($existing, $result);
     }
+
+    public function testOptionIsProperlyAddedBeforeDoubleDash()
+    {
+        $args = array('script.php', '--option', '--', 'paramA', 'paramB');
+
+        $result = Process::addColorOption($args, '--ansi');
+        $this->assertSame('script.php --option --ansi -- paramA paramB', implode(' ', $result));
+    }
 }
