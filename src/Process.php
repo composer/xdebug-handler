@@ -21,11 +21,11 @@ namespace Composer\XdebugHandler;
 class Process
 {
     /**
-     * Returns the process arguments, appending a color option if required
+     * Returns an array of parameters, including a color option if required
      *
      * A color option is needed because child process output is piped.
      *
-     * @param array $args Command line arguments
+     * @param array $args The script parameters
      * @param string $colorOption The long option to force color output
      *
      * @return array
@@ -39,8 +39,8 @@ class Process
         }
 
         if (isset($matches[2])) {
-            // Handle --color(s)= options. Note args[0] is the script name
-            if ($index = array_search($matches[2].'auto', $args)) {
+            // Handle --color(s)= options
+            if (false !== ($index = array_search($matches[2].'auto', $args))) {
                 $args[$index] = $colorOption;
                 return $args;
             } elseif (preg_grep('/^'.$matches[2].'/', $args)) {
@@ -50,12 +50,11 @@ class Process
             return $args;
         }
 
-        $doubleDashIndex = array_search('--', $args, true);
-
-        if (false === $doubleDashIndex) {
-            $args[] = $colorOption;
+        if (false !== ($index = array_search('--', $args))) {
+            // Position option before double-dash delimiter
+            array_splice($args, $index, 0, $colorOption);
         } else {
-            array_splice($args, $doubleDashIndex, 0, $colorOption);
+            $args[] = $colorOption;
         }
 
         return $args;
