@@ -45,6 +45,8 @@ This optional value is added to the restart command-line and is needed to force 
 
 If the original command-line contains an argument that pattern-matches this value, for example `--no-ansi` `--colors=never`, then _$colorOption_ is ignored.
 
+If the pattern-match ends with =auto, for example `--colors=auto`, the argument is replaced by _$colorOption_. Otherwise it is added at either the end of the command-line, or preceeding a double-dash `--` delimiter.
+
 ## Advanced Usage
 ### How it works
 

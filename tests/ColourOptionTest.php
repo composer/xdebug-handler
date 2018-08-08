@@ -24,20 +24,19 @@ class ColorOptionTest extends TestCase
      *
      * @dataProvider neededProvider
      */
-    public function testOptionNeeded($colorOption)
+    public function testOptionNeeded($args, $colorOption, $expected)
     {
-        $args = array('script.php', 'param');
-
         $result = Process::addColorOption($args, $colorOption);
-        $this->assertContains($colorOption, $result);
+        $this->assertSame($expected, implode(' ', $result));
     }
 
     public function neededProvider()
     {
-        // $colorOption
+        // $args, $colorOption, $expected
         return array(
-            'simple' => array('--xxx'),
-            'complex' => array('--xxx=yyy'),
+            'simple' => array(array('--option', 'param'), '--xxx', '--option param --xxx'),
+            'complex' => array(array('--option', 'param'), '--xxx=yyy', '--option param --xxx=yyy'),
+            'position' => array(array('--option', '--', 'param'), '--xxx', '--option --xxx -- param'),
         );
     }
 
@@ -49,8 +48,7 @@ class ColorOptionTest extends TestCase
      */
     public function testOptionNotNeeded($existing, $colorOption)
     {
-        $args = array('script.php', 'param');
-        $args[] = $existing;
+        $args = array($existing, '--option', 'param');
 
         $result = Process::addColorOption($args, $colorOption);
         $this->assertContains($existing, $result);
@@ -74,7 +72,7 @@ class ColorOptionTest extends TestCase
      */
     public function testOptionNotMatched($colorOption)
     {
-        $args = array('script.php', 'param');
+        $args = array('--option', 'param');
 
         $result = Process::addColorOption($args, $colorOption);
         $this->assertNotContains($colorOption, $result);
@@ -96,21 +94,10 @@ class ColorOptionTest extends TestCase
      */
     public function testOptionReplaced()
     {
-        $args = array('script.php', 'param');
-        $existing = '--xxx=auto';
+        $args = array('--xxx=auto', 'param');
         $colorOption = '--xxx=always';
-        $args[] = $existing;
 
         $result = Process::addColorOption($args, $colorOption);
-        $this->assertContains($colorOption, $result);
-        $this->assertNotContains($existing, $result);
-    }
-
-    public function testOptionIsProperlyAddedBeforeDoubleDash()
-    {
-        $args = array('script.php', '--option', '--', 'paramA', 'paramB');
-
-        $result = Process::addColorOption($args, '--ansi');
-        $this->assertSame('script.php --option --ansi -- paramA paramB', implode(' ', $result));
+        $this->assertSame('--xxx=always param', implode(' ', $result));
     }
 }
