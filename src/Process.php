@@ -50,7 +50,14 @@ class Process
             return $args;
         }
 
-        $args[] = $colorOption;
+        $doubleDashIndex = array_search('--', $args, true);
+
+        if (false === $doubleDashIndex) {
+            $args[] = $colorOption;
+        } else {
+            array_splice($args, $doubleDashIndex, 0, $colorOption);
+        }
+
         return $args;
     }
 
