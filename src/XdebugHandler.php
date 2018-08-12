@@ -73,20 +73,26 @@ class XdebugHandler
      * Activates status message output to a PSR3 logger
      *
      * @param LoggerInterface $logger
+     *
+     * @return $this
      */
     public function setLogger(LoggerInterface $logger)
     {
         $this->statusWriter = new Status($logger, $this->envAllowXdebug);
+        return $this;
     }
 
     /**
      * Sets the main script location if it cannot be called from argv
      *
      * @param string $script
+     *
+     * @return $this;
      */
     public function setMainScript($script)
     {
         $this->script = $script;
+        return $this;
     }
 
     /**
