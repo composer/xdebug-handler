@@ -51,7 +51,7 @@ class PhpConfigTest extends BaseTestCase
         return array(
             'original' => array('useOriginal', array()),
             'standard' => array('useStandard', array('-n', '-c', '')),
-            'persistent'  => array('usePersistent', array()),
+            'persistent' => array('usePersistent', array()),
         );
     }
 

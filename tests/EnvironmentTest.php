@@ -61,8 +61,9 @@ class EnvironmentTest extends BaseTestCase
      *
      * @param callable $iniFunc IniHelper method to use
      * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param $phprc Initial value for PHPRC
-     * @package $standard If this is a standard restart
+     * @param false|string $phprc Initial value for PHPRC
+     * @param bool $standard If this is a standard restart
+     *
      * @dataProvider environmentProvider
      */
     public function testEnvironmentBeforeRestart($iniFunc, $scanDir, $phprc, $standard)

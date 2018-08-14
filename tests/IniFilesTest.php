@@ -59,7 +59,7 @@ class IniFilesTest extends BaseTestCase
      * entries.
      *
      * @param callable $iniFunc IniHelper method to use
-     * @param integer $matches The number of disabled entries to match
+     * @param int $matches The number of disabled entries to match
      * @dataProvider tmpIniProvider
      */
     public function testTmpIni($iniFunc, $matches)

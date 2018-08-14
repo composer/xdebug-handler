@@ -21,7 +21,6 @@ class ClassTest extends TestCase
 {
     /**
      * @expectedException \RuntimeException
-     *
      */
     public function testConstructorThrowsOnEmptyEnvPrefix()
     {
@@ -30,7 +29,6 @@ class ClassTest extends TestCase
 
     /**
      * @expectedException \RuntimeException
-     *
      */
     public function testConstructorThrowsOnInvalidEnvPrefix()
     {
@@ -39,7 +37,6 @@ class ClassTest extends TestCase
 
     /**
      * @expectedException \RuntimeException
-     *
      */
     public function testConstructorThrowsOnInvalidColorOption()
     {
