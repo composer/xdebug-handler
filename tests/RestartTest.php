@@ -16,7 +16,6 @@ use Composer\XdebugHandler\Mocks\CoreMock;
 use Composer\XdebugHandler\Mocks\FailMock;
 use Composer\XdebugHandler\Mocks\PartialMock;
 use Composer\XdebugHandler\Mocks\RequiredMock;
-use Composer\XdebugHandler\Process;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4
