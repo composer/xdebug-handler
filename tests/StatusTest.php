@@ -11,10 +11,10 @@
 
 namespace Composer\XdebugHandler;
 
-use Psr\Log\LogLevel;
 use Composer\XdebugHandler\Helpers\BaseTestCase;
 use Composer\XdebugHandler\Helpers\Logger;
 use Composer\XdebugHandler\Mocks\CoreMock;
+use Psr\Log\LogLevel;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4

@@ -11,7 +11,6 @@
 
 namespace Composer\XdebugHandler;
 
-use Composer\XdebugHandler\Process;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
