@@ -1,6 +1,10 @@
 ## [Unreleased]
+  * Added: fluent interface for setters.
+  * Added: `PhpConfig` helper class for calling PHP sub-processes.
   * Added: `PHPRC` original value to restart stettings, for use in a restarted process.
   * Changed: internal procedure to disable ini-scanning, using `-n` command-line option.
+  * Fixed: improved color-option handling to respect double-dash delimiter.
+  * Fixed: color-option handling regression from main script changes.
   * Fixed: improved handling when checking main script.
   * Fixed: handling for standard input, that never actually did anything.
   * Fixed: fatal error when ctype extension is not available.
@@ -12,7 +16,7 @@
   * Added: `setMainScript` method for applications that change the working directory.
   * Changed: private `tmpIni` variable to protected for extending classes.
   * Fixed: environment variables not available in $_SERVER when restored in the restart.
-  * Fixed: relative path problems caused by Phar::interceptFileFuncs - [composer/xdebug-handler#46](https://github.com/composer/xdebug-handler/issues/46).
+  * Fixed: relative path problems caused by Phar::interceptFileFuncs.
   * Fixed: incorrect handling when script file cannot be found.
 
 ## [1.0.0] - 2018-03-08
