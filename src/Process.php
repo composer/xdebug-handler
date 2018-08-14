@@ -76,10 +76,11 @@ class Process
     public static function escape($arg, $meta = true, $module = false)
     {
         if (!defined('PHP_WINDOWS_VERSION_BUILD')) {
-            return escapeshellarg($arg);
+            return "'".str_replace("'", "'\\''", $arg)."'";
         }
 
         $quote = strpbrk($arg, " \t") !== false || $arg === '';
+
         $arg = preg_replace('/(\\\\*)"/', '$1$1\\"', $arg, -1, $dquotes);
 
         if ($meta) {
@@ -93,8 +94,7 @@ class Process
         }
 
         if ($quote) {
-            $arg = preg_replace('/(\\\\*)$/', '$1$1', $arg);
-            $arg = '"'.$arg.'"';
+            $arg = '"'.preg_replace('/(\\\\*)$/', '$1$1', $arg).'"';
         }
 
         if ($meta) {

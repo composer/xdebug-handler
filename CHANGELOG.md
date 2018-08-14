@@ -3,6 +3,7 @@
   * Added: `PhpConfig` helper class for calling PHP sub-processes.
   * Added: `PHPRC` original value to restart stettings, for use in a restarted process.
   * Changed: internal procedure to disable ini-scanning, using `-n` command-line option.
+  * Fixed: replaced `escapeshellarg` usage to avoid locale problems.
   * Fixed: improved color-option handling to respect double-dash delimiter.
   * Fixed: color-option handling regression from main script changes.
   * Fixed: improved handling when checking main script.
