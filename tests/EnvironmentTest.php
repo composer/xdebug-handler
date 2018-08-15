@@ -60,7 +60,7 @@ class EnvironmentTest extends BaseTestCase
      * Tests that environment variables are correctly set for a restart.
      *
      * @param callable $iniFunc IniHelper method to use
-     * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
+     * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
      * @param bool $standard If this is a standard restart
      *
