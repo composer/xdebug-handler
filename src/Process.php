@@ -60,7 +60,6 @@ class Process
         return $args;
     }
 
-
     /**
      * Escapes a string to be used as a shell argument.
      *

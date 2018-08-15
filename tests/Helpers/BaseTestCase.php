@@ -66,7 +66,6 @@ abstract class BaseTestCase extends TestCase
 
     /**
      * Unsets environment variables for each test and restores argv
-     *
      */
     protected function setUp()
     {
