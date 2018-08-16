@@ -1,4 +1,6 @@
 ## [Unreleased]
+
+## [1.2.0] - 2018-08-16
   * Added: debug information using `XDEBUG_HANDLER_DEBUG`.
   * Added: fluent interface for setters.
   * Added: `PhpConfig` helper class for calling PHP sub-processes.
@@ -28,6 +30,7 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.2.0...HEAD
+[1.2.0]: https://github.com/composer/xdebug-handler/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/composer/xdebug-handler/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/composer/xdebug-handler/compare/d66f0d15cb57...1.0.0
