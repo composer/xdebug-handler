@@ -154,7 +154,7 @@ $xdebug = new XdebugHandler('myapp');
 $xdebug->setLogger($myLogger);
 ```
 
-All messages are reported with either `DEBUG` or `WARNING` log levels. For example:
+All messages are reported with either `DEBUG` or `WARNING` log levels. For example (showing the level and message):
 
 ```
 // Restart overridden
@@ -167,6 +167,8 @@ DEBUG    Checking MYAPP_ALLOW_XDEBUG
 DEBUG    The xdebug extension is loaded (2.5.0)
 WARNING  No restart (Unable to create temporary ini file)
 ```
+
+Status messages can also be output with `XDEBUG_HANDLER_DEBUG`. See the Debugging section, below.
 
 ### Main script
 The process will not be restarted if the `argv` location of the main script is inaccessible. This is only likely in more esoteric use-cases and can be fixed by using the `setMainScript` method.
@@ -192,6 +194,13 @@ By default the process will restart if xdebug is loaded. Overriding this allows 
 
 #### _restart($command)_
 An application can hook into this to access the temporary ini file, its location given in the `tmpIni` property.
+
+### Debugging
+The following environment settings can be used to troubleshoot unexpected behavior:
+
+* `XDEBUG_HANDLER_DEBUG=1` Outputs status messages to standard output, irrespective of any PSR3 logger. Each message is prefixed `xdebug-handler[pid]`, where pid is the process identifier.
+
+* `XDEBUG_HANDLER_DEBUG=2` As above, but additionally saves the temporary ini file and reports its location in a status message.
 
 ## License
 composer/xdebug-handler is licensed under the MIT License, see the LICENSE file for details.
