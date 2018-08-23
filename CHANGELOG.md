@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+## [1.2.1] - 2018-08-23
+  * Fixed: fatal error with apc, when using `apc.mmap_file_mask`.
+
 ## [1.2.0] - 2018-08-16
   * Added: debug information using `XDEBUG_HANDLER_DEBUG`.
   * Added: fluent interface for setters.
@@ -30,7 +33,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.2.0...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.2.1...HEAD
+[1.2.1]: https://github.com/composer/xdebug-handler/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/composer/xdebug-handler/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/composer/xdebug-handler/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/composer/xdebug-handler/compare/d66f0d15cb57...1.0.0
