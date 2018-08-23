@@ -410,7 +410,9 @@ class XdebugHandler
 
         foreach ($loadedConfig as $name => $value) {
             // Value will either be null, string or array (HHVM only)
-            if (!is_string($value) || strpos($name, 'xdebug') === 0) {
+            if (!is_string($value)
+                || strpos($name, 'xdebug') === 0
+                || $name === 'apc.mmap_file_mask') {
                 continue;
             }
 
