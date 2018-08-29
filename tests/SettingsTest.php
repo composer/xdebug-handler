@@ -32,6 +32,10 @@ class SettingsTest extends BaseTestCase
      */
     public function testGetRestartSettings($iniFunc, $scanDir, $phprc)
     {
+        if ($message = EnvHelper::shouldSkipTest($scanDir)) {
+            $this->markTestSkipped($message);
+        }
+
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
 
         $loaded = true;
