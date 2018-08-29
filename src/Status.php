@@ -48,7 +48,7 @@ class Status
         $this->time = $start ? round((microtime(true) - $start) * 1000) : 0;
 
         $this->envAllowXdebug = $envAllowXdebug;
-        $this->debug = $debug;
+        $this->debug = $debug && defined('STDERR');
     }
 
     /**
@@ -85,7 +85,7 @@ class Status
         }
 
         if ($this->debug) {
-            printf('xdebug-handler[%d] %s%s', getmypid(), $text, PHP_EOL);
+            fwrite(STDERR, sprintf('xdebug-handler[%d] %s', getmypid(), $text.PHP_EOL));
         }
     }
 
