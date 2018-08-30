@@ -72,6 +72,10 @@ class EnvironmentTest extends BaseTestCase
      */
     public function testEnvironmentBeforeRestart($iniFunc, $scanDir, $phprc, $standard)
     {
+        if ($message = EnvHelper::shouldSkipTest($scanDir)) {
+            $this->markTestSkipped($message);
+        }
+
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
 

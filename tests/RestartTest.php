@@ -27,6 +27,7 @@ class RestartTest extends BaseTestCase
     public function testRestartWhenLoaded()
     {
         $loaded = true;
+        $this->setArgv();
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkRestart($xdebug);
@@ -34,13 +35,11 @@ class RestartTest extends BaseTestCase
         // Check command
         $xdebug = PartialMock::createAndCheck($loaded);
         $command = $xdebug->getCommand();
-
         $n = Process::escape('-n');
-        $this->assertContains(" {$n} ", " {$command} ");
-
         $c = Process::escape('-c');
         $tmpIni = Process::escape($xdebug->getTmpIni());
-        $this->assertContains(" {$c} {$tmpIni} ", " {$command} ");
+
+        $this->assertContains(" {$n} {$c} {$tmpIni} ", " {$command} ");
     }
 
     public function testNoRestartWhenNotLoaded()
@@ -96,6 +95,7 @@ class RestartTest extends BaseTestCase
     public function testRestartWithScriptSetter($script)
     {
         $loaded = true;
+        $this->setArgv();
         $settings = array('setMainScript' => array($script));
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
@@ -134,5 +134,13 @@ class RestartTest extends BaseTestCase
 
         $xdebug = RequiredMock::runCoreMock($loaded, $required);
         $this->checkNoRestart($xdebug);
+    }
+
+    /**
+     * Sets $_SERVER['argv'] for testing commands
+     */
+    private function setArgv()
+    {
+        $_SERVER['argv'] = array(__FILE__, 'command', '--param1, --param2');
     }
 }
