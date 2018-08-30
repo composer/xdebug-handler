@@ -65,6 +65,10 @@ class PhpConfigTest extends BaseTestCase
      */
     public function testEnvironment($iniFunc, $scanDir, $phprc)
     {
+        if ($message = EnvHelper::shouldSkipTest($scanDir)) {
+            $this->markTestSkipped($message);
+        }
+
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
 
         $loaded = true;
