@@ -1,4 +1,6 @@
 ## [Unreleased]
+  * Fixed: improved debugging by writing output to stderr.
+  * Fixed: no restart when `php_ini_scanned_files` is not functional and is needed.
 
 ## [1.2.1] - 2018-08-23
   * Fixed: fatal error with apc, when using `apc.mmap_file_mask`.
