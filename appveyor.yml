@@ -2,7 +2,7 @@ build: false
 clone_depth: 5
 
 environment:
-  PHP_CHOCO_VERSION: 7.2.0
+  PHP_CHOCO_VERSION: 7.2.8
   PHP_CACHE_DIR: C:\tools\php
 
 cache:
