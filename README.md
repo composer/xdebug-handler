@@ -57,13 +57,12 @@ If the pattern match ends with `=auto` (for example `--colors=auto`), the argume
 * [Troubleshooting](#troubleshooting)
 * [Extending the library](#extending-the-library)
 
-
 ### How it works
 
-A temporary ini file is created from the loaded (and scanned) ini files, with any references to the xdebug extension commented out. Current ini settings are merged, so that ini settings made on the command-line (but see [Limitations](#limitations)) or by the application are included.
+A temporary ini file is created from the loaded (and scanned) ini files, with any references to the xdebug extension commented out. Current ini settings are merged, so that most ini settings made on the command-line or by the application are included (see [Limitations](#limitations))
 
 * `MYAPP_ALLOW_XDEBUG` is set with internal data to flag and use in the restart.
-* The command-line is configured for the restart using [standard settings](#standard-settings).
+* The command-line and environment are [configured](#process-configuration) for the restart.
 * The application is restarted in a new process using `passthru`.
     * The restart settings are stored in the environment.
     * `MYAPP_ALLOW_XDEBUG` is unset.
@@ -92,7 +91,6 @@ $files = XdebugHandler::getAllIniFiles();
 $loadedIni = array_shift($files);
 $scannedInis = $files;
 ```
-
 
 These locations are also available in the `MYAPP_ORIGINAL_INIS` environment variable. This is a path-separated string comprising the location returned from `php_ini_loaded_file`, which could be empty, followed by locations parsed from calling `php_ini_scanned_files`.
 
@@ -149,29 +147,56 @@ Status messages can also be output with `XDEBUG_HANDLER_DEBUG`. See [Troubleshoo
 #### _setMainScript($script)_
 Sets the location of the main script to run in the restart. This is only needed in more esoteric use-cases, or if the `argv[0]` location is inaccessible. The script name `--` is supported for standard input.
 
+#### _setPersistent()_
+Configures the restart using [persistent settings](#persistent-settings), so that xdebug is not loaded in any sub-process.
+
+Use this method if your application invokes one or more PHP sub-process and the xdebug extension is not needed. This avoids the overhead of implementing specific [sub-process](#sub-processes) strategies.
+
+Alternatively, this method can be used to set up a _default_ xdebug-free environment which can be changed if a sub-process requires xdebug, then restored afterwards:
+
+```php
+function SubProcessWithXdebug()
+{
+    $phpConfig = new Composer\XdebugHandler\PhpConfig();
+
+    # Set the environment to the original configuration
+    $phpConfig->useOriginal();
+
+    # run the process with xdebug loaded
+    ...
+
+    # Restore xdebug-free environment
+    $phpConfig->usePersistent();
+}
+```
+
 ### Process configuration
-There are two ways to invoke a new PHP process without loading xdebug, using either _standard_ or _persistent_ settings. This is only important if an application calls a PHP sub-process.
+The library offers two strategies to invoke a new PHP process without loading xdebug, using either _standard_ or _persistent_ settings. Note that this is only important if the application calls a PHP sub-process.
 
 #### Standard settings
-This method uses command-line options to remove xdebug from the new process only.
+Uses command-line options to remove xdebug from the new process only.
 
 * The -n option is added to the command-line. This tells PHP not to scan for additional inis.
 * The temporary ini is added to the command-line with the -c option.
 
-_If the new process calls a PHP sub-process, xdebug will be loaded in that sub-process (unless it implements xdebug-handler, in which case there will be another restart)._
+>_If the new process calls a PHP sub-process, xdebug will be loaded in that sub-process (unless it implements xdebug-handler, in which case there will be another restart)._
 
-This is the default method used in the restart.
+This is the default strategy used in the restart.
 
 #### Persistent settings
-This method uses environment variables to remove xdebug from the new process and persist these settings to any sub-process.
+Uses environment variables to remove xdebug from the new process and persist these settings to any sub-process.
 
 * `PHP_INI_SCAN_DIR` is set to an empty string. This tells PHP not to scan for additional inis.
 * `PHPRC` is set to the temporary ini.
 
-_If the new process calls a PHP sub-process, xdebug will not be loaded in that sub-process._
+>_If the new process calls a PHP sub-process, xdebug will not be loaded in that sub-process._
+
+This strategy can be used in the restart by calling [setPersistent()](#setpersistent).
 
 #### Sub-processes
-The `PhpConfig` helper class makes it easy to invoke a PHP sub-process, either with or without xdebug loaded. Each of its methods returns an array of PHP options (to add to the command-line) and sets up the environment for the required strategy. The [getRestartSettings()](#getrestartsettings) method is used internally.
+The `PhpConfig` helper class makes it easy to invoke a PHP sub-process (with or without xdebug loaded), regardless of whether there has been a restart.
+
+Each of its methods returns an array of PHP options (to add to the command-line) and sets up the environment for the required strategy. The [getRestartSettings()](#getrestartsettings) method is used internally.
 
 * `useOriginal()` - xdebug will be loaded in the new process.
 * `useStandard()` - xdebug will **not** be loaded in the new process - see [standard settings](#standard-settings).
@@ -197,7 +222,6 @@ $options = $config->usePersistent();
 # environment:  PHPRC=tmpIni, PHP_INI_SCAN_DIR=''
 ```
 
-
 ### Troubleshooting
 The following environment settings can be used to troubleshoot unexpected behavior:
 
@@ -205,20 +229,18 @@ The following environment settings can be used to troubleshoot unexpected behavi
 
 * `XDEBUG_HANDLER_DEBUG=2` As above, but additionally saves the temporary ini file and reports its location in a status message.
 
-
-
 ### Extending the library
 The API is defined by classes and their accessible elements that are not annotated as @internal. The main class has two protected methods that can be overridden to provide additional functionality:
 
 #### _requiresRestart($isLoaded)_
 By default the process will restart if xdebug is loaded. Extending this method allows an application to decide, by returning a boolean (or equivalent) value. It is only called if `MYAPP_ALLOW_XDEBUG` is empty, so it will not be called in the restarted process (where this variable contains internal data), or if the restart has been overridden.
 
-Note that the `setMainScript` [setter](#setter-methods) can be used here, if required.
+Note that the [setMainScript()](#setmainscriptscript) and [setPersistent()](#setpersistent) setters can be used here, if required.
 
 #### _restart($command)_
 An application can extend this to modify the temporary ini file, its location given in the `tmpIni` property. Remember to finish with `parent::restart($command)`.
 
-Note that the `$command` parameter is the escaped command-line string for the new process and must be treated accordingly.
+Note that the `$command` parameter is the escaped command-line string that will be used for the new process and must be treated accordingly.
 
 #### Example
 This either forces a restart if `phar.readonly` is set (even when xdebug is not loaded) and unsets it in the temporary ini file for the new process, or skips the restart if a help command has been called.
@@ -253,7 +275,6 @@ class MyRestarter extends XdebugHandler
     }
 }
 ```
-
 
 ## License
 composer/xdebug-handler is licensed under the MIT License, see the LICENSE file for details.
