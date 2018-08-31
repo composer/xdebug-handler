@@ -1,4 +1,6 @@
 ## [Unreleased]
+
+## [1.3.0] - 2018-08-31
   * Added: `setPersistent` method to use environment variables for the restart.
   * Fixed: improved debugging by writing output to stderr.
   * Fixed: no restart when `php_ini_scanned_files` is not functional and is needed.
@@ -36,7 +38,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.2.1...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.3.0...HEAD
+[1.3.0]: https://github.com/composer/xdebug-handler/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/composer/xdebug-handler/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/composer/xdebug-handler/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/composer/xdebug-handler/compare/1.0.0...1.1.0
