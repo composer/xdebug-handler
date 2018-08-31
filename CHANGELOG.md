@@ -1,4 +1,5 @@
 ## [Unreleased]
+  * Added: `setPersistent` method to use environment variables for the restart.
   * Fixed: improved debugging by writing output to stderr.
   * Fixed: no restart when `php_ini_scanned_files` is not functional and is needed.
 
