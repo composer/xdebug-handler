@@ -76,6 +76,18 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    public function setInaccessibleIni()
+    {
+        $this->files = array(
+            '',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-missing.ini',
+        );
+
+        $this->setEnvironment();
+    }
+
     public function getIniFiles()
     {
         return $this->files;

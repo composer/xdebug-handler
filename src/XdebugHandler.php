@@ -283,6 +283,7 @@ class XdebugHandler
         $error = '';
         $iniFiles = self::getAllIniFiles();
         $scannedInis = count($iniFiles) > 1;
+        $tmpDir = sys_get_temp_dir();
 
         if (!$this->cli) {
             $error = 'Unsupported SAPI: '.PHP_SAPI;
@@ -292,8 +293,8 @@ class XdebugHandler
             $error = 'PHP version does not report scanned inis: '.PHP_VERSION;
         } elseif (!$this->checkMainScript()) {
             $error = 'Unable to access main script: '.$this->script;
-        } elseif (!$this->writeTmpIni($iniFiles)) {
-            $error = 'Unable to create temporary ini file';
+        } elseif (!$this->writeTmpIni($iniFiles, $tmpDir, $error)) {
+            $error = $error ?: 'Unable to create temp ini file at: '.$tmpDir;
         } elseif (!$this->setEnvironment($scannedInis, $iniFiles)) {
             $error = 'Unable to set environment variables';
         }
@@ -309,12 +310,14 @@ class XdebugHandler
      * Returns true if the tmp ini file was written
      *
      * @param array $iniFiles All ini files used in the current process
+     * @param string $tmpDir The system temporary directory
+     * @param string $error Set by method if ini file cannot be read
      *
      * @return bool
      */
-    private function writeTmpIni(array $iniFiles)
+    private function writeTmpIni(array $iniFiles, $tmpDir, &$error)
     {
-        if (!$this->tmpIni = tempnam(sys_get_temp_dir(), '')) {
+        if (!$this->tmpIni = @tempnam($tmpDir, '')) {
             return false;
         }
 
@@ -327,8 +330,12 @@ class XdebugHandler
         $regex = '/^\s*(zend_extension\s*=.*xdebug.*)$/mi';
 
         foreach ($iniFiles as $file) {
-            $data = preg_replace($regex, ';$1', file_get_contents($file));
-            $content .= $data.PHP_EOL;
+            // Check for inaccessible ini files
+            if (!$data = @file_get_contents($file)) {
+                $error = 'Unable to read ini: '.$file;
+                return false;
+            }
+            $content .= preg_replace($regex, ';$1', $data).PHP_EOL;
         }
 
         // Merge loaded settings into our ini content, if it is valid
