@@ -125,6 +125,23 @@ class IniFilesTest extends BaseTestCase
     }
 
     /**
+     * Tests that an inaccessible ini file causes the restart to fail
+     *
+     */
+    public function testInaccessbleIni()
+    {
+        $ini = new IniHelper();
+        $ini->setInaccessibleIni();
+
+        $loaded = true;
+        $xdebug = CoreMock::createAndCheck($loaded);
+
+        // We need to remove the mock inis from the environment
+        Process::setEnv(CoreMock::ORIGINAL_INIS, false);
+        $this->checkNoRestart($xdebug);
+    }
+
+    /**
      * Common method to get mocked tmp ini content
      *
      * @param mixed $xdebug
