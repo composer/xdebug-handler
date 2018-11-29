@@ -139,7 +139,7 @@ DEBUG    No restart (MYAPP_ALLOW_XDEBUG=1)
 // Failed restart
 DEBUG    Checking MYAPP_ALLOW_XDEBUG
 DEBUG    The xdebug extension is loaded (2.5.0)
-WARNING  No restart (Unable to create temporary ini file)
+WARNING  No restart (Unable to create temp ini file at: ...)
 ```
 
 Status messages can also be output with `XDEBUG_HANDLER_DEBUG`. See [Troubleshooting](#troubleshooting).

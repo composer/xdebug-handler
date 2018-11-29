@@ -1,4 +1,6 @@
 ## [Unreleased]
+  * Fixed: fail restart if `passthru` has been disabled in `disable_functions`.
+  * Fixed: fail restart if an ini file cannot be opened, otherwise settings will be missing.
 
 ## [1.3.0] - 2018-08-31
   * Added: `setPersistent` method to use environment variables for the restart.
