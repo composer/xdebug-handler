@@ -1,4 +1,6 @@
 ## [Unreleased]
+
+## [1.3.1] - 2018-11-29
   * Fixed: fail restart if `passthru` has been disabled in `disable_functions`.
   * Fixed: fail restart if an ini file cannot be opened, otherwise settings will be missing.
 
@@ -40,7 +42,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.3.0...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.3.1...HEAD
+[1.3.1]: https://github.com/composer/xdebug-handler/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/composer/xdebug-handler/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/composer/xdebug-handler/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/composer/xdebug-handler/compare/1.1.0...1.2.0
