@@ -55,8 +55,8 @@ class IniFilesTest extends BaseTestCase
     }
 
     /**
-     * Tests that the tmpIni file is created and contains disabled xdebug
-     * entries.
+     * Tests that the tmpIni file is created, contains disabled xdebug
+     * entries and is correctly end-of-line terminated.
      *
      * @param callable $iniFunc IniHelper method to use
      * @param int $matches The number of disabled entries to match
@@ -74,6 +74,10 @@ class IniFilesTest extends BaseTestCase
         $regex = '/^\s*;zend_extension\s*=.*xdebug.*$/mi';
         $result = preg_match_all($regex, $content);
         $this->assertSame($result, $matches);
+
+        // Check content is end-of-line terminated
+        $regex = sprintf('/%s/', preg_quote(PHP_EOL));
+        $this->assertTrue((bool) preg_match($regex, $content));
     }
 
     public function tmpIniProvider()

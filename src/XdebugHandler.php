@@ -119,7 +119,7 @@ class XdebugHandler
      *
      * This behaviour can be disabled by setting the MYAPP_ALLOW_XDEBUG
      * environment variable to 1. This variable is used internally so that
-     * restarted process is created only once.
+     * the restarted process is created only once.
      */
     public function check()
     {
