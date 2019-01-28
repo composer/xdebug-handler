@@ -1,4 +1,5 @@
 ## [Unreleased]
+  * Fixed: exit call being blocked by uopz extension, resulting in application code running twice.
 
 ## [1.3.1] - 2018-11-29
   * Fixed: fail restart if `passthru` has been disabled in `disable_functions`.
