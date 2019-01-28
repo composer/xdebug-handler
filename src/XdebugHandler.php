@@ -289,8 +289,8 @@ class XdebugHandler
             $error = 'Unsupported SAPI: '.PHP_SAPI;
         } elseif (!defined('PHP_BINARY')) {
             $error = 'PHP version is too old: '.PHP_VERSION;
-        } elseif (false !== strpos(ini_get('disable_functions'), 'passthru')) {
-            $error = 'Required function is disabled: passthru';
+        } elseif (!$this->checkConfiguration($info)) {
+            $error = $info;
         } elseif (!$this->checkScanDirConfig()) {
             $error = 'PHP version does not report scanned inis: '.PHP_VERSION;
         } elseif (!$this->checkMainScript()) {
@@ -536,5 +536,30 @@ class XdebugHandler
             && !PHP_CONFIG_FILE_SCAN_DIR
             && (PHP_VERSION_ID < 70113
             || PHP_VERSION_ID === 70200));
+    }
+
+    /**
+     * Returns true if there are no known configuration issues
+     *
+     * @param string $info Set by method
+     */
+    private function checkConfiguration(&$info)
+    {
+        if (false !== strpos(ini_get('disable_functions'), 'passthru')) {
+            $info = 'passthru function is disabled';
+            return false;
+        }
+
+        if (extension_loaded('uopz')) {
+            // uopz works at opcode level and disables exit calls
+            if (function_exists('uopz_allow_exit')) {
+                @uopz_allow_exit(true);
+            } else {
+                $info = 'uopz extension is not compatible';
+                return false;
+            }
+        }
+
+        return true;
     }
 }
