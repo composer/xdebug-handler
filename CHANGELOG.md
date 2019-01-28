@@ -1,4 +1,6 @@
 ## [Unreleased]
+
+## [1.3.2] - 2019-28-01
   * Fixed: exit call being blocked by uopz extension, resulting in application code running twice.
 
 ## [1.3.1] - 2018-11-29
@@ -43,7 +45,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.3.1...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.3.2...HEAD
+[1.3.2]: https://github.com/composer/xdebug-handler/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/composer/xdebug-handler/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/composer/xdebug-handler/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/composer/xdebug-handler/compare/1.2.0...1.2.1
