@@ -1,6 +1,6 @@
 ## [Unreleased]
 
-## [1.3.2] - 2019-28-01
+## [1.3.2] - 2019-01-28
   * Fixed: exit call being blocked by uopz extension, resulting in application code running twice.
 
 ## [1.3.1] - 2018-11-29
