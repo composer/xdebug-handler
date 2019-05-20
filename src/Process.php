@@ -155,6 +155,15 @@ class Process
         } else {
             $_SERVER[$name] = $value;
         }
+        
+        if (false !== strpos(ini_get('variables_order'), 'E')) {
+            if ($unset) {
+                unset($_ENV[$name]);
+            } else {
+                $_ENV[$name] = $value;
+            }
+        }
+        
         return true;
     }
 }
