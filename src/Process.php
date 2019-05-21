@@ -156,7 +156,7 @@ class Process
             $_SERVER[$name] = $value;
         }
         
-        if (false !== strpos((string) ini_get('variables_order'), 'E')) {
+        if (false !== stripos((string) ini_get('variables_order'), 'E')) {
             if ($unset) {
                 unset($_ENV[$name]);
             } else {
