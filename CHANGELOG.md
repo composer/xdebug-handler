@@ -1,4 +1,5 @@
 ## [Unreleased]
+  * Fixed: add environment changes to `$_ENV` if it is being used.
 
 ## [1.3.2] - 2019-01-28
   * Fixed: exit call being blocked by uopz extension, resulting in application code running twice.
