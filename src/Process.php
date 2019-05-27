@@ -135,7 +135,7 @@ class Process
     }
 
     /**
-     * Makes putenv environment changes available in $_SERVER
+     * Makes putenv environment changes available in $_SERVER and $_ENV
      *
      * @param string $name
      * @param string|false $value A false value unsets the variable
@@ -155,7 +155,8 @@ class Process
         } else {
             $_SERVER[$name] = $value;
         }
-        
+
+        // Update $_ENV if it is being used
         if (false !== stripos((string) ini_get('variables_order'), 'E')) {
             if ($unset) {
                 unset($_ENV[$name]);
@@ -163,7 +164,7 @@ class Process
                 $_ENV[$name] = $value;
             }
         }
-        
+
         return true;
     }
 }
