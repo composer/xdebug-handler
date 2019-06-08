@@ -115,6 +115,10 @@ class Process
      */
     public static function supportsColor($output)
     {
+        if ('Hyper' === getenv('TERM_PROGRAM')) {
+            return true;
+        }
+
         if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             return (function_exists('sapi_windows_vt100_support')
                 && sapi_windows_vt100_support($output))
@@ -125,7 +129,9 @@ class Process
 
         if (function_exists('stream_isatty')) {
             return stream_isatty($output);
-        } elseif (function_exists('posix_isatty')) {
+        }
+
+        if (function_exists('posix_isatty')) {
             return posix_isatty($output);
         }
 
