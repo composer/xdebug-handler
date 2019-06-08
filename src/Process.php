@@ -115,6 +115,10 @@ class Process
      */
     public static function supportsColor($output)
     {
+        if ('Hyper' === getenv('TERM_PROGRAM')) {
+            return true;
+        }
+
         if (defined('PHP_WINDOWS_VERSION_BUILD')) {
             return (function_exists('sapi_windows_vt100_support')
                 && sapi_windows_vt100_support($output))
