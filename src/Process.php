@@ -129,7 +129,9 @@ class Process
 
         if (function_exists('stream_isatty')) {
             return stream_isatty($output);
-        } elseif (function_exists('posix_isatty')) {
+        }
+
+        if (function_exists('posix_isatty')) {
             return posix_isatty($output);
         }
 
