@@ -50,7 +50,8 @@ class ClassTest extends TestCase
     {
         $xdebug = new XdebugHandler('myapp');
 
-        $result = call_user_func_array(array($xdebug, $setter), array($value));
+        $params = null !== $value ? array($value) : array();
+        $result = call_user_func_array(array($xdebug, $setter), $params);
         $this->assertInstanceOf(get_class($xdebug), $result);
     }
 
@@ -60,6 +61,7 @@ class ClassTest extends TestCase
         return array(
             'setLogger' => array('setLogger', new Logger()),
             'setMainScript' => array('setMainScript', '--'),
+            'setPersistent' => array('setPersistent', null),
         );
     }
 }
