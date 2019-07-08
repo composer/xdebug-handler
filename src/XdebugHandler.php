@@ -550,7 +550,7 @@ class XdebugHandler
             return false;
         }
 
-        if (extension_loaded('uopz')) {
+        if (extension_loaded('uopz') && !ini_get('uopz.disable')) {
             // uopz works at opcode level and disables exit calls
             if (function_exists('uopz_allow_exit')) {
                 @uopz_allow_exit(true);
