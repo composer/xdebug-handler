@@ -1,6 +1,6 @@
 {
     "name": "composer/xdebug-handler",
-    "description": "Restarts a process without xdebug.",
+    "description": "Restarts a process without Xdebug.",
     "type": "library",
     "license": "MIT",
     "keywords": [

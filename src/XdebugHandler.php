@@ -104,7 +104,7 @@ class XdebugHandler
     }
 
     /**
-     * Persist the settings to keep xdebug out of sub-processes
+     * Persist the settings to keep Xdebug out of sub-processes
      *
      * @return $this
      */
@@ -115,7 +115,7 @@ class XdebugHandler
     }
 
     /**
-     * Checks if xdebug is loaded and the process needs to be restarted
+     * Checks if Xdebug is loaded and the process needs to be restarted
      *
      * This behaviour can be disabled by setting the MYAPP_ALLOW_XDEBUG
      * environment variable to 1. This variable is used internally so that
@@ -146,7 +146,7 @@ class XdebugHandler
             self::$inRestart = true;
 
             if (!$this->loaded) {
-                // Skipped version is only set if xdebug is not loaded
+                // Skipped version is only set if Xdebug is not loaded
                 self::$skipped = $envArgs[1];
             }
 
@@ -218,7 +218,7 @@ class XdebugHandler
     }
 
     /**
-     * Returns the xdebug version that triggered a successful restart
+     * Returns the Xdebug version that triggered a successful restart
      *
      * @return string
      */
@@ -228,9 +228,9 @@ class XdebugHandler
     }
 
     /**
-     * Returns true if xdebug is loaded, or as directed by an extending class
+     * Returns true if Xdebug is loaded, or as directed by an extending class
      *
-     * @param bool $isLoaded Whether xdebug is loaded
+     * @param bool $isLoaded Whether Xdebug is loaded
      *
      * @return bool
      */
