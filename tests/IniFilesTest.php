@@ -55,7 +55,7 @@ class IniFilesTest extends BaseTestCase
     }
 
     /**
-     * Tests that the tmpIni file is created, contains disabled xdebug
+     * Tests that the tmpIni file is created, contains disabled Xdebug
      * entries and is correctly end-of-line terminated.
      *
      * @param callable $iniFunc IniHelper method to use

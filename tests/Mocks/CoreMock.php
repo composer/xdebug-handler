@@ -20,7 +20,7 @@ use Composer\XdebugHandler\XdebugHandler;
  * getProperty method that accesses private properties. Extend this class to
  * provide further capabilities.
  *
- * It does not matter whether xdebug is loaded, because this value is overriden
+ * It does not matter whether Xdebug is loaded, because this value is overriden
  * in the constructor.
  *
  * The tmpIni file is deleted in the destructor.

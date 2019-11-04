@@ -12,7 +12,7 @@
 namespace Composer\XdebugHandler\Mocks;
 
 /**
- * FailMock provides its own restart method that mocks a restart with xdebug
+ * FailMock provides its own restart method that mocks a restart with Xdebug
  * still loaded.
  */
 class FailMock extends CoreMock
