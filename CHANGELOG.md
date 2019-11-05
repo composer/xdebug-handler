@@ -1,4 +1,7 @@
 ## [Unreleased]
+  * Fixed: correct capitalization of Xdebug (apparently).
+  * Fixed: improved handling for uopz extension.
+  * Added: color support for Hyper terminal: https://github.com/zeit/hyper
 
 ## [1.3.3] - 2019-05-27
   * Fixed: add environment changes to `$_ENV` if it is being used.
