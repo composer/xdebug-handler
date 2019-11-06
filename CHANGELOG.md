@@ -1,8 +1,10 @@
 ## [Unreleased]
+
+## [1.4.0] - 2019-11-06
   * Added: support for `NO_COLOR` environment variable: https://no-color.org
+  * Added: color support for Hyper terminal: https://github.com/zeit/hyper
   * Fixed: correct capitalization of Xdebug (apparently).
   * Fixed: improved handling for uopz extension.
-  * Added: color support for Hyper terminal: https://github.com/zeit/hyper
 
 ## [1.3.3] - 2019-05-27
   * Fixed: add environment changes to `$_ENV` if it is being used.
@@ -52,7 +54,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.3.3...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.4.0...HEAD
+[1.4.0]: https://github.com/composer/xdebug-handler/compare/1.3.3...1.4.0
 [1.3.3]: https://github.com/composer/xdebug-handler/compare/1.3.2...1.3.3
 [1.3.2]: https://github.com/composer/xdebug-handler/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/composer/xdebug-handler/compare/1.3.0...1.3.1
