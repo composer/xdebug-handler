@@ -19,27 +19,21 @@ use PHPUnit\Framework\TestCase;
  */
 class ClassTest extends TestCase
 {
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testConstructorThrowsOnEmptyEnvPrefix()
     {
+        $this->setException('RuntimeException');
         new XdebugHandler('');
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testConstructorThrowsOnInvalidEnvPrefix()
     {
+        $this->setException('RuntimeException');
         new XdebugHandler(array('name'));
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testConstructorThrowsOnInvalidColorOption()
     {
+        $this->setException('RuntimeException');
         new XdebugHandler('test', false);
     }
 
@@ -63,5 +57,14 @@ class ClassTest extends TestCase
             'setMainScript' => array('setMainScript', '--'),
             'setPersistent' => array('setPersistent', null),
         );
+    }
+
+    private function setException($exception)
+    {
+        if (!method_exists($this, 'expectException')) {
+            $this->setExpectedException($exception);
+        } else {
+            $this->expectException($exception);
+        }
     }
 }

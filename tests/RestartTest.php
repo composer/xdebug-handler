@@ -39,7 +39,8 @@ class RestartTest extends BaseTestCase
         $c = Process::escape('-c');
         $tmpIni = Process::escape($xdebug->getTmpIni());
 
-        $this->assertContains(" {$n} {$c} {$tmpIni} ", " {$command} ");
+        $pattern = preg_quote(sprintf('%s %s %s', $n, $c, $tmpIni), '/');
+        $this->assertRegExp('/'.$pattern.'/', $command);
     }
 
     public function testNoRestartWhenNotLoaded()
@@ -105,8 +106,8 @@ class RestartTest extends BaseTestCase
         $xdebug = PartialMock::createAndCheck($loaded, null, $settings);
         $command = $xdebug->getCommand();
 
-        $escaped = Process::escape($script);
-        $this->assertContains(" {$escaped} ", " {$command} ");
+        $pattern = preg_quote(Process::escape($script), '/');
+        $this->assertRegExp('/'.$pattern.'/', $command);
     }
 
     public function scriptSetterProvider()
@@ -129,8 +130,9 @@ class RestartTest extends BaseTestCase
         $tmpIni = $xdebug->getTmpIni();
 
         foreach (array('-n', '-c', $tmpIni) as $param) {
-            $escaped = Process::escape($param);
-            $this->assertNotContains(" {$escaped} ", " {$command} ");
+            $pattern = preg_quote(Process::escape($param), '/');
+            $matched = (bool) preg_match('/'.$pattern.'/', $command);
+            $this->assertFalse($matched);
         }
     }
 
