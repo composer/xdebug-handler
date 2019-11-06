@@ -1,4 +1,5 @@
 ## [Unreleased]
+  * Added: support for `NO_COLOR` environment variable: https://no-color.org
   * Fixed: correct capitalization of Xdebug (apparently).
   * Fixed: improved handling for uopz extension.
   * Added: color support for Hyper terminal: https://github.com/zeit/hyper
