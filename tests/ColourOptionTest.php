@@ -18,6 +18,33 @@ use PHPUnit\Framework\TestCase;
  */
 class ColorOptionTest extends TestCase
 {
+    private static $nocolor;
+
+    /**
+     * Saves the NO_COLOR environment variable
+     */
+    public static function setUpBeforeClass()
+    {
+        self::$nocolor = getenv('NO_COLOR');
+    }
+
+    /**
+     * Restores the original NO_COLOR environment variable
+     */
+    public static function tearDownAfterClass()
+    {
+        $value = false !== self::$nocolor ? '='.self::$nocolor : '';
+        putenv('NO_COLOR'.$value);
+    }
+
+    /**
+     * Unsets the NO_COLOR environment variable for each test
+     */
+    protected function setUp()
+    {
+        putenv('NO_COLOR');
+    }
+
     /**
      * Tests that a colorOption is added to the arguments
      *
@@ -27,6 +54,18 @@ class ColorOptionTest extends TestCase
     {
         $result = Process::addColorOption($args, $colorOption);
         $this->assertSame($expected, implode(' ', $result));
+    }
+
+    /**
+     * Tests that a colorOption is not added if NO_COLOR is set
+     *
+     * @dataProvider neededProvider
+     */
+    public function testOptionNeededNoColor($args, $colorOption, $unused)
+    {
+        putenv('NO_COLOR=1');
+        $result = Process::addColorOption($args, $colorOption);
+        $this->assertSame($args, $result);
     }
 
     public function neededProvider()

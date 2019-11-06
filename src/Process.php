@@ -50,6 +50,11 @@ class Process
             return $args;
         }
 
+        // Check for NO_COLOR variable (https://no-color.org/)
+        if (false !== getenv('NO_COLOR')) {
+            return $args;
+        }
+
         if (false !== ($index = array_search('--', $args))) {
             // Position option before double-dash delimiter
             array_splice($args, $index, 0, $colorOption);
