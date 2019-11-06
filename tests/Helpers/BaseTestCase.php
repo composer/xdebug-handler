@@ -35,8 +35,10 @@ abstract class BaseTestCase extends TestCase
 
     /**
      * Saves the current environment and argv state
+     *
+     * @beforeClass
      */
-    public static function setUpBeforeClass()
+    public static function beforeClass()
     {
         foreach (self::$names as $name) {
             self::$env[$name] = getenv($name);
@@ -48,8 +50,10 @@ abstract class BaseTestCase extends TestCase
 
     /**
      * Restores the original environment and argv state
+     *
+     * @afterClass
      */
-    public static function tearDownAfterClass()
+    public static function afterClass()
     {
         foreach (self::$env as $name => $value) {
             if (false !== $value) {
@@ -66,8 +70,10 @@ abstract class BaseTestCase extends TestCase
 
     /**
      * Unsets environment variables for each test and restores argv
+     *
+     * @before
      */
-    protected function setUp()
+    public function setUpEnvironment()
     {
         foreach (self::$names as $name) {
             putenv($name);
@@ -92,7 +98,7 @@ abstract class BaseTestCase extends TestCase
         $this->assertSame(false, isset($_SERVER[CoreMock::ALLOW_XDEBUG]));
 
         // Env ORIGINAL_INIS must be set and be a string
-        $this->assertInternalType('string', getenv(CoreMock::ORIGINAL_INIS));
+        $this->assertTrue(is_string(getenv(CoreMock::ORIGINAL_INIS)));
         $this->assertSame(true, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
 
         // Skipped version must only be reported if it was unloaded in the restart
@@ -105,11 +111,11 @@ abstract class BaseTestCase extends TestCase
         $this->assertSame($version, $xdebug::getSkippedVersion());
 
         // Env RESTART_SETTINGS must be set and be a string
-        $this->assertInternalType('string', getenv(CoreMock::RESTART_SETTINGS));
+        $this->assertTrue(is_string(getenv(CoreMock::RESTART_SETTINGS)));
         $this->assertSame(true, isset($_SERVER[CoreMock::RESTART_SETTINGS]));
 
         // Restart settings must be an array
-        $this->assertInternalType('array', $xdebug::getRestartSettings());
+        $this->assertTrue(is_array($xdebug::getRestartSettings()));
     }
 
     /**

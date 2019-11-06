@@ -43,7 +43,7 @@ class SettingsTest extends BaseTestCase
 
         $settings = CoreMock::getRestartSettings();
 
-        $this->assertInternalType('string', $settings['tmpIni']);
+        $this->assertTrue(is_string($settings['tmpIni']));
         $this->assertSame($ini->hasScannedInis(), $settings['scannedInis']);
         $this->assertSame($scanDir, $settings['scanDir']);
         $this->assertSame($phprc, $settings['phprc']);

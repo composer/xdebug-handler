@@ -22,16 +22,20 @@ class ColorOptionTest extends TestCase
 
     /**
      * Saves the NO_COLOR environment variable
+     *
+     * @beforeClass
      */
-    public static function setUpBeforeClass()
+    public static function beforeClass()
     {
         self::$nocolor = getenv('NO_COLOR');
     }
 
     /**
      * Restores the original NO_COLOR environment variable
+     *
+     * @afterClass
      */
-    public static function tearDownAfterClass()
+    public static function afterClass()
     {
         $value = false !== self::$nocolor ? '='.self::$nocolor : '';
         putenv('NO_COLOR'.$value);
@@ -39,8 +43,10 @@ class ColorOptionTest extends TestCase
 
     /**
      * Unsets the NO_COLOR environment variable for each test
+     *
+     * @before
      */
-    protected function setUp()
+    public function setUpEnvironment()
     {
         putenv('NO_COLOR');
     }
