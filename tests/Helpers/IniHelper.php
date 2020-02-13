@@ -60,6 +60,7 @@ class IniHelper
             '',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-empty.ini',
         );
 
         $this->setEnvironment();
@@ -71,6 +72,7 @@ class IniHelper
             $this->loadedIni,
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'scan-empty.ini',
         );
 
         $this->setEnvironment();
