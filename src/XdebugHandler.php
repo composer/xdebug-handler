@@ -333,7 +333,7 @@ class XdebugHandler
 
         foreach ($iniFiles as $file) {
             // Check for inaccessible ini files
-            if (!$data = @file_get_contents($file)) {
+            if (($data = @file_get_contents($file)) === false) {
                 $error = 'Unable to read ini: '.$file;
                 return false;
             }
