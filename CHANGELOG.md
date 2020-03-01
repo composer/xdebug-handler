@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+## [1.4.1] - 2020-03-01
+  * Fixed: restart fails if an ini file is empty.
+
 ## [1.4.0] - 2019-11-06
   * Added: support for `NO_COLOR` environment variable: https://no-color.org
   * Added: color support for Hyper terminal: https://github.com/zeit/hyper
@@ -54,7 +57,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.4.0...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.4.1...HEAD
+[1.4.1]: https://github.com/composer/xdebug-handler/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/composer/xdebug-handler/compare/1.3.3...1.4.0
 [1.3.3]: https://github.com/composer/xdebug-handler/compare/1.3.2...1.3.3
 [1.3.2]: https://github.com/composer/xdebug-handler/compare/1.3.1...1.3.2
