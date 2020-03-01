@@ -3,7 +3,7 @@ clone_depth: 5
 
 environment:
   # This sets the PHP version (from Chocolatey)
-  PHPCI_CHOCO_VERSION: 7.3.11
+  PHPCI_CHOCO_VERSION: 7.4.3
   PHPCI_CACHE: C:\tools\phpci
   PHPCI_PHP: C:\tools\phpci\php
   PHPCI_COMPOSER: C:\tools\phpci\composer
