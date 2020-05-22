@@ -256,6 +256,12 @@ class XdebugHandler
      */
     private function doRestart($command)
     {
+        // ignore SIGINTs here so the child process can receive and handle them
+        if (function_exists('pcntl_async_signals') && function_exists('pcntl_signal')) {
+            pcntl_async_signals(true);
+            pcntl_signal(SIGINT, SIG_IGN);
+        }
+
         passthru($command, $exitCode);
         $this->notify(Status::INFO, 'Restarted process exited '.$exitCode);
 
