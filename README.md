@@ -75,6 +75,7 @@ There are a few things to be aware of when running inside a restarted process.
 * Extensions set on the command-line will not be loaded.
 * Ini file locations will be reported as per the restart - see [getAllIniFiles()](#getallinifiles).
 * Php sub-processes may be loaded with Xdebug enabled - see [Process configuration](#process-configuration).
+* On Windows `sapi_windows_set_ctrl_handler` handlers will not receive CTRL events.
 
 ### Helper methods
 These static methods provide information from the current process, regardless of whether it has been restarted or not.
