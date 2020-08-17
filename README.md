@@ -69,6 +69,10 @@ A temporary ini file is created from the loaded (and scanned) ini files, with an
     * The application runs and exits.
 * The main process exits with the exit code from the restarted process.
 
+#### Signal handling
+From PHP 7.1 with the pcntl extension loaded, asynchronous signal handling is automatically enabled. `SIGINT` is set to `SIG_IGN` in the parent
+process and restored to `SIG_DFL` in the restarted process (if no other handler has been set).
+
 ### Limitations
 There are a few things to be aware of when running inside a restarted process.
 
