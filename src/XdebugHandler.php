@@ -575,7 +575,7 @@ class XdebugHandler
      */
     private function tryEnableSignals()
     {
-        if (!function_exists('pcntl_async_signals')) {
+        if (!function_exists('pcntl_async_signals') || !function_exists('pcntl_signal')) {
             return;
         }
 
