@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+## [1.4.4] - 2020-10-24
+  * Fix: exception if 'pcntl_signal' is disabled.
+
 ## [1.4.3] - 2020-08-19
   * Fixed: restore SIGINT to default handler in restarted process if no other handler exists.
 
@@ -63,7 +66,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.4.3...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/1.4.4...HEAD
+[1.4.4]: https://github.com/composer/xdebug-handler/compare/1.4.3...1.4.4
 [1.4.3]: https://github.com/composer/xdebug-handler/compare/1.4.2...1.4.3
 [1.4.2]: https://github.com/composer/xdebug-handler/compare/1.4.1...1.4.2
 [1.4.1]: https://github.com/composer/xdebug-handler/compare/1.4.0...1.4.1
