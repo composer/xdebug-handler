@@ -260,7 +260,23 @@ class XdebugHandler
         $this->tryEnableSignals();
         $this->notify(Status::RESTARTING, $command);
 
-        passthru($command, $exitCode);
+        if (function_exists('proc_open')) {
+            $proc = proc_open($command, array(), $pipes);
+            while ($status = @proc_get_status($proc)) {
+                if (!$status['running']) {
+                    break;
+                }
+                usleep(10000);
+            }
+            if (isset($status['exitcode'])) {
+                $exitCode = $status['exitcode'];
+            } else {
+                $exitCode = 99;
+            }
+            @proc_close($proc);
+        } else {
+            passthru($command, $exitCode);
+        }
         $this->notify(Status::INFO, 'Restarted process exited '.$exitCode);
 
         if ($this->debug === '2') {
