@@ -260,7 +260,9 @@ class XdebugHandler
         $this->tryEnableSignals();
         $this->notify(Status::RESTARTING, $command);
 
-        if (function_exists('proc_open')) {
+        // Use proc_open on linux/OSX and on recent Windows where stream_isatty may be used
+        // This is to ensure the process pipes remain bound to a tty which does not happen with passthru
+        if (function_exists('proc_open') && (!\defined('PHP_WINDOWS_VERSION_BUILD') || function_exists('stream_isatty'))) {
             $proc = proc_open($command, array(), $pipes);
             while ($status = @proc_get_status($proc)) {
                 if (!$status['running']) {
@@ -270,11 +272,10 @@ class XdebugHandler
             }
             if (isset($status['exitcode'])) {
                 $exitCode = $status['exitcode'];
-            } else {
-                $exitCode = 99;
             }
             @proc_close($proc);
-        } else {
+        }
+        if (!isset($exitCode)) {
             passthru($command, $exitCode);
         }
         $this->notify(Status::INFO, 'Restarted process exited '.$exitCode);
