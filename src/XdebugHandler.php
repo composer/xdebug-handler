@@ -264,16 +264,9 @@ class XdebugHandler
         // This is to ensure the process pipes remain bound to a tty which does not happen with passthru
         if (function_exists('proc_open') && (!\defined('PHP_WINDOWS_VERSION_BUILD') || function_exists('stream_isatty'))) {
             $proc = proc_open($command, array(), $pipes);
-            while ($status = @proc_get_status($proc)) {
-                if (!$status['running']) {
-                    break;
-                }
-                usleep(10000);
+            if ($proc) {
+                $exitCode = @proc_close($proc);
             }
-            if (isset($status['exitcode'])) {
-                $exitCode = $status['exitcode'];
-            }
-            @proc_close($proc);
         }
         if (!isset($exitCode)) {
             passthru($command, $exitCode);
