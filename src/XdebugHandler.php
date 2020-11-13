@@ -260,25 +260,26 @@ class XdebugHandler
         $this->tryEnableSignals();
         $this->notify(Status::RESTARTING, $command);
 
-        // Use proc_open on linux/OSX and on recent Windows where stream_isatty may be used
-        // This is to ensure the process pipes remain bound to a tty which does not happen with passthru
-        if (function_exists('proc_open') && (!\defined('PHP_WINDOWS_VERSION_BUILD') || function_exists('stream_isatty'))) {
-            $proc = proc_open($command, array(), $pipes);
-            while ($status = @proc_get_status($proc)) {
-                if (!$status['running']) {
-                    break;
-                }
-                usleep(10000);
+        // Prefer proc_open to keep fds intact, because passthru pipes to stdout
+        if (function_exists('proc_open')) {
+            if (defined('PHP_WINDOWS_VERSION_BUILD') && PHP_VERSION_ID < 80000) {
+                $command = '"'.$command.'"';
             }
-            if (isset($status['exitcode'])) {
-                $exitCode = $status['exitcode'];
+            $process = proc_open($command, array(), $pipes);
+            if (is_resource($process)) {
+                $exitCode = proc_close($process);
             }
-            @proc_close($proc);
-        }
-        if (!isset($exitCode)) {
+        } else {
             passthru($command, $exitCode);
         }
-        $this->notify(Status::INFO, 'Restarted process exited '.$exitCode);
+
+        if (!isset($exitCode)) {
+            // Unlikely that the default shell cannot be invoked
+            $this->notify(Status::ERROR, 'Unable to restart process');
+            $exitCode = -1;
+        } else {
+            $this->notify(Status::INFO, 'Restarted process exited '.$exitCode);
+        }
 
         if ($this->debug === '2') {
             $this->notify(Status::INFO, 'Temp ini saved: '.$this->tmpIni);
