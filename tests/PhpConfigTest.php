@@ -58,9 +58,9 @@ class PhpConfigTest extends BaseTestCase
     /**
      * Tests that the environment is set correctly for each mode.
      *
-     * @param callable $iniFunc IniHelper method to use
+     * @param string $iniFunc IniHelper method to use
      * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param $phprc Initial value for PHPRC
+     * @param mixed $phprc Initial value for PHPRC
      * @dataProvider environmentProvider
      */
     public function testEnvironment($iniFunc, $scanDir, $phprc)

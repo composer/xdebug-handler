@@ -20,7 +20,7 @@ class EnvHelper
     /**
      * Mock the environment
      *
-     * @param callable $iniFunc IniHelper method to use
+     * @param string $iniFunc IniHelper method to use
      * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param mixed $phprc Initial value for PHPRC
      *
@@ -66,22 +66,22 @@ class EnvHelper
     {
         // Not relevant if no scan dir or it has been overriden
         if ($scanDir === false || $scanDir === '') {
-            return;
+            return null;
         }
 
         // Not relevant if --with-config-file-scan-dir was used
         if (PHP_CONFIG_FILE_SCAN_DIR !== '') {
-            return;
+            return null;
         }
 
         // Bug fixed in 7.1.13
         if (PHP_VERSION_ID >= 70113 && PHP_VERSION_ID < 70200) {
-            return;
+            return null;
         }
 
         // Bug fixed in 7.2.1
         if (PHP_VERSION_ID >= 70201) {
-            return;
+            return null;
         }
 
         return 'php_ini_scanned_files not functional on '.PHP_VERSION;

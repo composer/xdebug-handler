@@ -69,7 +69,7 @@ class CoreMock extends XdebugHandler
         return $xdebug->childProcess ?: $xdebug;
     }
 
-    public function __construct($loaded)
+    final public function __construct($loaded)
     {
         parent::__construct('mock');
 

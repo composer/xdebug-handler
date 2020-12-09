@@ -28,12 +28,14 @@ class ClassTest extends TestCase
     public function testConstructorThrowsOnInvalidEnvPrefix()
     {
         $this->setException('RuntimeException');
+        /** @phpstan-ignore-next-line */
         new XdebugHandler(array('name'));
     }
 
     public function testConstructorThrowsOnInvalidColorOption()
     {
         $this->setException('RuntimeException');
+        /** @phpstan-ignore-next-line */
         new XdebugHandler('test', false);
     }
 
@@ -62,6 +64,7 @@ class ClassTest extends TestCase
     private function setException($exception)
     {
         if (!method_exists($this, 'expectException')) {
+            /** @phpstan-ignore-next-line */
             $this->setExpectedException($exception);
         } else {
             $this->expectException($exception);

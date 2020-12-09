@@ -147,8 +147,6 @@ class IniFilesTest extends BaseTestCase
 
     /**
      * Common method to get mocked tmp ini content
-     *
-     * @param mixed $xdebug
      */
     private function getTmpIniContent(PartialMock $xdebug)
     {

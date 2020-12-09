@@ -204,8 +204,9 @@ class XdebugHandler
         $envArgs = explode('|', (string) getenv(self::RESTART_SETTINGS));
 
         if (count($envArgs) !== 6
-            || (!self::$inRestart && php_ini_loaded_file() !== $envArgs[0])) {
-            return;
+            || (!self::$inRestart && php_ini_loaded_file() !== $envArgs[0])
+        ) {
+            return null;
         }
 
         return array(
@@ -512,7 +513,7 @@ class XdebugHandler
     /**
      * Adds restart settings to the environment
      *
-     * @param string $envArgs
+     * @param string[] $envArgs
      */
     private function setEnvRestartSettings($envArgs)
     {
