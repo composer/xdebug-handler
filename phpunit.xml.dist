@@ -9,6 +9,10 @@
          stopOnFailure="false"
          bootstrap="vendor/autoload.php"
     >
+    <php>
+        <ini name="date.timezone" value="UTC" />
+    </php>
+
     <testsuites>
         <testsuite name="XdebugHandler Test Suite">
             <directory>tests</directory>
