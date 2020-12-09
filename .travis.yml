@@ -32,10 +32,44 @@ matrix:
     - dist: bionic
       php: nightly
       env: platform=ignore
+#Added power jobs
+    - dist: xenial
+      arch: ppc64le
+      php: 5.6
+    - dist: xenial
+      arch: ppc64le
+      php: 7.0
+    - dist: bionic
+      arch: ppc64le
+      php: 7.1
+    - dist: bionic
+      arch: ppc64le
+      php: 7.2
+    - dist: bionic
+      arch: ppc64le
+      php: 7.4
+    - dist: bionic
+      arch: ppc64le
+      php: nightly
+      env: platform=ignore
   fast_finish: true
   allow_failures:
     - php: nightly
-
+# Disable version 5.3, 5.4, 5.5, 7.3
+jobs: 
+  exclude:
+    - dist: precise
+      arch: ppc64le
+      php: 5.3
+    - dist: trusty
+      arch: ppc64le
+      php: 5.4
+    - dist: trusty
+      arch: ppc64le
+      php: 5.5
+    - dist: bionic
+      arch: ppc64le
+      php: 7.3
 before_install:
   # disable Xdebug if present
   - phpenv config-rm xdebug.ini || echo "Xdebug not present"
