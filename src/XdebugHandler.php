@@ -565,11 +565,12 @@ class XdebugHandler
      * Returns true if there are no known configuration issues
      *
      * @param string $info Set by method
+     * @return bool
      */
     private function checkConfiguration(&$info)
     {
-        if (false !== strpos(ini_get('disable_functions'), 'passthru')) {
-            $info = 'passthru function is disabled';
+        if (!function_exists('proc_open') && !function_exists('passthru')) {
+            $info = 'execution functions have been disabled (proc_open() or passthru() is needed)';
             return false;
         }
 
