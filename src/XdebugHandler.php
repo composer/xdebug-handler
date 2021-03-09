@@ -204,8 +204,7 @@ class XdebugHandler
         $envArgs = explode('|', (string) getenv(self::RESTART_SETTINGS));
 
         if (count($envArgs) !== 6
-            || (!self::$inRestart && php_ini_loaded_file() !== $envArgs[0])
-        ) {
+            || (!self::$inRestart && php_ini_loaded_file() !== $envArgs[0])) {
             return null;
         }
 
@@ -570,7 +569,7 @@ class XdebugHandler
     private function checkConfiguration(&$info)
     {
         if (!function_exists('proc_open') && !function_exists('passthru')) {
-            $info = 'execution functions have been disabled (proc_open() or passthru() is needed)';
+            $info = 'execution functions have been disabled (proc_open or passthru required)';
             return false;
         }
 

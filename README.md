@@ -63,7 +63,7 @@ A temporary ini file is created from the loaded (and scanned) ini files, with an
 
 * `MYAPP_ALLOW_XDEBUG` is set with internal data to flag and use in the restart.
 * The command-line and environment are [configured](#process-configuration) for the restart.
-* The application is restarted in a new process using `passthru`.
+* The application is restarted in a new process.
     * The restart settings are stored in the environment.
     * `MYAPP_ALLOW_XDEBUG` is unset.
     * The application runs and exits.
