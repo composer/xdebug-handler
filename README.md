@@ -73,6 +73,8 @@ A temporary ini file is created from the loaded (and scanned) ini files, with an
 From PHP 7.1 with the pcntl extension loaded, asynchronous signal handling is automatically enabled. `SIGINT` is set to `SIG_IGN` in the parent
 process and restored to `SIG_DFL` in the restarted process (if no other handler has been set).
 
+From PHP 7.4 on Windows, `CTRL+C` and `CTRL+BREAK` handling is ignored in the parent process and automatically enabled in the restarted process.
+
 ### Limitations
 There are a few things to be aware of when running inside a restarted process.
 

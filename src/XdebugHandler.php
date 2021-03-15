@@ -589,28 +589,32 @@ class XdebugHandler
     /**
      * Enables async signals and control interrupts in the restarted process
      *
-     * Only available on Unix PHP 7.1+ with the pcntl extension. To replicate on
-     * Windows would require PHP 7.4+ using proc_open rather than passthru.
+     * Available on Unix PHP 7.1+ with the pcntl extension and Windows PHP 7.4+.
      */
     private function tryEnableSignals()
     {
-        if (!function_exists('pcntl_async_signals') || !function_exists('pcntl_signal')) {
-            return;
+        if (function_exists('pcntl_async_signals') && function_exists('pcntl_signal')) {
+            pcntl_async_signals(true);
+            $message = 'Async signals enabled';
+
+            if (!self::$inRestart) {
+                // Restarting, so ignore SIGINT in parent
+                pcntl_signal(SIGINT, SIG_IGN);
+                $message .= ' (SIGINT = SIG_IGN)';
+            } elseif (is_int(pcntl_signal_get_handler(SIGINT))) {
+                // Restarted, no handler set so force default action
+                pcntl_signal(SIGINT, SIG_DFL);
+                $message .= ' (SIGINT = SIG_DFL)';
+            }
+            $this->notify(Status::INFO, $message);
         }
 
-        pcntl_async_signals(true);
-        $message = 'Async signals enabled';
-
-        if (!self::$inRestart) {
-            // Restarting, so ignore SIGINT in parent
-            pcntl_signal(SIGINT, SIG_IGN);
-            $message .= ' (SIGINT = SIG_IGN)';
-        } elseif (is_int(pcntl_signal_get_handler(SIGINT))) {
-            // Restarted, no handler set so force default action
-            pcntl_signal(SIGINT, SIG_DFL);
-            $message .= ' (SIGINT = SIG_DFL)';
+        if (!self::$inRestart && function_exists('sapi_windows_set_ctrl_handler')) {
+            // Restarting, so set a handler to ignore CTRL events in the parent.
+            // This ensures that CTRL+C events will be available in the child
+            // process without having to enable them there, which is unreliable.
+            sapi_windows_set_ctrl_handler(function ($evt) {});
+            $this->notify(Status::INFO, 'CTRL signals suppressed');
         }
-
-        $this->notify(Status::INFO, $message);
     }
 }
