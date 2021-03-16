@@ -109,7 +109,7 @@ class CoreMock extends XdebugHandler
         return $prop->getValue($this);
     }
 
-    protected function restart($command)
+    protected function restart(array $command)
     {
         static::createAndCheck(false, $this, static::$settings);
     }

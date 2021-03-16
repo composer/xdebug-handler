@@ -243,9 +243,9 @@ class XdebugHandler
     /**
      * Allows an extending class to access the tmpIni
      *
-     * @param string $command
+     * @param array $command
      */
-    protected function restart($command)
+    protected function restart(array $command)
     {
         $this->doRestart($command);
     }
@@ -253,28 +253,33 @@ class XdebugHandler
     /**
      * Executes the restarted command then deletes the tmp ini
      *
-     * @param string $command
+     * @param array $command
      */
-    private function doRestart($command)
+    private function doRestart(array $command)
     {
         $this->tryEnableSignals();
-        $this->notify(Status::RESTARTING, $command);
+        $this->notify(Status::RESTARTING, implode(' ', $command));
 
-        // Prefer proc_open to keep fds intact, because passthru pipes to stdout
-        if (function_exists('proc_open')) {
-            if (defined('PHP_WINDOWS_VERSION_BUILD') && PHP_VERSION_ID < 80000) {
-                $command = '"'.$command.'"';
-            }
-            $process = proc_open($command, array(), $pipes);
-            if (is_resource($process)) {
-                $exitCode = proc_close($process);
-            }
+        if (PHP_VERSION_ID >= 70400) {
+            $cmd = $command;
         } else {
-            passthru($command, $exitCode);
+            $cmd = Process::escape(array_shift($command), true, true);
+            foreach ($command as $arg) {
+                $cmd .= ' '.Process::escape($arg);
+            }
+            if (defined('PHP_WINDOWS_VERSION_BUILD')) {
+                // Outer quotes required on cmd string below PHP 8
+                $cmd = '"'.$cmd.'"';
+            }
+        }
+
+        $process = proc_open($cmd, array(), $pipes);
+        if (is_resource($process)) {
+            $exitCode = proc_close($process);
         }
 
         if (!isset($exitCode)) {
-            // Unlikely that the default shell cannot be invoked
+            // Unlikely that php or the default shell cannot be invoked
             $this->notify(Status::ERROR, 'Unable to restart process');
             $exitCode = -1;
         } else {
@@ -375,9 +380,9 @@ class XdebugHandler
     }
 
     /**
-     * Returns the restart command line
+     * Returns the command line arguments for the restart
      *
-     * @return string
+     * @return array
      */
     private function getCommand()
     {
@@ -393,14 +398,7 @@ class XdebugHandler
             $args = Process::addColorOption($args, $this->colorOption);
         }
 
-        $args = array_merge($php, array($this->script), $args);
-
-        $cmd = Process::escape(array_shift($args), true, true);
-        foreach ($args as $arg) {
-            $cmd .= ' '.Process::escape($arg);
-        }
-
-        return $cmd;
+        return array_merge($php, array($this->script), $args);
     }
 
     /**
@@ -568,8 +566,8 @@ class XdebugHandler
      */
     private function checkConfiguration(&$info)
     {
-        if (!function_exists('proc_open') && !function_exists('passthru')) {
-            $info = 'execution functions have been disabled (proc_open or passthru required)';
+        if (!function_exists('proc_open')) {
+            $info = 'proc_open function is disabled';
             return false;
         }
 

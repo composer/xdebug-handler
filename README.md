@@ -245,7 +245,7 @@ Note that the [setMainScript()](#setmainscriptscript) and [setPersistent()](#set
 #### _restart($command)_
 An application can extend this to modify the temporary ini file, its location given in the `tmpIni` property. New settings can be safely appended to the end of the data, which is `PHP_EOL` terminated.
 
-Note that the `$command` parameter is the escaped command-line string that will be used for the new process and must be treated accordingly.
+The `$command` parameter is an array of unescaped command-line arguments that will be used for the new process.
 
 Remember to finish with `parent::restart($command)`.
 
@@ -275,7 +275,7 @@ class MyRestarter extends XdebugHandler
         return $isLoaded || $this->required;
     }
 
-    protected function restart($command)
+    protected function restart(array $command)
     {
         if ($this->required) {
             # Add required ini setting to tmpIni
