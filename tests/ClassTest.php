@@ -73,6 +73,7 @@ class ClassTest extends TestCase
     public function methodProvider()
     {
         return array(
+            array('requiresRestart'),
             array('restart'),
         );
     }

@@ -5,7 +5,7 @@
 ![license](https://img.shields.io/github/license/composer/xdebug-handler.svg)
 ![php](https://img.shields.io/packagist/php-v/composer/xdebug-handler.svg?colorB=8892BF&label=php)
 
-Restart a CLI process without loading the Xdebug extension.
+Restart a CLI process without loading the Xdebug extension, unless `xdebug.mode=off`.
 
 Originally written as part of [composer/composer](https://github.com/composer/composer),
 now extracted and made available as a stand-alone library.
@@ -119,6 +119,17 @@ $version = XdebugHandler::getSkippedVersion();
 # $version: '2.6.0' (for example), or an empty string
 ```
 
+#### _isXdebugOff()_
+Returns true if Xdebug is running with `xdebug.mode=off`. Returns false if Xdebug is running in a different mode, if configuration modes are not supported, or if Xdebug is not loaded.
+
+```php
+use Composer\XdebugHandler\XdebugHandler;
+
+if (extension_loaded('xdebug') && !XdebugHandler::isXdebugOff()) {
+    # Code will take longer to run
+}
+```
+
 ### Setter methods
 These methods implement a fluent interface and must be called before the main `check()` method.
 
@@ -227,8 +238,9 @@ The following environment settings can be used to troubleshoot unexpected behavi
 ### Extending the library
 The API is defined by classes and their accessible elements that are not annotated as @internal. The main class has two protected methods that can be overridden to provide additional functionality:
 
-#### _requiresRestart($isLoaded)_
-By default the process will restart if Xdebug is loaded. Extending this method allows an application to decide, by returning a boolean (or equivalent) value. It is only called if `MYAPP_ALLOW_XDEBUG` is empty, so it will not be called in the restarted process (where this variable contains internal data), or if the restart has been overridden.
+#### _requiresRestart($default)_
+By default the process will restart if Xdebug is loaded and not running with `xdebug.mode=off`. Extending this method allows an application to decide, by returning a boolean (or equivalent) value.
+It is only called if `MYAPP_ALLOW_XDEBUG` is empty, so it will not be called in the restarted process (where this variable contains internal data), or if the restart has been overridden.
 
 Note that the [setMainScript()](#setmainscriptscript) and [setPersistent()](#setpersistent) setters can be used here, if required.
 
@@ -254,7 +266,7 @@ class MyRestarter extends XdebugHandler
 {
     private $required;
 
-    protected function requiresRestart($isLoaded)
+    protected function requiresRestart($default)
     {
         if (Command::isHelp()) {
             # No need to disable Xdebug for this
@@ -262,7 +274,7 @@ class MyRestarter extends XdebugHandler
         }
 
         $this->required = (bool) ini_get('phar.readonly');
-        return $isLoaded || $this->required;
+        return $this->required || $default;
     }
 
     protected function restart($command)

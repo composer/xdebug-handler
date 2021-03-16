@@ -30,12 +30,14 @@ class XdebugHandler
     private static $inRestart;
     private static $name;
     private static $skipped;
+    private static $xdebugOff;
 
     private $cli;
     private $debug;
     private $envAllowXdebug;
     private $envOriginalInis;
     private $loaded;
+    private $mode;
     private $persistent;
     private $script;
     /** @var Status|null */
@@ -64,7 +66,13 @@ class XdebugHandler
         if (extension_loaded('xdebug')) {
             $ext = new \ReflectionExtension('xdebug');
             $this->loaded = $ext->getVersion() ?: 'unknown';
+
+            if (false !== ($mode = ini_get('xdebug.mode'))) {
+                $this->mode = getenv('XDEBUG_MODE') ?: ($mode  ?: 'off');
+            }
         }
+
+        self::$xdebugOff = $this->mode === 'off';
 
         if ($this->cli = PHP_SAPI === 'cli') {
             $this->debug = getenv(self::DEBUG);
@@ -119,10 +127,11 @@ class XdebugHandler
      */
     public function check()
     {
-        $this->notify(Status::CHECK, $this->loaded);
+        $this->notify(Status::CHECK, $this->loaded.'|'.$this->mode);
         $envArgs = explode('|', (string) getenv($this->envAllowXdebug));
+        $default = $this->loaded && !self::$xdebugOff;
 
-        if (empty($envArgs[0]) && $this->requiresRestart((bool) $this->loaded)) {
+        if (empty($envArgs[0]) && $this->requiresRestart($default)) {
             // Restart required
             $this->notify(Status::RESTART);
 
@@ -225,15 +234,28 @@ class XdebugHandler
     }
 
     /**
-     * Returns true if Xdebug is loaded, or as directed by an extending class
-     *
-     * @param bool $isLoaded Whether Xdebug is loaded
+     * Returns whether Xdebug mode is off
      *
      * @return bool
      */
-    protected function requiresRestart($isLoaded)
+    public static function isXdebugOff()
     {
-        return $isLoaded;
+        return self::$xdebugOff;
+    }
+
+    /**
+     * Allows an extending class to decide if there should be a restart
+     *
+     * The default is to restart if Xdebug is loaded and its mode is not "off".
+     * Do not typehint for 1.x compatibility.
+     *
+     * @param bool $default The default behaviour
+     *
+     * @return bool Whether the process should restart
+     */
+    protected function requiresRestart($default)
+    {
+        return $default;
     }
 
     /**

@@ -42,6 +42,15 @@ class RestartTest extends BaseTestCase
         $this->assertTrue($matched);
     }
 
+    public function testRestartWhenModeIsNotOff()
+    {
+        $loaded = array(true, 'debug,trace');
+
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkRestart($xdebug);
+        $this->assertFalse($xdebug::isXdebugOff());
+    }
+
     public function testNoRestartWhenNotLoaded()
     {
         $loaded = false;
@@ -57,6 +66,15 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
+    }
+
+    public function testNoRestartWhenModeIsOff()
+    {
+        $loaded = array(true, 'off');
+
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkNoRestart($xdebug);
+        $this->assertTrue($xdebug::isXdebugOff());
     }
 
     public function testFailedRestart()
