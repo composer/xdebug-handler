@@ -32,13 +32,6 @@ class ClassTest extends TestCase
         new XdebugHandler(array('name'));
     }
 
-    public function testConstructorThrowsOnInvalidColorOption()
-    {
-        $this->setException('RuntimeException');
-        /** @phpstan-ignore-next-line */
-        new XdebugHandler('test', false);
-    }
-
     /**
      * @dataProvider setterProvider
      */
