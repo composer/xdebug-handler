@@ -32,7 +32,6 @@ class XdebugHandler
     private static $skipped;
 
     private $cli;
-    private $colorOption;
     private $debug;
     private $envAllowXdebug;
     private $envOriginalInis;
