@@ -31,20 +31,10 @@ $xdebug->check();
 unset($xdebug);
 ```
 
-The constructor takes two parameters:
-
-#### _$envPrefix_
-This is used to create distinct environment variables and is upper-cased and prepended to default base values. The above example enables the use of:
+The constructor takes a single parameter, `$envPrefix`, which is upper-cased and prepended to default base values to create two distinct environment variables. The above example enables the use of:
 
 - `MYAPP_ALLOW_XDEBUG=1` to override automatic restart and allow Xdebug
 - `MYAPP_ORIGINAL_INIS` to obtain ini file locations in a restarted process
-
-#### _$colorOption_
-This optional value is added to the restart command-line and is needed to force color output in a piped child process. Only long-options are supported, for example `--ansi` or `--colors=always` etc.
-
-If the original command-line contains an argument that pattern matches this value (for example `--no-ansi`, `--colors=never`) then _$colorOption_ is ignored.
-
-If the pattern match ends with `=auto` (for example `--colors=auto`), the argument is replaced by _$colorOption_. Otherwise it is added at either the end of the command-line, or preceding the first double-dash `--` delimiter.
 
 ## Advanced Usage
 

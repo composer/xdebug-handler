@@ -32,7 +32,6 @@ class XdebugHandler
     private static $skipped;
 
     private $cli;
-    private $colorOption;
     private $debug;
     private $envAllowXdebug;
     private $envOriginalInis;
@@ -50,20 +49,17 @@ class XdebugHandler
      * would result in MYAPP_ALLOW_XDEBUG and MYAPP_ORIGINAL_INIS.
      *
      * @param string $envPrefix Value used in environment variables
-     * @param string $colorOption Command-line long option to force color output
-     * @throws \RuntimeException If a parameter is invalid
+     * @throws \RuntimeException If the parameter is invalid
      */
-    public function __construct($envPrefix, $colorOption = '')
+    public function __construct($envPrefix)
     {
-        if (!is_string($envPrefix) || empty($envPrefix) || !is_string($colorOption)) {
+        if (!is_string($envPrefix) || empty($envPrefix)) {
             throw new \RuntimeException('Invalid constructor parameter');
         }
 
         self::$name = strtoupper($envPrefix);
         $this->envAllowXdebug = self::$name.self::SUFFIX_ALLOW;
         $this->envOriginalInis = self::$name.self::SUFFIX_INIS;
-
-        $this->colorOption = $colorOption;
 
         if (extension_loaded('xdebug')) {
             $ext = new \ReflectionExtension('xdebug');
@@ -392,10 +388,6 @@ class XdebugHandler
         if (!$this->persistent) {
             // Use command-line options
             array_push($php, '-n', '-c', $this->tmpIni);
-        }
-
-        if (defined('STDOUT') && Process::supportsColor(STDOUT)) {
-            $args = Process::addColorOption($args, $this->colorOption);
         }
 
         return array_merge($php, array($this->script), $args);
