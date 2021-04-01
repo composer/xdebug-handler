@@ -54,6 +54,29 @@ class ClassTest extends TestCase
         );
     }
 
+    /**
+     * Test compatibility with 1.x for extending classes
+     *
+     * @requires PHP 7.1
+     * @dataProvider methodProvider
+     */
+    public function testNoTypeHintingOnMethod($method)
+    {
+        $xdebug = new XdebugHandler('myapp');
+        $refMethod = new \ReflectionMethod($xdebug, $method);
+        $refParams = $refMethod->getParameters();
+
+        $this->assertCount(1, $refParams);
+        $this->assertNull($refParams[0]->getType());
+    }
+
+    public function methodProvider()
+    {
+        return array(
+            array('restart'),
+        );
+    }
+
     private function setException($exception)
     {
         if (!method_exists($this, 'expectException')) {

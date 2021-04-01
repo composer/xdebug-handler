@@ -239,9 +239,11 @@ class XdebugHandler
     /**
      * Allows an extending class to access the tmpIni
      *
+     * Do not typehint for 1.x compatibility
+     *
      * @param array $command
      */
-    protected function restart(array $command)
+    protected function restart($command)
     {
         $this->doRestart($command);
     }
