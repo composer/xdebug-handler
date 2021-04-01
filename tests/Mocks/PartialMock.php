@@ -31,7 +31,7 @@ class PartialMock extends CoreMock
         return $this->tmpIni;
     }
 
-    protected function restart(array $command)
+    protected function restart($command)
     {
         $this->command = $command;
         $this->restarted = true;

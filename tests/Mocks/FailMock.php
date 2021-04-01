@@ -17,7 +17,7 @@ namespace Composer\XdebugHandler\Mocks;
  */
 class FailMock extends CoreMock
 {
-    protected function restart(array $command)
+    protected function restart($command)
     {
         static::createAndCheck(true, $this, static::$settings);
     }

@@ -265,7 +265,7 @@ class MyRestarter extends XdebugHandler
         return $isLoaded || $this->required;
     }
 
-    protected function restart(array $command)
+    protected function restart($command)
     {
         if ($this->required) {
             # Add required ini setting to tmpIni
