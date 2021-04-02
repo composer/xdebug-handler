@@ -18,11 +18,6 @@ use Composer\XdebugHandler\Tests\Mocks\FailMock;
 use Composer\XdebugHandler\Tests\Mocks\PartialMock;
 use Composer\XdebugHandler\Tests\Mocks\RequiredMock;
 
-/**
- * We use PHP_BINARY which only became available in PHP 5.4
- *
- * @requires PHP 5.4
- */
 class RestartTest extends BaseTestCase
 {
     /**

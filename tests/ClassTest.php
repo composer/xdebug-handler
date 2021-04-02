@@ -12,7 +12,7 @@
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
-use Composer\XdebugHandler\Tests\Helpers\LoggerFactory;
+use Composer\XdebugHandler\Tests\Helpers\Logger;
 use Composer\XdebugHandler\XdebugHandler;
 
 class ClassTest extends BaseTestCase
@@ -22,7 +22,7 @@ class ClassTest extends BaseTestCase
      */
     public function testConstructorThrowsOnEmptyEnvPrefix()
     {
-        $this->setException('RuntimeException');
+        $this->expectException('RuntimeException');
         new XdebugHandler('');
     }
 
@@ -31,7 +31,7 @@ class ClassTest extends BaseTestCase
      */
     public function testConstructorThrowsOnInvalidEnvPrefix()
     {
-        $this->setException('RuntimeException');
+        $this->expectException('RuntimeException');
         /** @phpstan-ignore-next-line */
         new XdebugHandler(array('name'));
     }
@@ -59,7 +59,7 @@ class ClassTest extends BaseTestCase
     {
         // $setter, $value
         return array(
-            'setLogger' => array('setLogger', LoggerFactory::createLogger()),
+            'setLogger' => array('setLogger', new Logger()),
             'setMainScript' => array('setMainScript', '--'),
             'setPersistent' => array('setPersistent', null),
         );
@@ -68,8 +68,7 @@ class ClassTest extends BaseTestCase
     /**
      * Test compatibility with 1.x for extending classes
      *
-     * @requires PHP 7.1
-     * @dataProvider methodProvider     *
+     * @dataProvider methodProvider
      * @param string $method
      *
      * @return void
@@ -93,21 +92,5 @@ class ClassTest extends BaseTestCase
             array('requiresRestart'),
             array('restart'),
         );
-    }
-
-    /**
-     * @param string $exception
-     * @phpstan-param class-string<\Exception> $exception
-     *
-     * @return void
-     */
-    private function setException($exception)
-    {
-        if (method_exists($this, 'expectException')) {
-            $this->expectException($exception);
-        } else {
-            /** @phpstan-ignore-next-line */
-            $this->setExpectedException($exception);
-        }
     }
 }

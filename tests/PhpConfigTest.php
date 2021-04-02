@@ -17,9 +17,6 @@ use Composer\XdebugHandler\Tests\Helpers\EnvHelper;
 use Composer\XdebugHandler\Tests\Mocks\CoreMock;
 
 /**
- * We use PHP_BINARY which only became available in PHP 5.4
- *
- * @requires PHP 5.4
  * @phpstan-import-type envTestData from EnvHelper
  */
 class PhpConfigTest extends BaseTestCase
@@ -79,10 +76,6 @@ class PhpConfigTest extends BaseTestCase
      */
     public function testEnvironment($iniFunc, $scanDir, $phprc)
     {
-        if (($message = EnvHelper::shouldSkipTest($scanDir)) !== null) {
-            self::markTestSkipped($message);
-        }
-
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
 
         $loaded = true;
