@@ -8,14 +8,8 @@ parameters:
     paths:
         - src
         - tests
-    excludePaths:
-        - tests/Helpers/LegacyLogger.php
     ignoreErrors:
         # strict-rules errors
         - message: "#^Call to function is_string\\(\\) with string will always evaluate to true.#"
           count: 1
           path: src/XdebugHandler.php
-
-        - message: "#^Call to function method_exists\\(\\) with .* and 'expectException' will always evaluate to true.#"
-          count: 1
-          path: tests/ClassTest.php

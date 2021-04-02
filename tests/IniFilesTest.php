@@ -18,11 +18,6 @@ use Composer\XdebugHandler\Tests\Helpers\IniHelper;
 use Composer\XdebugHandler\Tests\Mocks\CoreMock;
 use Composer\XdebugHandler\Tests\Mocks\PartialMock;
 
-/**
- * We use PHP_BINARY which only became available in PHP 5.4
- *
- * @requires PHP 5.4
- */
 class IniFilesTest extends BaseTestCase
 {
     /**

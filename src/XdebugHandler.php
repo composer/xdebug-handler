@@ -367,12 +367,8 @@ class XdebugHandler
 
         if (!$this->cli) {
             $error = 'Unsupported SAPI: '.PHP_SAPI;
-        } elseif (!defined('PHP_BINARY')) {
-            $error = 'PHP version is too old: '.PHP_VERSION;
         } elseif (!$this->checkConfiguration($info)) {
             $error = $info;
-        } elseif (!$this->checkScanDirConfig()) {
-            $error = 'PHP version does not report scanned inis: '.PHP_VERSION;
         } elseif (!$this->checkMainScript()) {
             $error = 'Unable to access main script: '.$this->script;
         } elseif (!$this->writeTmpIni($iniFiles, $tmpDir, $error)) {
@@ -608,24 +604,6 @@ class XdebugHandler
 
         self::$skipped = $settings['skipped'];
         $this->notify(Status::INFO, 'Process called with existing restart settings');
-    }
-
-    /**
-     * Returns true if there are scanned inis and PHP is able to report them
-     *
-     * php_ini_scanned_files will fail when PHP_CONFIG_FILE_SCAN_DIR is empty.
-     * Fixed in 7.1.13 and 7.2.1
-     *
-     * @return bool
-     */
-    private function checkScanDirConfig()
-    {
-        if (PHP_VERSION_ID >= 70113 && PHP_VERSION_ID !== 70200) {
-            return true;
-        }
-
-        return ((string) getenv('PHP_INI_SCAN_DIR') === '')
-            || PHP_CONFIG_FILE_SCAN_DIR !== '';
     }
 
     /**

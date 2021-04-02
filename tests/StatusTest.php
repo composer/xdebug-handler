@@ -12,15 +12,10 @@
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
-use Composer\XdebugHandler\Tests\Helpers\LoggerFactory;
+use Composer\XdebugHandler\Tests\Helpers\Logger;
 use Composer\XdebugHandler\Tests\Mocks\CoreMock;
 use Psr\Log\LogLevel;
 
-/**
- * We use PHP_BINARY which only became available in PHP 5.4
- *
- * @requires PHP 5.4
- */
 class StatusTest extends BaseTestCase
 {
     /**
@@ -30,7 +25,7 @@ class StatusTest extends BaseTestCase
     {
         $loaded = true;
 
-        $logger = LoggerFactory::createLogger();
+        $logger = new Logger();
         $settings = array('setLogger' => array($logger));
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
