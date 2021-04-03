@@ -1,4 +1,12 @@
 ## [Unreleased]
+  * Break: this is a major release, see [UPGRADE.md](UPGRADE.md) for more information.
+  * Break: removed optional `$colorOption` constructor param and passthru fallback.
+  * Break: renamed `requiresRestart` param from `$isLoaded` to `$default`.
+  * Break: changed `restart` param `$command` from a string to an array.
+  * Added: support for Xdebug3 to only restart if Xdebug is not running with `xdebug.mode=off`.
+  * Added: `isXdebugActive()` method to determine if Xdebug is still running in the restart.
+  * Added: feature to bypass the shell in PHP-7.4+ by giving `proc_open` an array of arguments.
+  * Added: Process utility class to the API.
 
 ## [1.4.6] - 2021-03-25
   * Fixed: fail restart if `proc_open` has been disabled in `disable_functions`.
