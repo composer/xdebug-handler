@@ -48,7 +48,7 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkRestart($xdebug);
-        $this->assertFalse($xdebug::isXdebugOff());
+        $this->assertFalse($xdebug::isXdebugActive());
     }
 
     public function testNoRestartWhenNotLoaded()
@@ -57,6 +57,7 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
+        $this->assertFalse($xdebug::isXdebugActive());
     }
 
     public function testNoRestartWhenLoadedAndAllowed()
@@ -66,6 +67,7 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
+        $this->assertTrue($xdebug::isXdebugActive());
     }
 
     public function testNoRestartWhenModeIsOff()
@@ -74,7 +76,7 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
-        $this->assertTrue($xdebug::isXdebugOff());
+        $this->assertFalse($xdebug::isXdebugActive());
     }
 
     public function testFailedRestart()

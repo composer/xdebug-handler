@@ -30,7 +30,7 @@ class XdebugHandler
     private static $inRestart;
     private static $name;
     private static $skipped;
-    private static $xdebugOff;
+    private static $xdebugActive;
 
     private $cli;
     private $debug;
@@ -69,10 +69,13 @@ class XdebugHandler
 
             if (false !== ($mode = ini_get('xdebug.mode'))) {
                 $this->mode = getenv('XDEBUG_MODE') ?: ($mode  ?: 'off');
+                if (preg_match('/^,+$/', str_replace(' ', '', $this->mode))) {
+                    $this->mode = 'off';
+                }
             }
         }
 
-        self::$xdebugOff = $this->mode === 'off';
+        self::$xdebugActive = $this->loaded && $this->mode !== 'off';
 
         if ($this->cli = PHP_SAPI === 'cli') {
             $this->debug = getenv(self::DEBUG);
@@ -129,9 +132,8 @@ class XdebugHandler
     {
         $this->notify(Status::CHECK, $this->loaded.'|'.$this->mode);
         $envArgs = explode('|', (string) getenv($this->envAllowXdebug));
-        $default = $this->loaded && !self::$xdebugOff;
 
-        if (empty($envArgs[0]) && $this->requiresRestart($default)) {
+        if (empty($envArgs[0]) && $this->requiresRestart(self::$xdebugActive)) {
             // Restart required
             $this->notify(Status::RESTART);
 
@@ -234,13 +236,16 @@ class XdebugHandler
     }
 
     /**
-     * Returns whether Xdebug mode is off
+     * Returns whether Xdebug is loaded and active
+     *
+     * true: if Xdebug is loaded and is running in an active mode.
+     * false: if Xdebug is not loaded, or it is running with xdebug.mode=off.
      *
      * @return bool
      */
-    public static function isXdebugOff()
+    public static function isXdebugActive()
     {
-        return self::$xdebugOff;
+        return self::$xdebugActive;
     }
 
     /**

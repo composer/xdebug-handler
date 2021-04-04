@@ -119,16 +119,8 @@ $version = XdebugHandler::getSkippedVersion();
 # $version: '2.6.0' (for example), or an empty string
 ```
 
-#### _isXdebugOff()_
-Returns true if Xdebug is running with `xdebug.mode=off`. Returns false if Xdebug is running in a different mode, if configuration modes are not supported, or if Xdebug is not loaded.
-
-```php
-use Composer\XdebugHandler\XdebugHandler;
-
-if (extension_loaded('xdebug') && !XdebugHandler::isXdebugOff()) {
-    # Code will take longer to run
-}
-```
+#### _isXdebugActive()_
+Returns true if Xdebug is loaded and is running in an active mode (if it supports modes). Returns false if Xdebug is not loaded, or it is running with `xdebug.mode=off`.
 
 ### Setter methods
 These methods implement a fluent interface and must be called before the main `check()` method.

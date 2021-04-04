@@ -96,10 +96,10 @@ class CoreMock extends XdebugHandler
         $prop->setAccessible(true);
         $prop->setValue($this, $mode);
 
-        // Set private static xdebugOff
-        $prop = $this->refClass->getProperty('xdebugOff');
+        // Set private static xdebugActive
+        $prop = $this->refClass->getProperty('xdebugActive');
         $prop->setAccessible(true);
-        $prop->setValue($this, $mode === 'off');
+        $prop->setValue($this, $loaded && $mode !== 'off');
 
         // Ensure static private skipped is unset
         $prop = $this->refClass->getProperty('skipped');
