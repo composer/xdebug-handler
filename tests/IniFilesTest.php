@@ -141,7 +141,7 @@ class IniFilesTest extends BaseTestCase
         $xdebug = CoreMock::createAndCheck($loaded);
 
         // We need to remove the mock inis from the environment
-        Process::setEnv(CoreMock::ORIGINAL_INIS, false);
+        Process::setEnv(CoreMock::ORIGINAL_INIS, null);
         $this->checkNoRestart($xdebug);
     }
 

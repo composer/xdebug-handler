@@ -49,8 +49,8 @@ class PhpConfig
     public function usePersistent()
     {
         if ($data = $this->getDataAndReset()) {
-            Process::setEnv('PHPRC', $data['tmpIni']);
-            Process::setEnv('PHP_INI_SCAN_DIR', '');
+            $this->updateEnv('PHPRC', $data['tmpIni']);
+            $this->updateEnv('PHP_INI_SCAN_DIR', '');
         }
 
         return array();
@@ -64,10 +64,21 @@ class PhpConfig
     private function getDataAndReset()
     {
         if ($data = XdebugHandler::getRestartSettings()) {
-            Process::setEnv('PHPRC', $data['phprc']);
-            Process::setEnv('PHP_INI_SCAN_DIR', $data['scanDir']);
+            $this->updateEnv('PHPRC', $data['phprc']);
+            $this->updateEnv('PHP_INI_SCAN_DIR', $data['scanDir']);
         }
 
         return $data;
+    }
+
+    /**
+     * Updates a restart settings value in the environment
+     *
+     * @param string $name
+     * @param string|false $value
+     */
+    private function updateEnv($name, $value)
+    {
+        Process::setEnv($name, false !== $value ? $value : null);
     }
 }
