@@ -615,13 +615,10 @@ class XdebugHandler
             if (!self::$inRestart) {
                 // Restarting, so ignore SIGINT in parent
                 pcntl_signal(SIGINT, SIG_IGN);
-                $message .= ' (SIGINT = SIG_IGN)';
             } elseif (is_int(pcntl_signal_get_handler(SIGINT))) {
                 // Restarted, no handler set so force default action
                 pcntl_signal(SIGINT, SIG_DFL);
-                $message .= ' (SIGINT = SIG_DFL)';
             }
-            $this->notify(Status::INFO, $message);
         }
 
         if (!self::$inRestart && function_exists('sapi_windows_set_ctrl_handler')) {
@@ -629,7 +626,6 @@ class XdebugHandler
             // This ensures that CTRL+C events will be available in the child
             // process without having to enable them there, which is unreliable.
             sapi_windows_set_ctrl_handler(function ($evt) {});
-            $this->notify(Status::INFO, 'CTRL signals suppressed');
         }
     }
 }
