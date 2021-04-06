@@ -40,7 +40,17 @@ class CoreMock extends XdebugHandler
 
     public static function createAndCheck($loaded, $parentProcess = null, $settings = array())
     {
-        $xdebug = new static($loaded);
+        $mode = null;
+
+        if (is_array($loaded)) {
+            list($loaded, $mode) = $loaded;
+        }
+
+        if ($mode && !$loaded) {
+            throw new \InvalidArgumentException('Unexpected mode when not loaded: '.$mode);
+        }
+
+        $xdebug = new static($loaded, $mode);
 
         if ($parentProcess) {
             // This is a restart, so set restarted on parent so it is copied
@@ -69,7 +79,7 @@ class CoreMock extends XdebugHandler
         return $xdebug->childProcess ?: $xdebug;
     }
 
-    final public function __construct($loaded)
+    final public function __construct($loaded, $mode)
     {
         parent::__construct('mock');
 
@@ -80,6 +90,16 @@ class CoreMock extends XdebugHandler
         $prop = $this->refClass->getProperty('loaded');
         $prop->setAccessible(true);
         $prop->setValue($this, $this->parentLoaded);
+
+        // Set private mode
+        $prop = $this->refClass->getProperty('mode');
+        $prop->setAccessible(true);
+        $prop->setValue($this, $mode);
+
+        // Set private static xdebugActive
+        $prop = $this->refClass->getProperty('xdebugActive');
+        $prop->setAccessible(true);
+        $prop->setValue($this, $loaded && $mode !== 'off');
 
         // Ensure static private skipped is unset
         $prop = $this->refClass->getProperty('skipped');
