@@ -64,8 +64,7 @@ class XdebugHandler
         $this->envOriginalInis = self::$name.self::SUFFIX_INIS;
 
         if (extension_loaded('xdebug')) {
-            $ext = new \ReflectionExtension('xdebug');
-            $this->loaded = $ext->getVersion() ?: 'unknown';
+            $this->loaded = phpversion('xdebug') ?: 'unknown';
 
             if (false !== ($mode = ini_get('xdebug.mode'))) {
                 $this->mode = getenv('XDEBUG_MODE') ?: ($mode  ?: 'off');
