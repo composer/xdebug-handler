@@ -288,10 +288,7 @@ class XdebugHandler
         if (PHP_VERSION_ID >= 70400) {
             $cmd = $command;
         } else {
-            $cmd = Process::escape(array_shift($command), true, true);
-            foreach ($command as $arg) {
-                $cmd .= ' '.Process::escape($arg);
-            }
+            $cmd = Process::escapeShellCommand($command);
             if (defined('PHP_WINDOWS_VERSION_BUILD')) {
                 // Outer quotes required on cmd string below PHP 8
                 $cmd = '"'.$cmd.'"';

@@ -12,11 +12,9 @@
 namespace Composer\XdebugHandler;
 
 /**
- * Provides utility functions to prepare a child process command-line and set
- * environment variables in that process.
+ * Process utility functions
  *
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
- * @internal
  */
 class Process
 {
@@ -64,16 +62,33 @@ class Process
     }
 
     /**
+     * Escapes an array of arguments that make up a shell command
+     *
+     * @param array $args Argument list, with the module name first
+     *
+     * @return string The escaped command line
+     */
+    public static function escapeShellCommand(array $args)
+    {
+        $cmd = self::escape(array_shift($args), true, true);
+        foreach ($args as $arg) {
+            $cmd .= ' '.self::escape($arg);
+        }
+
+        return $cmd;
+    }
+
+    /**
      * Makes putenv environment changes available in $_SERVER and $_ENV
      *
      * @param string $name
-     * @param string|false $value A false value unsets the variable
+     * @param string|null $value A null value unsets the variable
      *
      * @return bool Whether the environment variable was set
      */
-    public static function setEnv($name, $value = false)
+    public static function setEnv($name, $value = null)
     {
-        $unset = false === $value;
+        $unset = null === $value;
 
         if (!putenv($unset ? $name : $name.'='.$value)) {
             return false;
