@@ -1,66 +1,67 @@
-name: "Continuous Integration"
+name: Continuous Integration
 
 on:
   - push
   - pull_request
 
 env:
-  COMPOSER_FLAGS: "--ansi --no-interaction --no-progress --prefer-dist"
-  SYMFONY_PHPUNIT_REMOVE_RETURN_TYPEHINT: "1"
+  COMPOSER_FLAGS: --ansi --no-interaction --no-progress --prefer-dist
 
 jobs:
   tests:
-    name: "CI"
+    name: CI
 
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         php-version:
-          - "5.3"
-          - "5.4"
-          - "5.5"
-          - "5.6"
-          - "7.0"
-          - "7.1"
-          - "7.2"
-          - "7.3"
-          - "7.4"
-          - "8.0"
-          - "8.1"
+          - '5.3'
+          - '5.4'
+          - '5.5'
+          - '5.6'
+          - '7.0'
+          - '7.1'
+          - '7.2'
+          - '7.3'
+          - '7.4'
+          - '8.0'
+          - '8.1'
         os: [ubuntu-latest]
         include:
-          - php-version: "5.3"
+          - php-version: '5.3'
             os: windows-latest
-          - php-version: "8.0"
+          - php-version: '8.0'
             os: windows-latest
 
     steps:
-      - name: "Checkout"
-        uses: "actions/checkout@v2"
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: "Install PHP"
-        uses: "shivammathur/setup-php@v2"
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
         with:
-          coverage: "none"
-          php-version: "${{ matrix.php-version }}"
+          coverage: none
+          php-version: ${{ matrix.php-version }}
+
+      - name: Remove PHPStan if unsupported
+        # Do this first to diffentiate cache keys
+        if: ${{ matrix.php-version < '7.1' }}
+        run: composer remove phpstan/phpstan --dev --no-update
 
       - name: Get composer cache directory
         id: composercache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-      - name: Cache dependencies
+      - name: Restore cached dependencies
         uses: actions/cache@v2
         with:
           path: ${{ steps.composercache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
-          restore-keys: ${{ runner.os }}-composer-
+          key: php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: php-${{ matrix.php-version }}-composer-
 
-      - name: "Install latest dependencies"
-        run: |
-          # Remove PHPStan as it requires a newer PHP
-          composer remove phpstan/phpstan --dev --no-update
-          composer update ${{ env.COMPOSER_FLAGS }}
+      - name: Install latest dependencies
+        run: composer update ${{ env.COMPOSER_FLAGS }}
 
-      - name: "Run tests"
-        run: "vendor/bin/simple-phpunit --verbose"
+      - name: Run tests
+        run: vendor/bin/simple-phpunit --verbose
