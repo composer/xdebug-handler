@@ -10,6 +10,10 @@ Restart a CLI process without loading the Xdebug extension, unless `xdebug.mode=
 Originally written as part of [composer/composer](https://github.com/composer/composer),
 now extracted and made available as a stand-alone library.
 
+### Version 2
+
+Support added for Xdebug3. See [UPGRADE](UPGRADE.md) for more information.
+
 ## Installation
 
 Install the latest version with:
