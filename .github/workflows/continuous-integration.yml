@@ -64,4 +64,7 @@ jobs:
         run: composer update ${{ env.COMPOSER_FLAGS }}
 
       - name: Run tests
+        # Temp fix. PHP 8.1 needs phpunit 9.5.5+
+        env:
+          SYMFONY_DEPRECATIONS_HELPER: disabled=1
         run: vendor/bin/simple-phpunit --verbose
