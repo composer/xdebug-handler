@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+## [2.0.1] - 2021-05-05
+  * Fixed: don't restart if the cwd is a UNC path and cmd.exe will be invoked.
+
 ## [2.0.0] - 2021-04-09
   * Break: this is a major release, see [UPGRADE.md](UPGRADE.md) for more information.
   * Break: removed optional `$colorOption` constructor param and passthru fallback.
@@ -83,7 +86,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/2.0.0...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/2.0.1...HEAD
+[2.0.1]: https://github.com/composer/xdebug-handler/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/composer/xdebug-handler/compare/1.4.6...2.0.0
 [1.4.6]: https://github.com/composer/xdebug-handler/compare/1.4.5...1.4.6
 [1.4.5]: https://github.com/composer/xdebug-handler/compare/1.4.4...1.4.5
