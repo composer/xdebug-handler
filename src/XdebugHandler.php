@@ -377,7 +377,8 @@ class XdebugHandler
         }
 
         $content = '';
-        $regex = '/^\s*(zend_extension\s*=.*xdebug.*)$/mi';
+        $sectionRegex = '/^\s*\[(?:PATH|HOST)\s*=/mi';
+        $xdebugRegex = '/^\s*(zend_extension\s*=.*xdebug.*)$/mi';
 
         foreach ($iniFiles as $file) {
             // Check for inaccessible ini files
@@ -385,7 +386,11 @@ class XdebugHandler
                 $error = 'Unable to read ini: '.$file;
                 return false;
             }
-            $content .= preg_replace($regex, ';$1', $data).PHP_EOL;
+            // Check and remove directives after HOST and PATH sections
+            if (preg_match($sectionRegex, $content, $matches, PREG_OFFSET_CAPTURE)) {
+                $content = substr($content, 0, $matches[0][1]);
+            }
+            $content .= preg_replace($xdebugRegex, ';$1', $data).PHP_EOL;
         }
 
         // Merge loaded settings into our ini content, if it is valid
