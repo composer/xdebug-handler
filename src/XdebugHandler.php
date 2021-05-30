@@ -387,8 +387,8 @@ class XdebugHandler
                 return false;
             }
             // Check and remove directives after HOST and PATH sections
-            if (preg_match($sectionRegex, $content, $matches, PREG_OFFSET_CAPTURE)) {
-                $content = substr($content, 0, $matches[0][1]);
+            if (preg_match($sectionRegex, $data, $matches, PREG_OFFSET_CAPTURE)) {
+                $data = substr($data, 0, $matches[0][1]);
             }
             $content .= preg_replace($xdebugRegex, ';$1', $data).PHP_EOL;
         }

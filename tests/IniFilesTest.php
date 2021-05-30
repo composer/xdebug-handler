@@ -56,8 +56,7 @@ class IniFilesTest extends BaseTestCase
 
     /**
      * Tests that the tmpIni file is created, contains disabled Xdebug
-     * entries, does not contain PATH or HOST entries and is correctly
-     * end-of-line terminated.
+     * entries and is correctly end-of-line terminated.
      *
      * @param callable $iniFunc IniHelper method to use
      * @param int $matches The number of disabled entries to match
@@ -75,10 +74,6 @@ class IniFilesTest extends BaseTestCase
         $regex = '/^\s*;zend_extension\s*=.*xdebug.*$/mi';
         $result = preg_match_all($regex, $content);
         $this->assertSame($result, $matches);
-
-        // Check directives below PATH and HOST sections are removed
-        $config = parse_ini_string($content);
-        $this->assertArrayNotHasKey('cgi.only.setting', $config);
 
         // Check content is end-of-line terminated
         $regex = sprintf('/%s/', preg_quote(PHP_EOL));
@@ -148,6 +143,33 @@ class IniFilesTest extends BaseTestCase
         // We need to remove the mock inis from the environment
         Process::setEnv(CoreMock::ORIGINAL_INIS, null);
         $this->checkNoRestart($xdebug);
+    }
+
+    /**
+     * Tests that directives below HOST and PATH sections are removed
+     *
+     * @dataProvider iniSectionsProvider
+     */
+    public function testIniSections($sectionName)
+    {
+        $ini = new IniHelper();
+        $ini->setSectionInis($sectionName);
+
+        $loaded = true;
+        $xdebug = PartialMock::createAndCheck($loaded);
+
+        $content = $this->getTmpIniContent($xdebug);
+        $config = parse_ini_string($content);
+        $this->assertArrayHasKey('cli.setting', $config);
+        $this->assertArrayNotHasKey('cgi.only.setting', $config);
+    }
+
+    public function iniSectionsProvider()
+    {
+        return array(
+            'host-section' => array('host'),
+            'path-section' => array('path'),
+        );
     }
 
     /**
