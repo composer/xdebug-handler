@@ -146,6 +146,33 @@ class IniFilesTest extends BaseTestCase
     }
 
     /**
+     * Tests that directives below HOST and PATH sections are removed
+     *
+     * @dataProvider iniSectionsProvider
+     */
+    public function testIniSections($sectionName)
+    {
+        $ini = new IniHelper();
+        $ini->setSectionInis($sectionName);
+
+        $loaded = true;
+        $xdebug = PartialMock::createAndCheck($loaded);
+
+        $content = $this->getTmpIniContent($xdebug);
+        $config = parse_ini_string($content);
+        $this->assertArrayHasKey('cli.setting', $config);
+        $this->assertArrayNotHasKey('cgi.only.setting', $config);
+    }
+
+    public function iniSectionsProvider()
+    {
+        return array(
+            'host-section' => array('host'),
+            'path-section' => array('path'),
+        );
+    }
+
+    /**
      * Common method to get mocked tmp ini content
      */
     private function getTmpIniContent(PartialMock $xdebug)

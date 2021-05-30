@@ -90,6 +90,17 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    public function setSectionInis($sectionName)
+    {
+        $this->files = array(
+            $this->loadedIni,
+            $this->scanDir.DIRECTORY_SEPARATOR.'section-first.ini',
+            $this->scanDir.DIRECTORY_SEPARATOR.'section-'.$sectionName.'.ini',
+        );
+
+        $this->setEnvironment();
+    }
+
     public function getIniFiles()
     {
         return $this->files;
