@@ -5,3 +5,5 @@ parameters:
     paths:
         - src
         - tests
+    excludePaths:
+        - tests/Helpers/LegacyLogger.php

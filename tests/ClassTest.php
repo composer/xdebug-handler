@@ -11,6 +11,7 @@
 
 namespace Composer\XdebugHandler;
 
+use Composer\XdebugHandler\Helpers\LegacyLogger;
 use Composer\XdebugHandler\Helpers\Logger;
 use PHPUnit\Framework\TestCase;
 
@@ -48,7 +49,7 @@ class ClassTest extends TestCase
     {
         // $setter, $value
         return array(
-            'setLogger' => array('setLogger', new Logger()),
+            'setLogger' => array('setLogger', \PHP_VERSION_ID < 70100 ? new LegacyLogger() : new Logger()),
             'setMainScript' => array('setMainScript', '--'),
             'setPersistent' => array('setPersistent', null),
         );

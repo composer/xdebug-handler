@@ -12,6 +12,7 @@
 namespace Composer\XdebugHandler;
 
 use Composer\XdebugHandler\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Helpers\LegacyLogger;
 use Composer\XdebugHandler\Helpers\Logger;
 use Composer\XdebugHandler\Mocks\CoreMock;
 use Psr\Log\LogLevel;
@@ -27,7 +28,7 @@ class StatusTest extends BaseTestCase
     {
         $loaded = true;
 
-        $logger = new Logger();
+        $logger = \PHP_VERSION_ID < 70100 ? new LegacyLogger() : new Logger();
         $settings = array('setLogger' => array($logger));
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
