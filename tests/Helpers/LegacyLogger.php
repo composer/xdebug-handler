@@ -13,11 +13,11 @@ namespace Composer\XdebugHandler\Helpers;
 
 use Psr\Log\AbstractLogger;
 
-class Logger extends AbstractLogger
+class LegacyLogger extends AbstractLogger
 {
     protected $output = array();
 
-    public function log($level, $message, array $context = array()): void
+    public function log($level, $message, array $context = array())
     {
         $this->output[] = array($level, $message, $context);
     }
