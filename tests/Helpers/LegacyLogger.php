@@ -13,6 +13,9 @@ namespace Composer\XdebugHandler\Helpers;
 
 use Psr\Log\AbstractLogger;
 
+/**
+ * Psr\Log version 1 implementation
+ */
 class LegacyLogger extends AbstractLogger
 {
     protected $output = array();
