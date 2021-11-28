@@ -35,22 +35,5 @@ class StatusTest extends BaseTestCase
 
         $output = $logger->getOutput();
         $this->assertNotEmpty($output);
-        $this->checkStatusOutput($output);
-    }
-
-    /**
-     * Assertions to check the status message and logging formats
-     *
-     * @param array $output
-     */
-    protected function checkStatusOutput(array $output)
-    {
-        $levels = array(LogLevel::DEBUG, LogLevel::WARNING);
-
-        foreach ($output as $record) {
-            $this->assertCount(3, $record);
-            $this->assertContains($record[0], $levels);
-            $this->assertCount(0, $record[2]);
-        }
     }
 }

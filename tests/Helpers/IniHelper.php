@@ -19,16 +19,27 @@ use Composer\XdebugHandler\Tests\Mocks\CoreMock;
  */
 class IniHelper
 {
+    /** @var string */
     protected $loadedIni;
+
+    /** @var string */
     protected $scanDir;
+
+    /** @var string[] */
     protected $files;
+
+    /**
+     * @var null|array
+     * @phpstan-var null|array{0?: false|string, 1?: false|string}
+     */
     protected $envOptions;
 
     /**
      * envOptions is an array of additional environment values to set,
      * comprising: [PHP_INI_SCAN_DIR, optional PHPRC]
      *
-     * @param mixed $envOptions
+     * @param null|array $envOptions
+     * @phpstan-param null|array{0?: false|string, 1?: false|string} $envOptions
      */
     public function __construct($envOptions = null)
     {
@@ -38,6 +49,9 @@ class IniHelper
         $this->scanDir = $base.DIRECTORY_SEPARATOR.'scandir';
     }
 
+    /**
+     * @return void
+     */
     public function setNoInis()
     {
         // Must have at least one entry
@@ -45,6 +59,9 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    /**
+     * @return void
+     */
     public function setLoadedIni()
     {
         $this->files = array(
@@ -54,6 +71,9 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    /**
+     * @return void
+     */
     public function setScannedInis()
     {
         $this->files = array(
@@ -66,6 +86,9 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    /**
+     * @return void
+     */
     public function setAllInis()
     {
         $this->files = array(
@@ -78,6 +101,9 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    /**
+     * @return void
+     */
     public function setInaccessibleIni()
     {
         $this->files = array(
@@ -90,6 +116,10 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    /**
+     * @param string $sectionName
+     * @return void
+     */
     public function setSectionInis($sectionName)
     {
         $this->files = array(
@@ -101,26 +131,41 @@ class IniHelper
         $this->setEnvironment();
     }
 
+    /**
+     * @return string[]
+     */
     public function getIniFiles()
     {
         return $this->files;
     }
 
+    /**
+     * @return bool
+     */
     public function hasScannedInis()
     {
         return count($this->files) > 1;
     }
 
+    /**
+     * @return string
+     */
     public function getLoadedIni()
     {
         return $this->loadedIni;
     }
 
+    /**
+     * @return string
+     */
     public function getScanDir()
     {
         return $this->scanDir;
     }
 
+    /**
+     * @return void
+     */
     private function setEnvironment()
     {
         // Set ORIGINAL_INIS. Values must be path-separated
@@ -140,6 +185,12 @@ class IniHelper
         }
     }
 
+    /**
+     * @param string $name
+     * @param string|false $value
+     *
+     * @return void
+     */
     private function setEnv($name, $value)
     {
         if (false !== $value) {

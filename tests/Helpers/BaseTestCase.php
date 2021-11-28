@@ -22,9 +22,16 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class BaseTestCase extends TestCase
 {
+    /**
+     * @var array
+     * @phpstan-var array<string, string|false>
+     */
     private static $env = array();
+
+    /** @var string[] */
     private static $argv = array();
 
+    /** @var string[] */
     private static $names = array(
         CoreMock::ALLOW_XDEBUG,
         CoreMock::ORIGINAL_INIS,
@@ -37,6 +44,8 @@ abstract class BaseTestCase extends TestCase
      * Saves the current environment and argv state
      *
      * @beforeClass
+     *
+     * @return void
      */
     public static function beforeClass()
     {
@@ -52,6 +61,8 @@ abstract class BaseTestCase extends TestCase
      * Restores the original environment and argv state
      *
      * @afterClass
+     *
+     * @return void
      */
     public static function afterClass()
     {
@@ -69,9 +80,35 @@ abstract class BaseTestCase extends TestCase
     }
 
     /**
+     * @param mixed $instance
+     * @param string $method
+     * @param mixed[] $params
+     * @param null|self $self
+     *
+     * @return mixed
+     */
+    public static function safeCall($instance, $method, array $params = null, $self = null)
+    {
+        $callable = array($instance, $method);
+        $params = $params ?: array();
+
+        if (is_callable($callable)) {
+            return call_user_func_array($callable, $params);
+        }
+
+        if ($self) {
+            $self->fail('Unable to call method: '. $method);
+        }
+
+        throw new \LogicException('Unable to call method: '. $method);
+    }
+
+    /**
      * Unsets environment variables for each test and restores argv
      *
      * @before
+     *
+     * @return void
      */
     public function setUpEnvironment()
     {
@@ -86,7 +123,9 @@ abstract class BaseTestCase extends TestCase
     /**
      * Provides basic assertions for a restarted process
      *
-     * @param mixed $xdebug
+     * @param \Composer\XdebugHandler\Tests\Mocks\CoreMock $xdebug
+     *
+     * @return void
      */
     protected function checkRestart($xdebug)
     {
@@ -121,7 +160,9 @@ abstract class BaseTestCase extends TestCase
     /**
      * Provides basic assertions for a non-restarted process
      *
-     * @param mixed $xdebug
+     * @param \Composer\XdebugHandler\Tests\Mocks\CoreMock $xdebug
+     *
+     * @return void
      */
     protected function checkNoRestart($xdebug)
     {

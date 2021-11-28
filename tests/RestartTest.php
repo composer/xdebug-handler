@@ -89,6 +89,8 @@ class RestartTest extends BaseTestCase
 
     /**
      * @dataProvider unreachableScriptProvider
+     *
+     * @param string $script
      */
     public function testNoRestartWithUnreachableScript($script)
     {
@@ -111,6 +113,8 @@ class RestartTest extends BaseTestCase
 
     /**
      * @dataProvider scriptSetterProvider
+     *
+     * @param string $script
      */
     public function testRestartWithScriptSetter($script)
     {
@@ -173,6 +177,8 @@ class RestartTest extends BaseTestCase
 
     /**
      * Sets $_SERVER['argv'] for testing commands
+     *
+     * @return void
      */
     private function setArgv()
     {

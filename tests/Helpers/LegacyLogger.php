@@ -22,7 +22,7 @@ class LegacyLogger extends AbstractLogger
 
     public function log($level, $message, array $context = array())
     {
-        $this->output[] = array($level, $message, $context);
+        $this->output[] = $message;
     }
 
     public function getOutput()

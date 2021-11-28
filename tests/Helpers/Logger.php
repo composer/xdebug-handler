@@ -18,13 +18,21 @@ use Psr\Log\AbstractLogger;
  */
 class Logger extends AbstractLogger
 {
+    /** @var string[]*/
     protected $output = array();
 
+    /**
+     * @inheritdoc
+     * @phpstan-param mixed[]  $context
+     */
     public function log($level, $message, array $context = array()): void
     {
-        $this->output[] = array($level, $message, $context);
+        $this->output[] = $message;
     }
 
+    /**
+     * @return string[]
+     */
     public function getOutput()
     {
         return $this->output;

@@ -27,20 +27,24 @@ class PhpConfigTest extends BaseTestCase
      * Tests that the correct command-line options are returned.
      *
      * @param string $method PhpConfig method to call
-     * @param array $expected
+     * @param string[] $expected
      * @dataProvider commandLineProvider
      */
     public function testCommandLineOptions($method, $expected)
     {
         $loaded = true;
         CoreMock::createAndCheck($loaded);
+        $settings = CoreMock::getRestartSettings();
+
+        if (null === $settings) {
+            $this->fail('getRestartSettings returned null');
+        }
 
         $config = new PhpConfig();
-        $options = call_user_func(array($config, $method));
+        $options = BaseTestCase::safeCall($config, $method, null, $this);
 
         if ($method === 'useStandard') {
-            $data = CoreMock::getRestartSettings();
-            $expected[2] = $data['tmpIni'];
+            $expected[2] = $settings['tmpIni'];
         }
 
         $this->assertSame($expected, $options);
@@ -60,8 +64,8 @@ class PhpConfigTest extends BaseTestCase
      * Tests that the environment is set correctly for each mode.
      *
      * @param string $iniFunc IniHelper method to use
-     * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param mixed $phprc Initial value for PHPRC
+     * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
+     * @param false|string $phprc Initial value for PHPRC
      * @dataProvider environmentProvider
      */
     public function testEnvironment($iniFunc, $scanDir, $phprc)
@@ -74,18 +78,21 @@ class PhpConfigTest extends BaseTestCase
 
         $loaded = true;
         CoreMock::createAndCheck($loaded);
+        $settings = CoreMock::getRestartSettings();
+
+        if (null === $settings) {
+            $this->fail('getRestartSettings returned null');
+        }
 
         $config = new PhpConfig();
-        $data = CoreMock::getRestartSettings();
-
         $tests = array('useOriginal', 'usePersistent', 'useStandard');
 
         foreach ($tests as $method) {
-            call_user_func(array($config, $method));
+            BaseTestCase::safeCall($config, $method, null, $this);
 
             if ($method === 'usePersistent') {
                 $expectedScanDir = '';
-                $expectedPhprc = $data['tmpIni'];
+                $expectedPhprc = $settings['tmpIni'];
             } else {
                 $expectedScanDir = $scanDir;
                 $expectedPhprc = $phprc;
@@ -106,6 +113,8 @@ class PhpConfigTest extends BaseTestCase
      * @param mixed $scanDir
      * @param mixed $phprc
      * @param string $name
+     *
+     * @return void
      */
     private function checkEnvironment($scanDir, $phprc, $name)
     {
