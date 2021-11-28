@@ -9,9 +9,9 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler\Helpers;
+namespace Composer\XdebugHandler\Tests\Helpers;
 
-use Composer\XdebugHandler\Mocks\CoreMock;
+use Composer\XdebugHandler\Tests\Mocks\CoreMock;
 use Composer\XdebugHandler\XdebugHandler;
 use PHPUnit\Framework\TestCase;
 

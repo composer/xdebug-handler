@@ -9,13 +9,13 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler;
+namespace Composer\XdebugHandler\Tests;
 
-use Composer\XdebugHandler\Helpers\BaseTestCase;
-use Composer\XdebugHandler\Mocks\CoreMock;
-use Composer\XdebugHandler\Mocks\FailMock;
-use Composer\XdebugHandler\Mocks\PartialMock;
-use Composer\XdebugHandler\Mocks\RequiredMock;
+use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Tests\Mocks\CoreMock;
+use Composer\XdebugHandler\Tests\Mocks\FailMock;
+use Composer\XdebugHandler\Tests\Mocks\PartialMock;
+use Composer\XdebugHandler\Tests\Mocks\RequiredMock;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4

@@ -9,7 +9,7 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler\Helpers;
+namespace Composer\XdebugHandler\Tests\Helpers;
 
 /**
  * Required to provide the correct Psr\Log implementation for phpstan analysis

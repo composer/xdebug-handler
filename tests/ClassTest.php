@@ -9,9 +9,10 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler;
+namespace Composer\XdebugHandler\Tests;
 
-use Composer\XdebugHandler\Helpers\LoggerFactory;
+use Composer\XdebugHandler\Tests\Helpers\LoggerFactory;
+use Composer\XdebugHandler\XdebugHandler;
 use PHPUnit\Framework\TestCase;
 
 /**

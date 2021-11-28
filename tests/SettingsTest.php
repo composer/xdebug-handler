@@ -9,11 +9,11 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler;
+namespace Composer\XdebugHandler\Tests;
 
-use Composer\XdebugHandler\Helpers\BaseTestCase;
-use Composer\XdebugHandler\Helpers\EnvHelper;
-use Composer\XdebugHandler\Mocks\CoreMock;
+use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Tests\Helpers\EnvHelper;
+use Composer\XdebugHandler\Tests\Mocks\CoreMock;
 
 /**
  * We use PHP_BINARY which only became available in PHP 5.4

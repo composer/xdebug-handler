@@ -32,7 +32,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Composer\\XdebugHandler\\": "tests"
+            "Composer\\XdebugHandler\\Tests\\": "tests"
         }
     },
     "scripts": {

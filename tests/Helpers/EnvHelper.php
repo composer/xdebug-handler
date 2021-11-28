@@ -9,7 +9,7 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler\Helpers;
+namespace Composer\XdebugHandler\Tests\Helpers;
 
 /**
  * This helper class provides a central data provider that uses IniHelper to

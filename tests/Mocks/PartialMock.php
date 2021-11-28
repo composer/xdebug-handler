@@ -9,7 +9,7 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler\Mocks;
+namespace Composer\XdebugHandler\Tests\Mocks;
 
 /**
  * PartialMock provides its own restart method that simply sets the restarted

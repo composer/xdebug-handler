@@ -9,11 +9,11 @@
  * the LICENSE file that was distributed with this source code.
  */
 
-namespace Composer\XdebugHandler;
+namespace Composer\XdebugHandler\Tests;
 
-use Composer\XdebugHandler\Helpers\BaseTestCase;
-use Composer\XdebugHandler\Helpers\LoggerFactory;
-use Composer\XdebugHandler\Mocks\CoreMock;
+use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
+use Composer\XdebugHandler\Tests\Helpers\LoggerFactory;
+use Composer\XdebugHandler\Tests\Mocks\CoreMock;
 use Psr\Log\LogLevel;
 
 /**
