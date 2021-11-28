@@ -66,7 +66,7 @@ class CoreMock extends XdebugHandler
 
             $parentProcess->childProcess = $xdebug;
             // Ensure $_SERVER has our environment changes
-            static::updateServerEnvironment();
+            self::updateServerEnvironment();
         }
 
         foreach ($settings as $method => $args) {

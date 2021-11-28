@@ -67,7 +67,6 @@ class XdebugHandler
             $this->loaded = phpversion('xdebug') ?: 'unknown';
 
             if (version_compare($this->loaded, '3.1', '>=')) {
-                /** @phpstan-ignore-next-line */
                 $modes = xdebug_info('mode');
                 $this->mode = empty($modes) ? 'off' : implode(',', $modes);
             } elseif (false !== ($mode = ini_get('xdebug.mode'))) {
