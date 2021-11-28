@@ -19,18 +19,28 @@ namespace Composer\XdebugHandler\Tests\Mocks;
  */
 class PartialMock extends CoreMock
 {
+    /** @var string[] */
     protected $command;
 
+    /**
+     * @return string[]
+     */
     public function getCommand()
     {
         return $this->command;
     }
 
+    /**
+     * @return string|null
+     */
     public function getTmpIni()
     {
         return $this->tmpIni;
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function restart($command)
     {
         $this->command = $command;

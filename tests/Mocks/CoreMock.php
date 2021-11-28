@@ -11,6 +11,7 @@
 
 namespace Composer\XdebugHandler\Tests\Mocks;
 
+use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
 use Composer\XdebugHandler\XdebugHandler;
 
 /**
@@ -31,13 +32,36 @@ class CoreMock extends XdebugHandler
     const ORIGINAL_INIS = 'MOCK_ORIGINAL_INIS';
     const TEST_VERSION = '2.5.0';
 
+    /** @var bool */
     public $restarted;
+
+    /** @var bool */
     public $parentLoaded;
 
+    /** @var null|static */
     protected $childProcess;
+
+    /**
+     * @var mixed
+     * @phpstan-var \ReflectionClass<\Composer\XdebugHandler\XdebugHandler>
+     */
     protected $refClass;
+
+    /**
+     * @var array
+     * @phpstan-var array<string, mixed[]>
+     */
     protected static $settings;
 
+    /**
+     * @param bool|array $loaded
+     * @phpstan-param bool|array{0: bool, 1: string} $loaded
+     * @param null|static $parentProcess
+     * @param array $settings
+     * @phpstan-param array<string, mixed[]> $settings
+     *
+     * @return static
+     */
     public static function createAndCheck($loaded, $parentProcess = null, $settings = array())
     {
         $mode = null;
@@ -70,7 +94,7 @@ class CoreMock extends XdebugHandler
         }
 
         foreach ($settings as $method => $args) {
-            call_user_func_array(array($xdebug, $method), $args);
+            BaseTestCase::safeCall($xdebug, $method, $args);
         }
 
         static::$settings = $settings;
@@ -79,6 +103,11 @@ class CoreMock extends XdebugHandler
         return $xdebug->childProcess ?: $xdebug;
     }
 
+    /**
+     *
+     * @param bool $loaded
+     * @param string|null $mode
+     */
     final public function __construct($loaded, $mode)
     {
         parent::__construct('mock');
@@ -122,6 +151,11 @@ class CoreMock extends XdebugHandler
         }
     }
 
+    /**
+     * @param string $name
+     *
+     * @return mixed
+     */
     public function getProperty($name)
     {
         $prop = $this->refClass->getProperty($name);
@@ -129,11 +163,19 @@ class CoreMock extends XdebugHandler
         return $prop->getValue($this);
     }
 
+    /**
+     * @param string[] $command
+     *
+     * @return void
+     */
     protected function restart($command)
     {
         static::createAndCheck(false, $this, static::$settings);
     }
 
+    /**
+     * @return void
+     */
     private static function updateServerEnvironment()
     {
         $names = array(

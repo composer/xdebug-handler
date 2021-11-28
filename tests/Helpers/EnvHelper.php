@@ -11,6 +11,8 @@
 
 namespace Composer\XdebugHandler\Tests\Helpers;
 
+use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
+
 /**
  * This helper class provides a central data provider that uses IniHelper to
  * mock environment settings.
@@ -21,15 +23,15 @@ class EnvHelper
      * Mock the environment
      *
      * @param string $iniFunc IniHelper method to use
-     * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param mixed $phprc Initial value for PHPRC
+     * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
+     * @param false|string $phprc Initial value for PHPRC
      *
      * @return IniHelper
      */
     public static function setInis($iniFunc, $scanDir, $phprc)
     {
         $ini = new IniHelper(array($scanDir, $phprc));
-        call_user_func(array($ini, $iniFunc));
+        BaseTestCase::safeCall($ini, $iniFunc);
 
         return $ini;
     }

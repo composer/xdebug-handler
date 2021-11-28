@@ -28,14 +28,14 @@ class IniFilesTest extends BaseTestCase
      * Tests that the ini files stored in the _ORIGINAL_INIS environment
      * variable are formatted and reported correctly.
      *
-     * @param callable $iniFunc IniHelper method to use
+     * @param string $iniFunc IniHelper method to use
      *
      * @dataProvider iniFilesProvider
      */
     public function testGetAllIniFiles($iniFunc)
     {
         $ini = new IniHelper();
-        call_user_func(array($ini, $iniFunc));
+        BaseTestCase::safeCall($ini, $iniFunc, null, $this);
 
         $loaded = true;
         $xdebug = CoreMock::createAndCheck($loaded);
@@ -59,14 +59,14 @@ class IniFilesTest extends BaseTestCase
      * Tests that the tmpIni file is created, contains disabled Xdebug
      * entries and is correctly end-of-line terminated.
      *
-     * @param callable $iniFunc IniHelper method to use
+     * @param string $iniFunc IniHelper method to use
      * @param int $matches The number of disabled entries to match
      * @dataProvider tmpIniProvider
      */
     public function testTmpIni($iniFunc, $matches)
     {
         $ini = new IniHelper();
-        call_user_func(array($ini, $iniFunc));
+        BaseTestCase::safeCall($ini, $iniFunc, null, $this);
 
         $loaded = true;
         $xdebug = PartialMock::createAndCheck($loaded);
@@ -107,12 +107,21 @@ class IniFilesTest extends BaseTestCase
         // Mock user -d setting
         $orig = ini_set($name, $value);
 
+        if (false === $orig) {
+            $this->fail('Unable to set ini value: '.$name);
+        }
+
         $loaded = true;
         $xdebug = PartialMock::createAndCheck($loaded);
         ini_set($name, $orig);
 
         $content = $this->getTmpIniContent($xdebug);
         $config = parse_ini_string($content);
+
+        if (false === $config) {
+            $this->fail('Unable to parse ini content');
+        }
+
         $this->assertArrayHasKey($name, $config);
         $this->assertEquals($value, $config[$name]);
     }
@@ -150,6 +159,8 @@ class IniFilesTest extends BaseTestCase
      * Tests that directives below HOST and PATH sections are removed
      *
      * @dataProvider iniSectionsProvider
+     *
+     * @param string $sectionName
      */
     public function testIniSections($sectionName)
     {
@@ -161,6 +172,11 @@ class IniFilesTest extends BaseTestCase
 
         $content = $this->getTmpIniContent($xdebug);
         $config = parse_ini_string($content);
+
+        if (false === $config) {
+            $this->fail('Unable to parse ini content');
+        }
+
         $this->assertArrayHasKey('cli.setting', $config);
         $this->assertArrayNotHasKey('cgi.only.setting', $config);
     }
@@ -175,6 +191,8 @@ class IniFilesTest extends BaseTestCase
 
     /**
      * Common method to get mocked tmp ini content
+     *
+     * @return string
      */
     private function getTmpIniContent(PartialMock $xdebug)
     {
@@ -188,6 +206,12 @@ class IniFilesTest extends BaseTestCase
             $this->fail($tmpIni.' does not exist');
         }
 
-        return file_get_contents($tmpIni);
+        $content = file_get_contents($tmpIni);
+
+        if (false === $content) {
+            $this->fail($tmpIni.' cannot be read');
+        }
+
+        return $content;
     }
 }

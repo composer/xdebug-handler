@@ -26,8 +26,8 @@ class SettingsTest extends BaseTestCase
      * Tests that the restart settings are correctly set.
      *
      * @param string $iniFunc IniHelper method to use
-     * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param mixed $phprc Initial value for PHPRC
+     * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
+     * @param false|string $phprc Initial value for PHPRC
      * @dataProvider environmentProvider
      */
     public function testGetRestartSettings($iniFunc, $scanDir, $phprc)
@@ -42,6 +42,10 @@ class SettingsTest extends BaseTestCase
         CoreMock::createAndCheck($loaded);
 
         $settings = CoreMock::getRestartSettings();
+
+        if (null === $settings) {
+            $this->fail('getRestartSettings returned null');
+        }
 
         $this->assertTrue(is_string($settings['tmpIni']));
         $this->assertSame($ini->hasScannedInis(), $settings['scannedInis']);

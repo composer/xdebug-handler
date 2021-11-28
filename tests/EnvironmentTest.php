@@ -26,9 +26,9 @@ class EnvironmentTest extends BaseTestCase
      * Tests that the _ALLOW_XDEBUG environment variable is correctly formatted
      * for use in the restarted process.
      *
-     * @param callable $iniFunc IniHelper method to use
-     * @param mixed $scanDir Initial value for PHP_INI_SCAN_DIR
-     * @param mixed $phprc Initial value for PHPRC
+     * @param string $iniFunc IniHelper method to use
+     * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
+     * @param false|string $phprc Initial value for PHPRC
      *
      * @dataProvider envAllowBeforeProvider
      */
@@ -63,7 +63,7 @@ class EnvironmentTest extends BaseTestCase
     /**
      * Tests that environment variables are correctly set for a restart.
      *
-     * @param callable $iniFunc IniHelper method to use
+     * @param string $iniFunc IniHelper method to use
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
      * @param bool $standard If this is a standard restart

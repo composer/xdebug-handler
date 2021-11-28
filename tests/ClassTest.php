@@ -11,14 +11,11 @@
 
 namespace Composer\XdebugHandler\Tests;
 
+use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
 use Composer\XdebugHandler\Tests\Helpers\LoggerFactory;
 use Composer\XdebugHandler\XdebugHandler;
-use PHPUnit\Framework\TestCase;
 
-/**
- * This class does not need to extend Helpers\BaseTestCase
- */
-class ClassTest extends TestCase
+class ClassTest extends BaseTestCase
 {
     public function testConstructorThrowsOnEmptyEnvPrefix()
     {
@@ -35,13 +32,16 @@ class ClassTest extends TestCase
 
     /**
      * @dataProvider setterProvider
+     *
+     * @param string $setter
+     * @param \Psr\Log\AbstractLogger|string|null $value
      */
     public function testSettersAreFluent($setter, $value)
     {
         $xdebug = new XdebugHandler('myapp');
 
         $params = null !== $value ? array($value) : array();
-        $result = call_user_func_array(array($xdebug, $setter), $params);
+        $result = BaseTestCase::safeCall($xdebug, $setter, $params, $this);
         $this->assertInstanceOf(get_class($xdebug), $result);
     }
 
@@ -60,6 +60,8 @@ class ClassTest extends TestCase
      *
      * @requires PHP 7.1
      * @dataProvider methodProvider
+     *
+     * @param string $method
      */
     public function testNoTypeHintingOnMethod($method)
     {
@@ -79,6 +81,12 @@ class ClassTest extends TestCase
         );
     }
 
+    /**
+     * @param string $exception
+     * @phpstan-param class-string<\Exception> $exception
+     *
+     * @return void
+     */
     private function setException($exception)
     {
         if (!method_exists($this, 'expectException')) {

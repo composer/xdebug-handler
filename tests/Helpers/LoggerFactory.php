@@ -16,11 +16,16 @@ namespace Composer\XdebugHandler\Tests\Helpers;
  */
 class LoggerFactory
 {
+    /**
+     * @return \Composer\XdebugHandler\Tests\Helpers\Logger
+     */
     public static function createLogger()
     {
-        $class = PHP_VERSION_ID < 70100 ? 'LegacyLogger' : 'Logger';
-        $className = __NAMESPACE__.'\\'.$class;
+        if (PHP_VERSION_ID < 70100) {
+            /** @phpstan-ignore-next-line */
+            return new LegacyLogger();
+        }
 
-        return new $className();
+        return new Logger();
     }
 }
