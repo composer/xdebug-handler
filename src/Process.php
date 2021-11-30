@@ -64,18 +64,23 @@ class Process
     /**
      * Escapes an array of arguments that make up a shell command
      *
-     * @param array $args Argument list, with the module name first
+     * @param string[] $args Argument list, with the module name first
      *
      * @return string The escaped command line
      */
     public static function escapeShellCommand(array $args)
     {
-        $cmd = self::escape(array_shift($args), true, true);
-        foreach ($args as $arg) {
-            $cmd .= ' '.self::escape($arg);
+        $command = '';
+
+        if ($module = array_shift($args)) {
+            $command = self::escape($module, true, true);
+
+            foreach ($args as $arg) {
+                $command .= ' '.self::escape($arg);
+            }
         }
 
-        return $cmd;
+        return $command;
     }
 
     /**

@@ -3,7 +3,7 @@ parameters:
     bootstrapFiles:
         - tests/bootstrap_phpstan.php
     paths:
-        #- src
+        - src
         - tests
     excludePaths:
         - tests/Helpers/LegacyLogger.php

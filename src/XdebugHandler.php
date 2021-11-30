@@ -15,6 +15,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
+ *
+ * @phpstan-import-type restartData from PhpConfig
  */
 class XdebugHandler
 {
@@ -27,20 +29,43 @@ class XdebugHandler
     /** @var string|null */
     protected $tmpIni;
 
+    /** @var bool|null */
     private static $inRestart;
+
+    /** @var string */
     private static $name;
+
+    /** @var string|null */
     private static $skipped;
+
+    /** @var bool */
     private static $xdebugActive;
 
+    /** @var bool */
     private $cli;
+
+    /** @var string|null */
     private $debug;
+
+    /** @var string */
     private $envAllowXdebug;
+
+    /** @var string */
     private $envOriginalInis;
+
+    /** @var string|null */
     private $loaded;
+
+    /** @var string|null */
     private $mode;
+
+    /** @var bool */
     private $persistent;
+
+    /** @var string|null */
     private $script;
-    /** @var Status|null */
+
+    /** @var Status */
     private $statusWriter;
 
     /**
@@ -129,6 +154,8 @@ class XdebugHandler
      * This behaviour can be disabled by setting the MYAPP_ALLOW_XDEBUG
      * environment variable to 1. This variable is used internally so that
      * the restarted process is created only once.
+     *
+     * @return void
      */
     public function check()
     {
@@ -179,7 +206,7 @@ class XdebugHandler
      * The equivalent of calling php_ini_loaded_file then php_ini_scanned_files.
      * The loaded ini location is the first entry and may be empty.
      *
-     * @return array
+     * @return string[]
      */
     public static function getAllIniFiles()
     {
@@ -207,6 +234,7 @@ class XdebugHandler
      * called with the settings from an existing restart.
      *
      * @return array|null
+     * @phpstan-return restartData|null
      */
     public static function getRestartSettings()
     {
@@ -270,7 +298,9 @@ class XdebugHandler
      *
      * Do not typehint for 1.x compatibility
      *
-     * @param array $command
+     * @param string[] $command
+     *
+     * @return void
      */
     protected function restart($command)
     {
@@ -280,7 +310,10 @@ class XdebugHandler
     /**
      * Executes the restarted command then deletes the tmp ini
      *
-     * @param array $command
+     * @param string[] $command
+     *
+     * @return void
+     * @phpstan-return never
      */
     private function doRestart(array $command)
     {
@@ -362,7 +395,7 @@ class XdebugHandler
     /**
      * Returns true if the tmp ini file was written
      *
-     * @param array $iniFiles All ini files used in the current process
+     * @param string[] $iniFiles All ini files used in the current process
      * @param string $tmpDir The system temporary directory
      * @param string $error Set by method if ini file cannot be read
      *
@@ -411,7 +444,7 @@ class XdebugHandler
     /**
      * Returns the command line arguments for the restart
      *
-     * @return array
+     * @return string[]
      */
     private function getCommand()
     {
@@ -432,7 +465,7 @@ class XdebugHandler
      * No need to update $_SERVER since this is set in the restarted process.
      *
      * @param bool $scannedInis Whether there were scanned ini files
-     * @param array $iniFiles All ini files used in the current process
+     * @param string[] $iniFiles All ini files used in the current process
      *
      * @return bool
      */
@@ -470,6 +503,8 @@ class XdebugHandler
      *
      * @param string $op Status handler constant
      * @param null|string $data Optional data
+     *
+     * @return void
      */
     private function notify($op, $data = null)
     {
@@ -479,8 +514,8 @@ class XdebugHandler
     /**
      * Returns default, changed and command-line ini settings
      *
-     * @param array $loadedConfig All current ini settings
-     * @param array $iniConfig Settings from user ini files
+     * @param mixed[] $loadedConfig All current ini settings
+     * @param mixed[] $iniConfig Settings from user ini files
      *
      * @return string
      */
@@ -536,6 +571,8 @@ class XdebugHandler
      * Adds restart settings to the environment
      *
      * @param string[] $envArgs
+     *
+     * @return void
      */
     private function setEnvRestartSettings($envArgs)
     {
@@ -555,6 +592,9 @@ class XdebugHandler
      * Syncs settings and the environment if called with existing settings
      *
      * @param array $settings
+     * @phpstan-param restartData $settings
+     *
+     * @return void
      */
     private function syncSettings(array $settings)
     {
@@ -622,6 +662,8 @@ class XdebugHandler
      * Enables async signals and control interrupts in the restarted process
      *
      * Available on Unix PHP 7.1+ with the pcntl extension and Windows PHP 7.4+.
+     *
+     * @return void
      */
     private function tryEnableSignals()
     {
