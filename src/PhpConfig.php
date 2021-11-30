@@ -13,13 +13,15 @@ namespace Composer\XdebugHandler;
 
 /**
  * @author John Stevenson <john-stevenson@blueyonder.co.uk>
+ *
+ * @phpstan-type restartData array{tmpIni: string, scannedInis: bool, scanDir: false|string, phprc: false|string, inis: string[], skipped: string}
  */
 class PhpConfig
 {
     /**
      * Use the original PHP configuration
      *
-     * @return array PHP cli options
+     * @return string[] Empty array of PHP cli options
      */
     public function useOriginal()
     {
@@ -30,7 +32,7 @@ class PhpConfig
     /**
      * Use standard restart settings
      *
-     * @return array PHP cli options
+     * @return string[] PHP cli options
      */
     public function useStandard()
     {
@@ -44,7 +46,7 @@ class PhpConfig
     /**
      * Use environment variables to persist settings
      *
-     * @return array PHP cli options
+     * @return string[] Empty array of PHP cli options
      */
     public function usePersistent()
     {
@@ -60,6 +62,7 @@ class PhpConfig
      * Returns restart data if available and resets the environment
      *
      * @return array|null
+     * @phpstan-return restartData|null
      */
     private function getDataAndReset()
     {
@@ -76,6 +79,8 @@ class PhpConfig
      *
      * @param string $name
      * @param string|false $value
+     *
+     * @return void
      */
     private function updateEnv($name, $value)
     {
