@@ -11,6 +11,7 @@
 
 namespace Composer\XdebugHandler\Tests;
 
+use Composer\Pcre\Preg;
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
 use Composer\XdebugHandler\Tests\Mocks\CoreMock;
 use Composer\XdebugHandler\Tests\Mocks\FailMock;
@@ -38,7 +39,7 @@ class RestartTest extends BaseTestCase
         $tmpIni = $xdebug->getTmpIni();
 
         $pattern = preg_quote(sprintf(' -n -c %s ', $tmpIni), '/');
-        $matched = (bool) preg_match('/'.$pattern.'/', $command);
+        $matched = Preg::isMatch('/'.$pattern.'/', $command);
         $this->assertTrue($matched);
     }
 

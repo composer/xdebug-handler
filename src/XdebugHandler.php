@@ -11,6 +11,7 @@
 
 namespace Composer\XdebugHandler;
 
+use Composer\Pcre\Preg;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -96,7 +97,7 @@ class XdebugHandler
                 $this->mode = empty($modes) ? 'off' : implode(',', $modes);
             } elseif (false !== ($mode = ini_get('xdebug.mode'))) {
                 $this->mode = getenv('XDEBUG_MODE') ?: ($mode  ?: 'off');
-                if (preg_match('/^,+$/', str_replace(' ', '', $this->mode))) {
+                if (Preg::isMatch('/^,+$/', str_replace(' ', '', $this->mode))) {
                     $this->mode = 'off';
                 }
             }
@@ -346,7 +347,7 @@ class XdebugHandler
         if ($this->debug === '2') {
             $this->notify(Status::INFO, 'Temp ini saved: '.$this->tmpIni);
         } else {
-            @unlink($this->tmpIni);
+            @unlink((string) $this->tmpIni);
         }
 
         exit($exitCode);
@@ -423,10 +424,10 @@ class XdebugHandler
                 return false;
             }
             // Check and remove directives after HOST and PATH sections
-            if (preg_match($sectionRegex, $data, $matches, PREG_OFFSET_CAPTURE)) {
+            if (Preg::isMatchWithOffsets($sectionRegex, $data, $matches, PREG_OFFSET_CAPTURE)) {
                 $data = substr($data, 0, $matches[0][1]);
             }
-            $content .= preg_replace($xdebugRegex, ';$1', $data).PHP_EOL;
+            $content .= Preg::replace($xdebugRegex, ';$1', $data).PHP_EOL;
         }
 
         // Merge loaded settings into our ini content, if it is valid
