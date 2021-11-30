@@ -11,6 +11,7 @@
 
 namespace Composer\XdebugHandler\Tests;
 
+use Composer\Pcre\Preg;
 use Composer\XdebugHandler\Process;
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
 use Composer\XdebugHandler\Tests\Helpers\IniHelper;
@@ -73,12 +74,12 @@ class IniFilesTest extends BaseTestCase
 
         $content = $this->getTmpIniContent($xdebug);
         $regex = '/^\s*;zend_extension\s*=.*xdebug.*$/mi';
-        $result = preg_match_all($regex, $content);
+        $result = Preg::matchAll($regex, $content);
         $this->assertSame($result, $matches);
 
         // Check content is end-of-line terminated
         $regex = sprintf('/%s/', preg_quote(PHP_EOL));
-        $this->assertTrue((bool) preg_match($regex, $content));
+        $this->assertTrue(Preg::isMatch($regex, $content));
     }
 
     public function tmpIniProvider()
