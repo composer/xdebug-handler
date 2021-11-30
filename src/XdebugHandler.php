@@ -105,7 +105,7 @@ class XdebugHandler
         self::$xdebugActive = $this->loaded && $this->mode !== 'off';
 
         if ($this->cli = PHP_SAPI === 'cli') {
-            $this->debug = getenv(self::DEBUG);
+            $this->debug = (string) getenv(self::DEBUG);
         }
 
         $this->statusWriter = new Status($this->envAllowXdebug, (bool) $this->debug);
@@ -403,7 +403,7 @@ class XdebugHandler
      */
     private function writeTmpIni(array $iniFiles, $tmpDir, &$error)
     {
-        if (!$this->tmpIni = @tempnam($tmpDir, '')) {
+        if (!$this->tmpIni = (string) @tempnam($tmpDir, '')) {
             return false;
         }
 
@@ -430,15 +430,20 @@ class XdebugHandler
         }
 
         // Merge loaded settings into our ini content, if it is valid
-        if ($config = parse_ini_string($content)) {
-            $loaded = ini_get_all(null, false);
-            $content .= $this->mergeLoadedConfig($loaded, $config);
+        $config = parse_ini_string($content);
+        $loaded = ini_get_all(null, false);
+
+        if (false === $config || false === $loaded) {
+            $error = 'Unable to parse ini data';
+            return false;
         }
+
+        $content .= $this->mergeLoadedConfig($loaded, $config);
 
         // Work-around for https://bugs.php.net/bug.php?id=75932
         $content .= 'opcache.enable_cli=0'.PHP_EOL;
 
-        return @file_put_contents($this->tmpIni, $content);
+        return (bool) @file_put_contents($this->tmpIni, $content);
     }
 
     /**
@@ -556,9 +561,8 @@ class XdebugHandler
             return true;
         }
 
-        // Use a backtrace to resolve Phar and chdir issues
-        $options = PHP_VERSION_ID >= 50306 ? DEBUG_BACKTRACE_IGNORE_ARGS : false;
-        $trace = debug_backtrace($options);
+        // Use a backtrace to resolve Phar and chdir issues.
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
         if (($main = end($trace)) && isset($main['file'])) {
             return file_exists($this->script = $main['file']);
@@ -646,10 +650,14 @@ class XdebugHandler
             }
         }
 
+        // Check UNC paths when using cmd.exe
+        if (defined('PHP_WINDOWS_VERSION_BUILD') && PHP_VERSION_ID < 70400) {
+            if (!$workingDir = getcwd()) {
+                $info = 'unable to determine working directory';
+                return false;
+            }
 
-        $workingDir = getcwd();
-        if (0 === strpos($workingDir, '\\\\')) {
-            if (defined('PHP_WINDOWS_VERSION_BUILD') && PHP_VERSION_ID < 70400) {
+            if (0 === strpos($workingDir, '\\\\')) {
                 $info = 'cmd.exe does not support UNC paths: '.$workingDir;
                 return false;
             }
