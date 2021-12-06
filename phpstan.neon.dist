@@ -1,3 +1,6 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+
 parameters:
     level: 9
     bootstrapFiles:
@@ -7,8 +10,12 @@ parameters:
         - tests
     excludePaths:
         - tests/Helpers/LegacyLogger.php
-
     ignoreErrors:
-        # Ignore some irrelevant errors in test files
-        - '~Method Composer\\XdebugHandler\\Tests\\[^:]+::test[^(]+\(\) has no return type specified.~'
-        - '~Method Composer\\XdebugHandler\\Tests\\[^:]+::\w+?Provider\(\) has no return type specified.~'
+        # strict-rules errors
+        - message: "#^Call to function is_string\\(\\) with string will always evaluate to true.#"
+          count: 1
+          path: src/XdebugHandler.php
+
+        - message: "#^Call to function method_exists\\(\\) with .* and 'expectException' will always evaluate to true.#"
+          count: 1
+          path: tests/ClassTest.php

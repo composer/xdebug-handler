@@ -47,7 +47,7 @@ jobs:
       - name: Remove PHPStan if unsupported
         # Do this first to diffentiate cache keys
         if: ${{ matrix.php-version < '7.1' }}
-        run: composer remove phpstan/phpstan --dev --no-update
+        run: composer remove phpstan/phpstan phpstan/phpstan-strict-rules --dev --no-update
 
       - name: Get composer cache directory
         id: composercache

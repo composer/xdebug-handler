@@ -23,6 +23,9 @@ use Psr\Log\LogLevel;
  */
 class StatusTest extends BaseTestCase
 {
+    /**
+     * @return void
+     */
     public function testSetLoggerProvidesOutput()
     {
         $loaded = true;
@@ -34,6 +37,6 @@ class StatusTest extends BaseTestCase
         $this->checkRestart($xdebug);
 
         $output = $logger->getOutput();
-        $this->assertNotEmpty($output);
+        self::assertNotEmpty($output);
     }
 }

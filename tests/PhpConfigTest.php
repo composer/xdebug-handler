@@ -20,6 +20,7 @@ use Composer\XdebugHandler\Tests\Mocks\CoreMock;
  * We use PHP_BINARY which only became available in PHP 5.4
  *
  * @requires PHP 5.4
+ * @phpstan-import-type envTestData from EnvHelper
  */
 class PhpConfigTest extends BaseTestCase
 {
@@ -29,6 +30,8 @@ class PhpConfigTest extends BaseTestCase
      * @param string $method PhpConfig method to call
      * @param string[] $expected
      * @dataProvider commandLineProvider
+     *
+     * @return void
      */
     public function testCommandLineOptions($method, $expected)
     {
@@ -37,7 +40,7 @@ class PhpConfigTest extends BaseTestCase
         $settings = CoreMock::getRestartSettings();
 
         if (null === $settings) {
-            $this->fail('getRestartSettings returned null');
+            self::fail('getRestartSettings returned null');
         }
 
         $config = new PhpConfig();
@@ -47,9 +50,13 @@ class PhpConfigTest extends BaseTestCase
             $expected[2] = $settings['tmpIni'];
         }
 
-        $this->assertSame($expected, $options);
+        self::assertSame($expected, $options);
     }
 
+    /**
+     * @return array
+     * @phpstan-return array<string, array{0: string, 1: string[]}>
+     */
     public function commandLineProvider()
     {
         // $method, $expected
@@ -67,11 +74,13 @@ class PhpConfigTest extends BaseTestCase
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
      * @dataProvider environmentProvider
+     *
+     * @return void
      */
     public function testEnvironment($iniFunc, $scanDir, $phprc)
     {
-        if ($message = EnvHelper::shouldSkipTest($scanDir)) {
-            $this->markTestSkipped($message);
+        if (($message = EnvHelper::shouldSkipTest($scanDir)) !== null) {
+            self::markTestSkipped($message);
         }
 
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
@@ -81,7 +90,7 @@ class PhpConfigTest extends BaseTestCase
         $settings = CoreMock::getRestartSettings();
 
         if (null === $settings) {
-            $this->fail('getRestartSettings returned null');
+            self::fail('getRestartSettings returned null');
         }
 
         $config = new PhpConfig();
@@ -102,6 +111,10 @@ class PhpConfigTest extends BaseTestCase
         }
     }
 
+    /**
+     * @return array
+     * @phpstan-return envTestData
+     */
     public function environmentProvider()
     {
         return EnvHelper::dataProvider();
@@ -122,12 +135,12 @@ class PhpConfigTest extends BaseTestCase
 
         foreach ($tests as $env => $value) {
             $message = $name.' '.strtolower($env);
-            $this->assertSame($value, getenv($env), 'getenv '.$message);
+            self::assertSame($value, getenv($env), 'getenv '.$message);
 
             if (false === $value) {
-                $this->assertSame($value, isset($_SERVER[$env]), '$_SERVER '.$message);
+                self::assertSame($value, isset($_SERVER[$env]), '$_SERVER '.$message);
             } else {
-                $this->assertSame($value, $_SERVER[$env], '$_SERVER '.$message);
+                self::assertSame($value, $_SERVER[$env], '$_SERVER '.$message);
             }
         }
     }
