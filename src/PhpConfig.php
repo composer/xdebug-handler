@@ -36,7 +36,8 @@ class PhpConfig
      */
     public function useStandard()
     {
-        if ($data = $this->getDataAndReset()) {
+        $data = $this->getDataAndReset();
+        if ($data !== null) {
             return array('-n', '-c', $data['tmpIni']);
         }
 
@@ -50,7 +51,8 @@ class PhpConfig
      */
     public function usePersistent()
     {
-        if ($data = $this->getDataAndReset()) {
+        $data = $this->getDataAndReset();
+        if ($data !== null) {
             $this->updateEnv('PHPRC', $data['tmpIni']);
             $this->updateEnv('PHP_INI_SCAN_DIR', '');
         }
@@ -66,7 +68,8 @@ class PhpConfig
      */
     private function getDataAndReset()
     {
-        if ($data = XdebugHandler::getRestartSettings()) {
+        $data = XdebugHandler::getRestartSettings();
+        if ($data !== null) {
             $this->updateEnv('PHPRC', $data['phprc']);
             $this->updateEnv('PHP_INI_SCAN_DIR', $data['scanDir']);
         }

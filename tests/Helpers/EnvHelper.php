@@ -16,6 +16,8 @@ use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
 /**
  * This helper class provides a central data provider that uses IniHelper to
  * mock environment settings.
+ *
+ * @phpstan-type envTestData array<string, array{0: string, 1: false|string, 2: false|string}>
  */
 class EnvHelper
 {
@@ -36,6 +38,10 @@ class EnvHelper
         return $ini;
     }
 
+    /**
+     * @return array
+     * @phpstan-return envTestData
+     */
     public static function dataProvider()
     {
         $ini = new IniHelper();

@@ -25,6 +25,9 @@ use Composer\XdebugHandler\Tests\Mocks\RequiredMock;
  */
 class RestartTest extends BaseTestCase
 {
+    /**
+     * @return void
+     */
     public function testRestartWhenLoaded()
     {
         $loaded = true;
@@ -40,27 +43,36 @@ class RestartTest extends BaseTestCase
 
         $pattern = preg_quote(sprintf(' -n -c %s ', $tmpIni), '/');
         $matched = Preg::isMatch('/'.$pattern.'/', $command);
-        $this->assertTrue($matched);
+        self::assertTrue($matched);
     }
 
+    /**
+     * @return void
+     */
     public function testRestartWhenModeIsNotOff()
     {
         $loaded = array(true, 'debug,trace');
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkRestart($xdebug);
-        $this->assertFalse($xdebug::isXdebugActive());
+        self::assertFalse($xdebug::isXdebugActive());
     }
 
+    /**
+     * @return void
+     */
     public function testNoRestartWhenNotLoaded()
     {
         $loaded = false;
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
-        $this->assertFalse($xdebug::isXdebugActive());
+        self::assertFalse($xdebug::isXdebugActive());
     }
 
+    /**
+     * @return void
+     */
     public function testNoRestartWhenLoadedAndAllowed()
     {
         $loaded = true;
@@ -68,18 +80,24 @@ class RestartTest extends BaseTestCase
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
-        $this->assertTrue($xdebug::isXdebugActive());
+        self::assertTrue($xdebug::isXdebugActive());
     }
 
+    /**
+     * @return void
+     */
     public function testNoRestartWhenModeIsOff()
     {
         $loaded = array(true, 'off');
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
-        $this->assertFalse($xdebug::isXdebugActive());
+        self::assertFalse($xdebug::isXdebugActive());
     }
 
+    /**
+     * @return void
+     */
     public function testFailedRestart()
     {
         $loaded = true;
@@ -89,9 +107,10 @@ class RestartTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider unreachableScriptProvider
-     *
+     * @dataProvider unreachableScriptProvider     *
      * @param string $script
+     *
+     * @return void
      */
     public function testNoRestartWithUnreachableScript($script)
     {
@@ -103,6 +122,9 @@ class RestartTest extends BaseTestCase
         $this->checkNoRestart($xdebug);
     }
 
+    /**
+     * @return array<string[]>
+     */
     public function unreachableScriptProvider()
     {
         return array(
@@ -113,9 +135,10 @@ class RestartTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider scriptSetterProvider
-     *
+     * @dataProvider scriptSetterProvider     *
      * @param string $script
+     *
+     * @return void
      */
     public function testRestartWithScriptSetter($script)
     {
@@ -130,17 +153,23 @@ class RestartTest extends BaseTestCase
         $xdebug = PartialMock::createAndCheck($loaded, null, $settings);
         $command = $xdebug->getCommand();
 
-        $this->assertContains($script, $command);
+        self::assertContains($script, $command);
     }
 
+    /**
+     * @return array<string[]>
+     */
     public function scriptSetterProvider()
     {
         return array(
-            array(realpath($_SERVER['argv'][0])),
+            array((string) realpath($_SERVER['argv'][0])),
             array('--'),
         );
     }
 
+    /**
+     * @return void
+     */
     public function testSetPersistent()
     {
         $loaded = true;
@@ -153,10 +182,13 @@ class RestartTest extends BaseTestCase
         $tmpIni = $xdebug->getTmpIni();
 
         foreach (array('-n', '-c', $tmpIni) as $param) {
-            $this->assertNotContains($param, $command);
+            self::assertNotContains($param, $command);
         }
     }
 
+    /**
+     * @return void
+     */
     public function testNoRestartWhenNotRequired()
     {
         $loaded = true;
@@ -166,6 +198,9 @@ class RestartTest extends BaseTestCase
         $this->checkNoRestart($xdebug);
     }
 
+    /**
+     * @return void
+     */
     public function testNoRestartWhenRequiredAndAllowed()
     {
         $loaded = true;

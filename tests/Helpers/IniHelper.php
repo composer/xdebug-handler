@@ -30,7 +30,7 @@ class IniHelper
 
     /**
      * @var null|array
-     * @phpstan-var null|array{0?: false|string, 1?: false|string}
+     * @phpstan-var null|array{0: false|string, 1: false|string}
      */
     protected $envOptions;
 
@@ -39,11 +39,11 @@ class IniHelper
      * comprising: [PHP_INI_SCAN_DIR, optional PHPRC]
      *
      * @param null|array $envOptions
-     * @phpstan-param null|array{0?: false|string, 1?: false|string} $envOptions
+     * @phpstan-param null|array{0: false|string, 1: false|string} $envOptions
      */
     public function __construct($envOptions = null)
     {
-        $this->envOptions = $envOptions ?: array();
+        $this->envOptions = $envOptions;
         $base = dirname(__DIR__).DIRECTORY_SEPARATOR.'Fixtures';
         $this->loadedIni = $base.DIRECTORY_SEPARATOR.'php.ini';
         $this->scanDir = $base.DIRECTORY_SEPARATOR.'scandir';
@@ -171,17 +171,10 @@ class IniHelper
         // Set ORIGINAL_INIS. Values must be path-separated
         $this->setEnv(CoreMock::ORIGINAL_INIS, implode(PATH_SEPARATOR, $this->files));
 
-        $options = $this->envOptions ?: array();
-
-        if ($options) {
-            $scanDir = array_shift($options);
-            $phprc = array_shift($options);
-
+        if ($this->envOptions !== null) {
+            list($scanDir, $phprc) = $this->envOptions;
             $this->setEnv('PHP_INI_SCAN_DIR', $scanDir);
-
-            if (null !== $phprc) {
-                $this->setEnv('PHPRC', $phprc);
-            }
+            $this->setEnv('PHPRC', $phprc);
         }
     }
 

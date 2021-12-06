@@ -19,6 +19,7 @@ use Composer\XdebugHandler\Tests\Mocks\CoreMock;
  * We use PHP_BINARY which only became available in PHP 5.4
  *
  * @requires PHP 5.4
+ * @phpstan-import-type envTestData from EnvHelper
  */
 class SettingsTest extends BaseTestCase
 {
@@ -29,11 +30,13 @@ class SettingsTest extends BaseTestCase
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
      * @dataProvider environmentProvider
+     *
+     * @return void
      */
     public function testGetRestartSettings($iniFunc, $scanDir, $phprc)
     {
-        if ($message = EnvHelper::shouldSkipTest($scanDir)) {
-            $this->markTestSkipped($message);
+        if (($message = EnvHelper::shouldSkipTest($scanDir)) !== null) {
+            self::markTestSkipped($message);
         }
 
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
@@ -44,17 +47,21 @@ class SettingsTest extends BaseTestCase
         $settings = CoreMock::getRestartSettings();
 
         if (null === $settings) {
-            $this->fail('getRestartSettings returned null');
+            self::fail('getRestartSettings returned null');
         }
 
-        $this->assertTrue(is_string($settings['tmpIni']));
-        $this->assertSame($ini->hasScannedInis(), $settings['scannedInis']);
-        $this->assertSame($scanDir, $settings['scanDir']);
-        $this->assertSame($phprc, $settings['phprc']);
-        $this->assertSame(CoreMock::getAllIniFiles(), $settings['inis']);
-        $this->assertSame(CoreMock::TEST_VERSION, $settings['skipped']);
+        self::assertTrue(strlen($settings['tmpIni']) !== 0);
+        self::assertSame($ini->hasScannedInis(), $settings['scannedInis']);
+        self::assertSame($scanDir, $settings['scanDir']);
+        self::assertSame($phprc, $settings['phprc']);
+        self::assertSame(CoreMock::getAllIniFiles(), $settings['inis']);
+        self::assertSame(CoreMock::TEST_VERSION, $settings['skipped']);
     }
 
+    /**
+     * @return array
+     * @phpstan-return envTestData
+     */
     public function environmentProvider()
     {
         return EnvHelper::dataProvider();
@@ -62,7 +69,9 @@ class SettingsTest extends BaseTestCase
 
     /**
      * Tests that a call with existing restart settings updates the current
-     * settings.
+     * settings
+     *
+     * @return void.
      */
     public function testSyncSettings()
     {
@@ -82,10 +91,10 @@ class SettingsTest extends BaseTestCase
         CoreMock::createAndCheck($loaded);
 
         // Env ORIGINAL_INIS must be set and be a string
-        $this->assertSame($originalInis, getenv(CoreMock::ORIGINAL_INIS));
-        $this->assertSame($originalInis, $_SERVER[CoreMock::ORIGINAL_INIS]);
+        self::assertSame($originalInis, getenv(CoreMock::ORIGINAL_INIS));
+        self::assertSame($originalInis, $_SERVER[CoreMock::ORIGINAL_INIS]);
 
         // Skipped version must be set
-        $this->assertSame(CoreMock::TEST_VERSION, CoreMock::getSkippedVersion());
+        self::assertSame(CoreMock::TEST_VERSION, CoreMock::getSkippedVersion());
     }
 }

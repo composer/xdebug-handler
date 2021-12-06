@@ -57,7 +57,7 @@ class Status
     {
         $start = getenv(self::ENV_RESTART);
         Process::setEnv(self::ENV_RESTART);
-        $this->time = $start ? round((microtime(true) - $start) * 1000) : 0;
+        $this->time = is_numeric($start) ? round((microtime(true) - $start) * 1000) : 0;
 
         $this->envAllowXdebug = $envAllowXdebug;
         $this->debug = $debug && defined('STDERR');
@@ -85,14 +85,14 @@ class Status
      */
     public function report($op, $data)
     {
-        if ($this->logger || $this->debug) {
+        if ($this->logger !== null || $this->debug) {
             $callable = array($this, 'report'.$op);
 
             if (!is_callable($callable)) {
                 throw new \InvalidArgumentException('Unknown op handler: '.$op);
             }
 
-            $params = $data ?: array();
+            $params = $data !== null ? $data : array();
             call_user_func_array($callable, array($params));
         }
     }
@@ -107,8 +107,8 @@ class Status
      */
     private function output($text, $level = null)
     {
-        if ($this->logger) {
-            $this->logger->log($level ?: LogLevel::DEBUG, $text);
+        if ($this->logger !== null) {
+            $this->logger->log($level !== null ? $level: LogLevel::DEBUG, $text);
         }
 
         if ($this->debug) {
@@ -125,8 +125,8 @@ class Status
     {
         list($version, $mode) = explode('|', $loaded);
 
-        if ($version) {
-            $this->loaded = '('.$version.')'.($mode ? ' mode='.$mode : '');
+        if ($version !== '') {
+            $this->loaded = '('.$version.')'.($mode !== '' ? ' mode='.$mode : '');
         }
         $this->modeOff = $mode === 'off';
         $this->output('Checking '.$this->envAllowXdebug);
@@ -159,9 +159,9 @@ class Status
     {
         $this->output($this->getLoadedMessage());
 
-        if ($this->loaded) {
+        if ($this->loaded !== null) {
             $text = sprintf('No restart (%s)', $this->getEnvAllow());
-            if (!getenv($this->envAllowXdebug)) {
+            if (!((bool) getenv($this->envAllowXdebug))) {
                 $text .= ' Allowed by '.($this->modeOff ? 'mode' : 'application');
             }
             $this->output($text);
@@ -184,7 +184,7 @@ class Status
     {
         $loaded = $this->getLoadedMessage();
         $text = sprintf('Restarted (%d ms). %s', $this->time, $loaded);
-        $level = $this->loaded ? LogLevel::WARNING : null;
+        $level = $this->loaded !== null ? LogLevel::WARNING : null;
         $this->output($text, $level);
     }
 
@@ -218,7 +218,7 @@ class Status
      */
     private function getLoadedMessage()
     {
-        $loaded = $this->loaded ? sprintf('loaded %s', $this->loaded) : 'not loaded';
+        $loaded = $this->loaded !== null ? sprintf('loaded %s', $this->loaded) : 'not loaded';
         return 'The Xdebug extension is '.$loaded;
     }
 }

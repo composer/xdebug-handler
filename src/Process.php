@@ -73,8 +73,9 @@ class Process
     public static function escapeShellCommand(array $args)
     {
         $command = '';
+        $module = array_shift($args);
 
-        if ($module = array_shift($args)) {
+        if ($module !== null) {
             $command = self::escape($module, true, true);
 
             foreach ($args as $arg) {

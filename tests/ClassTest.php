@@ -17,12 +17,18 @@ use Composer\XdebugHandler\XdebugHandler;
 
 class ClassTest extends BaseTestCase
 {
+    /**
+     * @return void
+     */
     public function testConstructorThrowsOnEmptyEnvPrefix()
     {
         $this->setException('RuntimeException');
         new XdebugHandler('');
     }
 
+    /**
+     * @return void
+     */
     public function testConstructorThrowsOnInvalidEnvPrefix()
     {
         $this->setException('RuntimeException');
@@ -31,10 +37,11 @@ class ClassTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider setterProvider
-     *
+     * @dataProvider setterProvider     *
      * @param string $setter
      * @param \Psr\Log\AbstractLogger|string|null $value
+     *
+     * @return void
      */
     public function testSettersAreFluent($setter, $value)
     {
@@ -42,9 +49,12 @@ class ClassTest extends BaseTestCase
 
         $params = null !== $value ? array($value) : array();
         $result = BaseTestCase::safeCall($xdebug, $setter, $params, $this);
-        $this->assertInstanceOf(get_class($xdebug), $result);
+        self::assertInstanceOf(get_class($xdebug), $result);
     }
 
+    /**
+     * @return array<string, mixed[]>
+     */
     public function setterProvider()
     {
         // $setter, $value
@@ -59,9 +69,10 @@ class ClassTest extends BaseTestCase
      * Test compatibility with 1.x for extending classes
      *
      * @requires PHP 7.1
-     * @dataProvider methodProvider
-     *
+     * @dataProvider methodProvider     *
      * @param string $method
+     *
+     * @return void
      */
     public function testNoTypeHintingOnMethod($method)
     {
@@ -69,10 +80,13 @@ class ClassTest extends BaseTestCase
         $refMethod = new \ReflectionMethod($xdebug, $method);
         $refParams = $refMethod->getParameters();
 
-        $this->assertCount(1, $refParams);
-        $this->assertNull($refParams[0]->getType());
+        self::assertCount(1, $refParams);
+        self::assertNull($refParams[0]->getType());
     }
 
+    /**
+     * @return array<string[]>
+     */
     public function methodProvider()
     {
         return array(
@@ -89,11 +103,11 @@ class ClassTest extends BaseTestCase
      */
     private function setException($exception)
     {
-        if (!method_exists($this, 'expectException')) {
+        if (method_exists($this, 'expectException')) {
+            $this->expectException($exception);
+        } else {
             /** @phpstan-ignore-next-line */
             $this->setExpectedException($exception);
-        } else {
-            $this->expectException($exception);
         }
     }
 }

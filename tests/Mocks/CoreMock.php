@@ -21,8 +21,8 @@ use Composer\XdebugHandler\XdebugHandler;
  * getProperty method that accesses private properties. Extend this class to
  * provide further capabilities.
  *
- * It does not matter whether Xdebug is loaded, because this value is overriden
- * in the constructor.
+ * It does not matter whether Xdebug is loaded, because test values overwrite
+ * runtime values in the constructor.
  *
  * The tmpIni file is deleted in the destructor.
  */
@@ -48,8 +48,7 @@ class CoreMock extends XdebugHandler
     protected $refClass;
 
     /**
-     * @var array
-     * @phpstan-var array<string, mixed[]>
+     * @var array<string, mixed[]>
      */
     protected static $settings;
 
@@ -70,26 +69,23 @@ class CoreMock extends XdebugHandler
             list($loaded, $mode) = $loaded;
         }
 
-        if ($mode && !$loaded) {
+        if ($mode !== null && !$loaded) {
             throw new \InvalidArgumentException('Unexpected mode when not loaded: '.$mode);
         }
 
         $xdebug = new static($loaded, $mode);
 
-        if ($parentProcess) {
-            // This is a restart, so set restarted on parent so it is copied
+        if ($parentProcess !== null) {
+            // This is a restart, so we need to set specific testing
+            // properties on the parent and child
             $parentProcess->restarted = true;
+            $xdebug->restarted = true;
+            $xdebug->parentLoaded = $parentProcess->parentLoaded;
 
-            // Copy all public properties
-            $refClass = new \ReflectionClass($parentProcess);
-            $props = $refClass->getProperties(\ReflectionProperty::IS_PUBLIC);
-
-            foreach ($props as $prop) {
-                $xdebug->{$prop->name} = $parentProcess->{$prop->name};
-            }
-
+            // Make the child available
             $parentProcess->childProcess = $xdebug;
-            // Ensure $_SERVER has our environment changes
+
+            // Ensure $_SERVER has the restart environment changes
             self::updateServerEnvironment();
         }
 
@@ -100,7 +96,7 @@ class CoreMock extends XdebugHandler
         static::$settings = $settings;
 
         $xdebug->check();
-        return $xdebug->childProcess ?: $xdebug;
+        return $xdebug->childProcess !==null ? $xdebug->childProcess : $xdebug;
     }
 
     /**
@@ -146,7 +142,7 @@ class CoreMock extends XdebugHandler
     public function __destruct()
     {
         // Delete the tmpIni if one has been created
-        if (!empty($this->tmpIni)) {
+        if (is_string($this->tmpIni)) {
             @unlink($this->tmpIni);
         }
     }

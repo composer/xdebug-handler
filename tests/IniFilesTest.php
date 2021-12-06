@@ -29,9 +29,10 @@ class IniFilesTest extends BaseTestCase
      * Tests that the ini files stored in the _ORIGINAL_INIS environment
      * variable are formatted and reported correctly.
      *
-     * @param string $iniFunc IniHelper method to use
-     *
+     * @param string $iniFunc IniHelper method to use     *
      * @dataProvider iniFilesProvider
+     *
+     * @return void
      */
     public function testGetAllIniFiles($iniFunc)
     {
@@ -42,9 +43,12 @@ class IniFilesTest extends BaseTestCase
         $xdebug = CoreMock::createAndCheck($loaded);
 
         $this->checkRestart($xdebug);
-        $this->assertEquals($ini->getIniFiles(), CoreMock::getAllIniFiles());
+        self::assertEquals($ini->getIniFiles(), CoreMock::getAllIniFiles());
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public function iniFilesProvider()
     {
         // $iniFunc
@@ -63,6 +67,8 @@ class IniFilesTest extends BaseTestCase
      * @param string $iniFunc IniHelper method to use
      * @param int $matches The number of disabled entries to match
      * @dataProvider tmpIniProvider
+     *
+     * @return void
      */
     public function testTmpIni($iniFunc, $matches)
     {
@@ -75,13 +81,17 @@ class IniFilesTest extends BaseTestCase
         $content = $this->getTmpIniContent($xdebug);
         $regex = '/^\s*;zend_extension\s*=.*xdebug.*$/mi';
         $result = Preg::matchAll($regex, $content);
-        $this->assertSame($result, $matches);
+        self::assertSame($result, $matches);
 
         // Check content is end-of-line terminated
         $regex = sprintf('/%s/', preg_quote(PHP_EOL));
-        $this->assertTrue(Preg::isMatch($regex, $content));
+        self::assertTrue(Preg::isMatch($regex, $content));
     }
 
+    /**
+     * @return array<string, mixed[]>
+     * @phpstan-return array<string, array{0: string, 1: int}>
+     */
     public function tmpIniProvider()
     {
         // $iniFunc, $matches (number of disabled entries)
@@ -99,6 +109,8 @@ class IniFilesTest extends BaseTestCase
      * @param string $name Ini setting name
      * @param string $value Ini setting value
      * @dataProvider mergeIniProvider
+     *
+     * @return void
      */
     public function testMergeInis($name, $value)
     {
@@ -109,7 +121,7 @@ class IniFilesTest extends BaseTestCase
         $orig = ini_set($name, $value);
 
         if (false === $orig) {
-            $this->fail('Unable to set ini value: '.$name);
+            self::fail('Unable to set ini value: '.$name);
         }
 
         $loaded = true;
@@ -120,13 +132,16 @@ class IniFilesTest extends BaseTestCase
         $config = parse_ini_string($content);
 
         if (false === $config) {
-            $this->fail('Unable to parse ini content');
+            self::fail('Unable to parse ini content');
         }
 
-        $this->assertArrayHasKey($name, $config);
-        $this->assertEquals($value, $config[$name]);
+        self::assertArrayHasKey($name, $config);
+        self::assertEquals($value, $config[$name]);
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public function mergeIniProvider()
     {
         // $name, $value
@@ -142,6 +157,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * Tests that an inaccessible ini file causes the restart to fail
      *
+     * @return void
      */
     public function testInaccessbleIni()
     {
@@ -159,9 +175,10 @@ class IniFilesTest extends BaseTestCase
     /**
      * Tests that directives below HOST and PATH sections are removed
      *
-     * @dataProvider iniSectionsProvider
-     *
+     * @dataProvider iniSectionsProvider      *
      * @param string $sectionName
+     *
+     * @return void
      */
     public function testIniSections($sectionName)
     {
@@ -175,13 +192,16 @@ class IniFilesTest extends BaseTestCase
         $config = parse_ini_string($content);
 
         if (false === $config) {
-            $this->fail('Unable to parse ini content');
+            self::fail('Unable to parse ini content');
         }
 
-        $this->assertArrayHasKey('cli.setting', $config);
-        $this->assertArrayNotHasKey('cgi.only.setting', $config);
+        self::assertArrayHasKey('cli.setting', $config);
+        self::assertArrayNotHasKey('cgi.only.setting', $config);
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public function iniSectionsProvider()
     {
         return array(
@@ -199,18 +219,18 @@ class IniFilesTest extends BaseTestCase
     {
         $tmpIni = $xdebug->getTmpIni();
 
-        if (!$tmpIni) {
-            $this->fail('The tmpIni file was not created');
+        if ($tmpIni === null) {
+            self::fail('The tmpIni file was not created');
         }
 
         if (!file_exists($tmpIni)) {
-            $this->fail($tmpIni.' does not exist');
+            self::fail($tmpIni.' does not exist');
         }
 
         $content = file_get_contents($tmpIni);
 
         if (false === $content) {
-            $this->fail($tmpIni.' cannot be read');
+            self::fail($tmpIni.' cannot be read');
         }
 
         return $content;

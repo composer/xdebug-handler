@@ -19,6 +19,7 @@ use Composer\XdebugHandler\Tests\Mocks\PartialMock;
  * We use PHP_BINARY which only became available in PHP 5.4
  *
  * @requires PHP 5.4
+ * @phpstan-import-type envTestData from EnvHelper
  */
 class EnvironmentTest extends BaseTestCase
 {
@@ -31,11 +32,13 @@ class EnvironmentTest extends BaseTestCase
      * @param false|string $phprc Initial value for PHPRC
      *
      * @dataProvider envAllowBeforeProvider
+     *
+     * @return void
      */
     public function testEnvAllowBeforeRestart($iniFunc, $scanDir, $phprc)
     {
-        if ($message = EnvHelper::shouldSkipTest($scanDir)) {
-            $this->markTestSkipped($message);
+        if (($message = EnvHelper::shouldSkipTest($scanDir)) !== null) {
+            self::markTestSkipped($message);
         }
 
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
@@ -52,9 +55,13 @@ class EnvironmentTest extends BaseTestCase
         );
 
         $expected = implode('|', $args);
-        $this->assertSame($expected, getenv(PartialMock::ALLOW_XDEBUG));
+        self::assertSame($expected, getenv(PartialMock::ALLOW_XDEBUG));
     }
 
+    /**
+     * @return array
+     * @phpstan-return envTestData
+     */
     public function envAllowBeforeProvider()
     {
         return EnvHelper::dataProvider();
@@ -69,11 +76,13 @@ class EnvironmentTest extends BaseTestCase
      * @param bool $standard If this is a standard restart
      *
      * @dataProvider environmentProvider
+     *
+     * @return void
      */
     public function testEnvironmentBeforeRestart($iniFunc, $scanDir, $phprc, $standard)
     {
-        if ($message = EnvHelper::shouldSkipTest($scanDir)) {
-            $this->markTestSkipped($message);
+        if (($message = EnvHelper::shouldSkipTest($scanDir)) !== null) {
+            self::markTestSkipped($message);
         }
 
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
@@ -89,10 +98,14 @@ class EnvironmentTest extends BaseTestCase
         }
 
         $strategy = $standard ? 'standard' : 'persistent';
-        $this->assertSame($scanDir, getenv('PHP_INI_SCAN_DIR'), $strategy.' scanDir');
-        $this->assertSame($phprc, getenv('PHPRC'), $strategy.' phprc');
+        self::assertSame($scanDir, getenv('PHP_INI_SCAN_DIR'), $strategy.' scanDir');
+        self::assertSame($phprc, getenv('PHPRC'), $strategy.' phprc');
     }
 
+    /**
+     * @return array
+     * @phpstan-return array<string, array{0: string, 1: false|string, 2: false|string, 3: bool}>
+     */
     public function environmentProvider()
     {
         // $iniFunc, $scanDir, $phprc, $standard (added below)
@@ -100,8 +113,10 @@ class EnvironmentTest extends BaseTestCase
         $result = array();
 
         foreach ($data as $test => $params) {
-            $result[$test.' standard'] = array_merge($params, array(true));
-            $result[$test.' persistent'] = array_merge($params, array(false));
+            $params[3] = true;
+            $result[$test.' standard'] = $params;
+            $params[3] = false;
+            $result[$test.' persistent'] = $params;
         }
 
         return $result;
