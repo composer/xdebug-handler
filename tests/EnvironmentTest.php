@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
@@ -29,10 +31,8 @@ class EnvironmentTest extends BaseTestCase
      * @param false|string $phprc Initial value for PHPRC
      *
      * @dataProvider envAllowBeforeProvider
-     *
-     * @return void
      */
-    public function testEnvAllowBeforeRestart($iniFunc, $scanDir, $phprc)
+    public function testEnvAllowBeforeRestart(string $iniFunc, $scanDir, $phprc): void
     {
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
@@ -52,10 +52,9 @@ class EnvironmentTest extends BaseTestCase
     }
 
     /**
-     * @return array
      * @phpstan-return envTestData
      */
-    public function envAllowBeforeProvider()
+    public function envAllowBeforeProvider(): array
     {
         return EnvHelper::dataProvider();
     }
@@ -67,12 +66,9 @@ class EnvironmentTest extends BaseTestCase
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
      * @param bool $standard If this is a standard restart
-     *
      * @dataProvider environmentProvider
-     *
-     * @return void
      */
-    public function testEnvironmentBeforeRestart($iniFunc, $scanDir, $phprc, $standard)
+    public function testEnvironmentBeforeRestart(string $iniFunc, $scanDir, $phprc, bool $standard): void
     {
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
@@ -92,10 +88,9 @@ class EnvironmentTest extends BaseTestCase
     }
 
     /**
-     * @return array
      * @phpstan-return array<string, array{0: string, 1: false|string, 2: false|string, 3: bool}>
      */
-    public function environmentProvider()
+    public function environmentProvider(): array
     {
         // $iniFunc, $scanDir, $phprc, $standard (added below)
         $data = EnvHelper::dataProvider();

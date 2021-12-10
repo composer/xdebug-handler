@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
@@ -26,11 +28,9 @@ class SettingsTest extends BaseTestCase
      * @param string $iniFunc IniHelper method to use
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
-     * @dataProvider environmentProvider
-     *
-     * @return void
+     * @dataProvider environmentProvider     *
      */
-    public function testGetRestartSettings($iniFunc, $scanDir, $phprc)
+    public function testGetRestartSettings(string $iniFunc, $scanDir, $phprc): void
     {
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
 
@@ -52,10 +52,9 @@ class SettingsTest extends BaseTestCase
     }
 
     /**
-     * @return array
      * @phpstan-return envTestData
      */
-    public function environmentProvider()
+    public function environmentProvider(): array
     {
         return EnvHelper::dataProvider();
     }
@@ -63,10 +62,8 @@ class SettingsTest extends BaseTestCase
     /**
      * Tests that a call with existing restart settings updates the current
      * settings
-     *
-     * @return void.
      */
-    public function testSyncSettings()
+    public function testSyncSettings(): void
     {
         $ini = EnvHelper::setInis('setAllInis', false, false);
 

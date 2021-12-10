@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests\Mocks;
 
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
@@ -56,12 +58,11 @@ class CoreMock extends XdebugHandler
      * @param bool|array $loaded
      * @phpstan-param bool|array{0: bool, 1: string} $loaded
      * @param null|static $parentProcess
-     * @param array $settings
      * @phpstan-param array<string, mixed[]> $settings
      *
      * @return static
      */
-    public static function createAndCheck($loaded, $parentProcess = null, $settings = [])
+    public static function createAndCheck($loaded, ?self $parentProcess = null, array $settings = array()): self
     {
         $mode = null;
 
@@ -99,12 +100,7 @@ class CoreMock extends XdebugHandler
         return $xdebug->childProcess !==null ? $xdebug->childProcess : $xdebug;
     }
 
-    /**
-     *
-     * @param bool $loaded
-     * @param string|null $mode
-     */
-    final public function __construct($loaded, $mode)
+    final public function __construct(bool $loaded, ?string $mode)
     {
         parent::__construct('mock');
 
@@ -148,11 +144,9 @@ class CoreMock extends XdebugHandler
     }
 
     /**
-     * @param string $name
-     *
      * @return mixed
      */
-    public function getProperty($name)
+    public function getProperty(string $name)
     {
         $prop = $this->refClass->getProperty($name);
         $prop->setAccessible(true);
@@ -161,18 +155,13 @@ class CoreMock extends XdebugHandler
 
     /**
      * @param string[] $command
-     *
-     * @return void
      */
-    protected function restart($command)
+    protected function restart(array $command): void
     {
         static::createAndCheck(false, $this, static::$settings);
     }
 
-    /**
-     * @return void
-     */
-    private static function updateServerEnvironment()
+    private static function updateServerEnvironment(): void
     {
         $names = [
             CoreMock::ALLOW_XDEBUG,

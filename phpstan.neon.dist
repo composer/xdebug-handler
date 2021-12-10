@@ -8,8 +8,3 @@ parameters:
     paths:
         - src
         - tests
-    ignoreErrors:
-        # strict-rules errors
-        - message: "#^Call to function is_string\\(\\) with string will always evaluate to true.#"
-          count: 1
-          path: src/XdebugHandler.php

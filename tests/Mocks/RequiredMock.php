@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests\Mocks;
 
 /**
@@ -21,22 +23,16 @@ class RequiredMock extends CoreMock
     protected static $required;
 
     /**
-     * @param bool $loaded
-     * @param bool $required
-     *
-     * @return \Composer\XdebugHandler\Tests\Mocks\CoreMock
+     * @return static
      */
-    public static function runCoreMock($loaded, $required)
+    public static function runCoreMock(bool $loaded, bool $required): self
     {
         static::$required = $required;
         return parent::createAndCheck($loaded, null);
     }
 
-    /**
-     * @param bool $isLoaded
-     */
-    protected function requiresRestart($isLoaded)
+    protected function requiresRestart(bool $default): bool
     {
-        return $isLoaded && static::$required;
+        return $default && static::$required;
     }
 }

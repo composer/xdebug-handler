@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\Pcre\Preg;
@@ -24,12 +26,9 @@ class IniFilesTest extends BaseTestCase
      * Tests that the ini files stored in the _ORIGINAL_INIS environment
      * variable are formatted and reported correctly.
      *
-     * @param string $iniFunc IniHelper method to use     *
      * @dataProvider iniFilesProvider
-     *
-     * @return void
      */
-    public function testGetAllIniFiles($iniFunc)
+    public function testGetAllIniFiles(string $iniFunc): void
     {
         $ini = new IniHelper();
         BaseTestCase::safeCall($ini, $iniFunc, null, $this);
@@ -44,7 +43,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * @return array<string, string[]>
      */
-    public function iniFilesProvider()
+    public function iniFilesProvider(): array
     {
         // $iniFunc
         return [
@@ -59,13 +58,9 @@ class IniFilesTest extends BaseTestCase
      * Tests that the tmpIni file is created, contains disabled Xdebug
      * entries and is correctly end-of-line terminated.
      *
-     * @param string $iniFunc IniHelper method to use
-     * @param int $matches The number of disabled entries to match
      * @dataProvider tmpIniProvider
-     *
-     * @return void
      */
-    public function testTmpIni($iniFunc, $matches)
+    public function testTmpIni(string $iniFunc, int $matchCount): void
     {
         $ini = new IniHelper();
         BaseTestCase::safeCall($ini, $iniFunc, null, $this);
@@ -76,7 +71,7 @@ class IniFilesTest extends BaseTestCase
         $content = $this->getTmpIniContent($xdebug);
         $regex = '/^\s*;zend_extension\s*=.*xdebug.*$/mi';
         $result = Preg::matchAll($regex, $content);
-        self::assertSame($result, $matches);
+        self::assertSame($result, $matchCount);
 
         // Check content is end-of-line terminated
         $regex = sprintf('/%s/', preg_quote(PHP_EOL));
@@ -84,12 +79,11 @@ class IniFilesTest extends BaseTestCase
     }
 
     /**
-     * @return array<string, mixed[]>
      * @phpstan-return array<string, array{0: string, 1: int}>
      */
-    public function tmpIniProvider()
+    public function tmpIniProvider(): array
     {
-        // $iniFunc, $matches (number of disabled entries)
+        // $iniFunc, $matchCount (number of disabled entries)
         return [
             'no-inis' => ['setNoInis', 0],
             'loaded-ini' => ['setLoadedIni', 1],
@@ -101,13 +95,9 @@ class IniFilesTest extends BaseTestCase
     /**
      * Tests that changed values are added correctly in the tmp ini
      *
-     * @param string $name Ini setting name
-     * @param string $value Ini setting value
      * @dataProvider mergeIniProvider
-     *
-     * @return void
      */
-    public function testMergeInis($name, $value)
+    public function testMergeInis(string $name, string $value): void
     {
         $ini = new IniHelper();
         $ini->setAllInis();
@@ -137,7 +127,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * @return array<string, string[]>
      */
-    public function mergeIniProvider()
+    public function mergeIniProvider(): array
     {
         // $name, $value
         return [
@@ -151,10 +141,8 @@ class IniFilesTest extends BaseTestCase
 
     /**
      * Tests that an inaccessible ini file causes the restart to fail
-     *
-     * @return void
      */
-    public function testInaccessbleIni()
+    public function testInaccessbleIni(): void
     {
         $ini = new IniHelper();
         $ini->setInaccessibleIni();
@@ -171,11 +159,8 @@ class IniFilesTest extends BaseTestCase
      * Tests that directives below HOST and PATH sections are removed
      *
      * @dataProvider iniSectionsProvider      *
-     * @param string $sectionName
-     *
-     * @return void
      */
-    public function testIniSections($sectionName)
+    public function testIniSections(string $sectionName): void
     {
         $ini = new IniHelper();
         $ini->setSectionInis($sectionName);
@@ -197,7 +182,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * @return array<string, string[]>
      */
-    public function iniSectionsProvider()
+    public function iniSectionsProvider(): array
     {
         return [
             'host-section' => ['host'],
@@ -207,10 +192,8 @@ class IniFilesTest extends BaseTestCase
 
     /**
      * Common method to get mocked tmp ini content
-     *
-     * @return string
      */
-    private function getTmpIniContent(PartialMock $xdebug)
+    private function getTmpIniContent(PartialMock $xdebug): string
     {
         $tmpIni = $xdebug->getTmpIni();
 

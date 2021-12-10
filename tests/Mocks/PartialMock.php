@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests\Mocks;
 
 /**
@@ -25,15 +27,12 @@ class PartialMock extends CoreMock
     /**
      * @return string[]
      */
-    public function getCommand()
+    public function getCommand(): array
     {
         return $this->command;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getTmpIni()
+    public function getTmpIni(): ?string
     {
         return $this->tmpIni;
     }
@@ -41,7 +40,7 @@ class PartialMock extends CoreMock
     /**
      * @inheritdoc
      */
-    protected function restart($command)
+    protected function restart(array $command): void
     {
         $this->command = $command;
         $this->restarted = true;
