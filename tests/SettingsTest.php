@@ -43,7 +43,7 @@ class SettingsTest extends BaseTestCase
             self::fail('getRestartSettings returned null');
         }
 
-        self::assertTrue(strlen($settings['tmpIni']) !== 0);
+        self::assertNotEmpty($settings['tmpIni']);
         self::assertSame($ini->hasScannedInis(), $settings['scannedInis']);
         self::assertSame($scanDir, $settings['scanDir']);
         self::assertSame($phprc, $settings['phprc']);
