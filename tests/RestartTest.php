@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\Pcre\Preg;
@@ -20,10 +22,7 @@ use Composer\XdebugHandler\Tests\Mocks\RequiredMock;
 
 class RestartTest extends BaseTestCase
 {
-    /**
-     * @return void
-     */
-    public function testRestartWhenLoaded()
+    public function testRestartWhenLoaded(): void
     {
         $loaded = true;
         $this->setArgv();
@@ -41,10 +40,7 @@ class RestartTest extends BaseTestCase
         self::assertTrue($matched);
     }
 
-    /**
-     * @return void
-     */
-    public function testRestartWhenModeIsNotOff()
+    public function testRestartWhenModeIsNotOff(): void
     {
         $loaded = [true, 'debug,trace'];
 
@@ -53,10 +49,7 @@ class RestartTest extends BaseTestCase
         self::assertFalse($xdebug::isXdebugActive());
     }
 
-    /**
-     * @return void
-     */
-    public function testNoRestartWhenNotLoaded()
+    public function testNoRestartWhenNotLoaded(): void
     {
         $loaded = false;
 
@@ -65,10 +58,7 @@ class RestartTest extends BaseTestCase
         self::assertFalse($xdebug::isXdebugActive());
     }
 
-    /**
-     * @return void
-     */
-    public function testNoRestartWhenLoadedAndAllowed()
+    public function testNoRestartWhenLoadedAndAllowed(): void
     {
         $loaded = true;
         putenv(CoreMock::ALLOW_XDEBUG.'=1');
@@ -78,10 +68,7 @@ class RestartTest extends BaseTestCase
         self::assertTrue($xdebug::isXdebugActive());
     }
 
-    /**
-     * @return void
-     */
-    public function testNoRestartWhenModeIsOff()
+    public function testNoRestartWhenModeIsOff(): void
     {
         $loaded = [true, 'off'];
 
@@ -90,10 +77,7 @@ class RestartTest extends BaseTestCase
         self::assertFalse($xdebug::isXdebugActive());
     }
 
-    /**
-     * @return void
-     */
-    public function testFailedRestart()
+    public function testFailedRestart(): void
     {
         $loaded = true;
 
@@ -102,12 +86,9 @@ class RestartTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider unreachableScriptProvider     *
-     * @param string $script
-     *
-     * @return void
+     * @dataProvider unreachableScriptProvider
      */
-    public function testNoRestartWithUnreachableScript($script)
+    public function testNoRestartWithUnreachableScript(string $script): void
     {
         $loaded = true;
         // We can only check this by setting a script
@@ -120,7 +101,7 @@ class RestartTest extends BaseTestCase
     /**
      * @return array<string[]>
      */
-    public function unreachableScriptProvider()
+    public function unreachableScriptProvider(): array
     {
         return [
             ['nonexistent.php'],
@@ -130,12 +111,9 @@ class RestartTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider scriptSetterProvider     *
-     * @param string $script
-     *
-     * @return void
+     * @dataProvider scriptSetterProvider
      */
-    public function testRestartWithScriptSetter($script)
+    public function testRestartWithScriptSetter(string $script): void
     {
         $loaded = true;
         $this->setArgv();
@@ -154,7 +132,7 @@ class RestartTest extends BaseTestCase
     /**
      * @return array<string[]>
      */
-    public function scriptSetterProvider()
+    public function scriptSetterProvider(): array
     {
         return [
             [(string) realpath($_SERVER['argv'][0])],
@@ -162,10 +140,7 @@ class RestartTest extends BaseTestCase
         ];
     }
 
-    /**
-     * @return void
-     */
-    public function testSetPersistent()
+    public function testSetPersistent(): void
     {
         $loaded = true;
         $this->setArgv();
@@ -181,10 +156,7 @@ class RestartTest extends BaseTestCase
         }
     }
 
-    /**
-     * @return void
-     */
-    public function testNoRestartWhenNotRequired()
+    public function testNoRestartWhenNotRequired(): void
     {
         $loaded = true;
         $required = false;
@@ -193,10 +165,7 @@ class RestartTest extends BaseTestCase
         $this->checkNoRestart($xdebug);
     }
 
-    /**
-     * @return void
-     */
-    public function testNoRestartWhenRequiredAndAllowed()
+    public function testNoRestartWhenRequiredAndAllowed(): void
     {
         $loaded = true;
         putenv(CoreMock::ALLOW_XDEBUG.'=1');
@@ -208,10 +177,8 @@ class RestartTest extends BaseTestCase
 
     /**
      * Sets $_SERVER['argv'] for testing commands
-     *
-     * @return void
      */
-    private function setArgv()
+    private function setArgv(): void
     {
         $_SERVER['argv'] = [__FILE__, 'command', '--param1, --param2'];
     }

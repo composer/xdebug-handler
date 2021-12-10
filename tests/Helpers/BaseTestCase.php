@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests\Helpers;
 
 use Composer\XdebugHandler\Tests\Mocks\CoreMock;
@@ -43,12 +45,8 @@ abstract class BaseTestCase extends TestCase
 
     /**
      * Saves the current environment and argv state
-     *
-     * @beforeClass
-     *
-     * @return void
      */
-    public static function beforeClass()
+    public static function setUpBeforeClass(): void
     {
         foreach (self::$names as $name) {
             self::$env[$name] = getenv($name);
@@ -60,12 +58,8 @@ abstract class BaseTestCase extends TestCase
 
     /**
      * Restores the original environment and argv state
-     *
-     * @afterClass
-     *
-     * @return void
      */
-    public static function afterClass()
+    public static function tearDownAfterClass(): void
     {
         foreach (self::$env as $name => $value) {
             if (false !== $value) {
@@ -88,7 +82,7 @@ abstract class BaseTestCase extends TestCase
      *
      * @return mixed
      */
-    public static function safeCall($instance, $method, array $params = null, $self = null)
+    public static function safeCall($instance, string $method, ?array $params = null, ?self $self = null)
     {
         $callable = [$instance, $method];
         $params = $params !== null ? $params : [];
@@ -106,12 +100,8 @@ abstract class BaseTestCase extends TestCase
 
     /**
      * Unsets environment variables for each test and restores argv
-     *
-     * @before
-     *
-     * @return void
      */
-    public function setUpEnvironment()
+    protected function setUp(): void
     {
         foreach (self::$names as $name) {
             putenv($name);
@@ -128,7 +118,7 @@ abstract class BaseTestCase extends TestCase
      *
      * @return void
      */
-    protected function checkRestart($xdebug)
+    protected function checkRestart(CoreMock $xdebug)
     {
         // We must have been restarted
         self::assertTrue($xdebug->restarted);
@@ -169,7 +159,7 @@ abstract class BaseTestCase extends TestCase
      *
      * @return void
      */
-    protected function checkNoRestart($xdebug)
+    protected function checkNoRestart(CoreMock $xdebug)
     {
         // We must not have been restarted
         self::assertFalse($xdebug->restarted);

@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests\Mocks;
 
 /**
@@ -20,7 +22,7 @@ class FailMock extends CoreMock
     /**
      * @inheritdoc
      */
-    protected function restart($command)
+    protected function restart(array $command): void
     {
         static::createAndCheck(true, $this, static::$settings);
     }

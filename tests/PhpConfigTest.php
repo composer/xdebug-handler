@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\PhpConfig;
@@ -27,10 +29,8 @@ class PhpConfigTest extends BaseTestCase
      * @param string $method PhpConfig method to call
      * @param string[] $expected
      * @dataProvider commandLineProvider
-     *
-     * @return void
      */
-    public function testCommandLineOptions($method, $expected)
+    public function testCommandLineOptions(string $method, array $expected): void
     {
         $loaded = true;
         CoreMock::createAndCheck($loaded);
@@ -51,10 +51,9 @@ class PhpConfigTest extends BaseTestCase
     }
 
     /**
-     * @return array
      * @phpstan-return array<string, array{0: string, 1: string[]}>
      */
-    public function commandLineProvider()
+    public function commandLineProvider(): array
     {
         // $method, $expected
         return [
@@ -71,10 +70,8 @@ class PhpConfigTest extends BaseTestCase
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
      * @dataProvider environmentProvider
-     *
-     * @return void
      */
-    public function testEnvironment($iniFunc, $scanDir, $phprc)
+    public function testEnvironment(string $iniFunc, $scanDir, $phprc): void
     {
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
 
@@ -105,10 +102,9 @@ class PhpConfigTest extends BaseTestCase
     }
 
     /**
-     * @return array
      * @phpstan-return envTestData
      */
-    public function environmentProvider()
+    public function environmentProvider(): array
     {
         return EnvHelper::dataProvider();
     }
@@ -119,10 +115,8 @@ class PhpConfigTest extends BaseTestCase
      * @param mixed $scanDir
      * @param mixed $phprc
      * @param string $name
-     *
-     * @return void
      */
-    private function checkEnvironment($scanDir, $phprc, $name)
+    private function checkEnvironment($scanDir, $phprc, $name): void
     {
         $tests = ['PHP_INI_SCAN_DIR' => $scanDir, 'PHPRC' => $phprc];
 

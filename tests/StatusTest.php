@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
@@ -18,10 +20,7 @@ use Psr\Log\LogLevel;
 
 class StatusTest extends BaseTestCase
 {
-    /**
-     * @return void
-     */
-    public function testSetLoggerProvidesOutput()
+    public function testSetLoggerProvidesOutput(): void
     {
         $loaded = true;
 

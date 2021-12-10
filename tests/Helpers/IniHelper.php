@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests\Helpers;
 
 use Composer\XdebugHandler\Tests\Mocks\CoreMock;
@@ -38,10 +40,9 @@ class IniHelper
      * envOptions is an array of additional environment values to set,
      * comprising: [PHP_INI_SCAN_DIR, optional PHPRC]
      *
-     * @param null|array $envOptions
      * @phpstan-param null|array{0: false|string, 1: false|string} $envOptions
      */
-    public function __construct($envOptions = null)
+    public function __construct(?array $envOptions = null)
     {
         $this->envOptions = $envOptions;
         $base = dirname(__DIR__).DIRECTORY_SEPARATOR.'Fixtures';
@@ -49,20 +50,14 @@ class IniHelper
         $this->scanDir = $base.DIRECTORY_SEPARATOR.'scandir';
     }
 
-    /**
-     * @return void
-     */
-    public function setNoInis()
+    public function setNoInis(): void
     {
         // Must have at least one entry
         $this->files = [''];
         $this->setEnvironment();
     }
 
-    /**
-     * @return void
-     */
-    public function setLoadedIni()
+    public function setLoadedIni(): void
     {
         $this->files = [
             $this->loadedIni,
@@ -71,10 +66,7 @@ class IniHelper
         $this->setEnvironment();
     }
 
-    /**
-     * @return void
-     */
-    public function setScannedInis()
+    public function setScannedInis(): void
     {
         $this->files = [
             '',
@@ -86,10 +78,7 @@ class IniHelper
         $this->setEnvironment();
     }
 
-    /**
-     * @return void
-     */
-    public function setAllInis()
+    public function setAllInis(): void
     {
         $this->files = [
             $this->loadedIni,
@@ -101,10 +90,7 @@ class IniHelper
         $this->setEnvironment();
     }
 
-    /**
-     * @return void
-     */
-    public function setInaccessibleIni()
+    public function setInaccessibleIni(): void
     {
         $this->files = [
             '',
@@ -116,11 +102,7 @@ class IniHelper
         $this->setEnvironment();
     }
 
-    /**
-     * @param string $sectionName
-     * @return void
-     */
-    public function setSectionInis($sectionName)
+    public function setSectionInis(string $sectionName): void
     {
         $this->files = [
             $this->loadedIni,
@@ -134,39 +116,27 @@ class IniHelper
     /**
      * @return string[]
      */
-    public function getIniFiles()
+    public function getIniFiles(): array
     {
         return $this->files;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasScannedInis()
+    public function hasScannedInis(): bool
     {
         return count($this->files) > 1;
     }
 
-    /**
-     * @return string
-     */
-    public function getLoadedIni()
+    public function getLoadedIni(): string
     {
         return $this->loadedIni;
     }
 
-    /**
-     * @return string
-     */
-    public function getScanDir()
+    public function getScanDir(): string
     {
         return $this->scanDir;
     }
 
-    /**
-     * @return void
-     */
-    private function setEnvironment()
+    private function setEnvironment(): void
     {
         // Set ORIGINAL_INIS. Values must be path-separated
         $this->setEnv(CoreMock::ORIGINAL_INIS, implode(PATH_SEPARATOR, $this->files));
@@ -181,10 +151,8 @@ class IniHelper
     /**
      * @param string $name
      * @param string|false $value
-     *
-     * @return void
      */
-    private function setEnv($name, $value)
+    private function setEnv(string $name, $value): void
     {
         if (false !== $value) {
             putenv($name.'='.$value);

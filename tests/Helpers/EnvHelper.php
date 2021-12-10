@@ -9,6 +9,8 @@
  * the LICENSE file that was distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Composer\XdebugHandler\Tests\Helpers;
 
 use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
@@ -27,10 +29,8 @@ class EnvHelper
      * @param string $iniFunc IniHelper method to use
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
-     *
-     * @return IniHelper
      */
-    public static function setInis($iniFunc, $scanDir, $phprc)
+    public static function setInis(string $iniFunc, $scanDir, $phprc): IniHelper
     {
         $ini = new IniHelper([$scanDir, $phprc]);
         BaseTestCase::safeCall($ini, $iniFunc);
@@ -39,10 +39,9 @@ class EnvHelper
     }
 
     /**
-     * @return array
      * @phpstan-return envTestData
      */
-    public static function dataProvider()
+    public static function dataProvider(): array
     {
         $ini = new IniHelper();
         $loaded = $ini->getLoadedIni();
