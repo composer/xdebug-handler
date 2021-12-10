@@ -134,12 +134,12 @@ abstract class BaseTestCase extends TestCase
         self::assertTrue($xdebug->restarted);
 
         // Env ALLOW_XDEBUG must be unset
-        self::assertSame(false, getenv(CoreMock::ALLOW_XDEBUG));
-        self::assertSame(false, isset($_SERVER[CoreMock::ALLOW_XDEBUG]));
+        self::assertFalse(getenv(CoreMock::ALLOW_XDEBUG));
+        self::assertArrayNotHasKey(CoreMock::ALLOW_XDEBUG, $_SERVER);
 
         // Env ORIGINAL_INIS must be set and be a string
-        self::assertTrue(is_string(getenv(CoreMock::ORIGINAL_INIS)));
-        self::assertSame(true, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
+        self::assertIsString(getenv(CoreMock::ORIGINAL_INIS));
+        self::assertArrayHasKey(CoreMock::ORIGINAL_INIS, $_SERVER);
 
         // Skipped version must only be reported if it was unloaded in the restart
         if (!$xdebug->parentLoaded) {
@@ -155,8 +155,8 @@ abstract class BaseTestCase extends TestCase
         self::assertSame($version, $xdebug::getSkippedVersion());
 
         // Env RESTART_SETTINGS must be set and be a string
-        self::assertTrue(is_string(getenv(CoreMock::RESTART_SETTINGS)));
-        self::assertSame(true, isset($_SERVER[CoreMock::RESTART_SETTINGS]));
+        self::assertIsString(getenv(CoreMock::RESTART_SETTINGS));
+        self::assertArrayHasKey(CoreMock::RESTART_SETTINGS, $_SERVER);
 
         // Restart settings must be an array
         self::assertTrue(is_array($xdebug::getRestartSettings()));
@@ -175,15 +175,15 @@ abstract class BaseTestCase extends TestCase
         self::assertFalse($xdebug->restarted);
 
         // Env ORIGINAL_INIS must not be set
-        self::assertSame(false, getenv(CoreMock::ORIGINAL_INIS));
-        self::assertSame(false, isset($_SERVER[CoreMock::ORIGINAL_INIS]));
+        self::assertFalse(getenv(CoreMock::ORIGINAL_INIS));
+        self::assertArrayNotHasKey(CoreMock::ORIGINAL_INIS, $_SERVER);
 
         // Skipped version must be an empty string
         self::assertSame('', $xdebug::getSkippedVersion());
 
         // Env RESTART_SETTINGS must not be set
-        self::assertSame(false, getenv(CoreMock::RESTART_SETTINGS));
-        self::assertSame(false, isset($_SERVER[CoreMock::RESTART_SETTINGS]));
+        self::assertFalse(getenv(CoreMock::RESTART_SETTINGS));
+        self::assertArrayNotHasKey(CoreMock::RESTART_SETTINGS, $_SERVER);
 
         // Restart settings must be null
         self::assertNull($xdebug::getRestartSettings());

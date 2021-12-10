@@ -131,7 +131,7 @@ class PhpConfigTest extends BaseTestCase
             self::assertSame($value, getenv($env), 'getenv '.$message);
 
             if (false === $value) {
-                self::assertSame($value, isset($_SERVER[$env]), '$_SERVER '.$message);
+                self::assertArrayNotHasKey($env, $_SERVER, '$_SERVER '.$message);
             } else {
                 self::assertSame($value, $_SERVER[$env], '$_SERVER '.$message);
             }

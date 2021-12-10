@@ -38,7 +38,7 @@ class IniFilesTest extends BaseTestCase
         $xdebug = CoreMock::createAndCheck($loaded);
 
         $this->checkRestart($xdebug);
-        self::assertEquals($ini->getIniFiles(), CoreMock::getAllIniFiles());
+        self::assertSame($ini->getIniFiles(), CoreMock::getAllIniFiles());
     }
 
     /**
@@ -131,7 +131,7 @@ class IniFilesTest extends BaseTestCase
         }
 
         self::assertArrayHasKey($name, $config);
-        self::assertEquals($value, $config[$name]);
+        self::assertSame($value, $config[$name]);
     }
 
     /**
