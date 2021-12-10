@@ -39,13 +39,13 @@ class EnvironmentTest extends BaseTestCase
 
         PartialMock::createAndCheck($loaded);
 
-        $args = array(
+        $args = [
             PartialMock::RESTART_ID,
             PartialMock::TEST_VERSION,
             $ini->hasScannedInis() ? '1' : '0',
             false !== $scanDir ? $scanDir : '*',
             false !== $phprc ? $phprc : '*',
-        );
+        ];
 
         $expected = implode('|', $args);
         self::assertSame($expected, getenv(PartialMock::ALLOW_XDEBUG));
@@ -77,7 +77,7 @@ class EnvironmentTest extends BaseTestCase
         $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
 
-        $settings = $standard ? array() : array('setPersistent' => array());
+        $settings = $standard ? [] : ['setPersistent' => []];
 
         $xdebug = PartialMock::createAndCheck($loaded, null, $settings);
 
@@ -99,7 +99,7 @@ class EnvironmentTest extends BaseTestCase
     {
         // $iniFunc, $scanDir, $phprc, $standard (added below)
         $data = EnvHelper::dataProvider();
-        $result = array();
+        $result = [];
 
         foreach ($data as $test => $params) {
             $params[3] = true;

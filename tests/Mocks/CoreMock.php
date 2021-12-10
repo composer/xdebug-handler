@@ -61,7 +61,7 @@ class CoreMock extends XdebugHandler
      *
      * @return static
      */
-    public static function createAndCheck($loaded, $parentProcess = null, $settings = array())
+    public static function createAndCheck($loaded, $parentProcess = null, $settings = [])
     {
         $mode = null;
 
@@ -174,12 +174,12 @@ class CoreMock extends XdebugHandler
      */
     private static function updateServerEnvironment()
     {
-        $names = array(
+        $names = [
             CoreMock::ALLOW_XDEBUG,
             CoreMock::ORIGINAL_INIS,
             'PHP_INI_SCAN_DIR',
             'PHPRC',
-        );
+        ];
 
         foreach ($names as $name) {
             $value = getenv($name);

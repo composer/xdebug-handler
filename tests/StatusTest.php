@@ -26,7 +26,7 @@ class StatusTest extends BaseTestCase
         $loaded = true;
 
         $logger = new Logger();
-        $settings = array('setLogger' => array($logger));
+        $settings = ['setLogger' => [$logger]];
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);

@@ -32,7 +32,7 @@ class EnvHelper
      */
     public static function setInis($iniFunc, $scanDir, $phprc)
     {
-        $ini = new IniHelper(array($scanDir, $phprc));
+        $ini = new IniHelper([$scanDir, $phprc]);
         BaseTestCase::safeCall($ini, $iniFunc);
 
         return $ini;
@@ -49,11 +49,11 @@ class EnvHelper
         $scanDir = $ini->getScanDir();
 
         // $iniFunc, $scanDir, $phprc
-        return array(
-            'loaded false myini' => array('setLoadedIni', false, '/my.ini'),
-            'loaded empty false' => array('setLoadedIni', '', false),
-            'scanned false file' => array('setScannedInis', false, $loaded),
-            'scanned dir false' => array('setScannedInis', $scanDir, false),
-        );
+        return [
+            'loaded false myini' => ['setLoadedIni', false, '/my.ini'],
+            'loaded empty false' => ['setLoadedIni', '', false],
+            'scanned false file' => ['setScannedInis', false, $loaded],
+            'scanned dir false' => ['setScannedInis', $scanDir, false],
+        ];
     }
 }

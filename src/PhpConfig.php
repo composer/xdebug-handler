@@ -26,7 +26,7 @@ class PhpConfig
     public function useOriginal()
     {
         $this->getDataAndReset();
-        return array();
+        return [];
     }
 
     /**
@@ -38,10 +38,10 @@ class PhpConfig
     {
         $data = $this->getDataAndReset();
         if ($data !== null) {
-            return array('-n', '-c', $data['tmpIni']);
+            return ['-n', '-c', $data['tmpIni']];
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -57,7 +57,7 @@ class PhpConfig
             $this->updateEnv('PHP_INI_SCAN_DIR', '');
         }
 
-        return array();
+        return [];
     }
 
     /**
