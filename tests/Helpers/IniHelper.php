@@ -55,7 +55,7 @@ class IniHelper
     public function setNoInis()
     {
         // Must have at least one entry
-        $this->files = array('');
+        $this->files = [''];
         $this->setEnvironment();
     }
 
@@ -64,9 +64,9 @@ class IniHelper
      */
     public function setLoadedIni()
     {
-        $this->files = array(
+        $this->files = [
             $this->loadedIni,
-        );
+        ];
 
         $this->setEnvironment();
     }
@@ -76,12 +76,12 @@ class IniHelper
      */
     public function setScannedInis()
     {
-        $this->files = array(
+        $this->files = [
             '',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-empty.ini',
-        );
+        ];
 
         $this->setEnvironment();
     }
@@ -91,12 +91,12 @@ class IniHelper
      */
     public function setAllInis()
     {
-        $this->files = array(
+        $this->files = [
             $this->loadedIni,
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-empty.ini',
-        );
+        ];
 
         $this->setEnvironment();
     }
@@ -106,12 +106,12 @@ class IniHelper
      */
     public function setInaccessibleIni()
     {
-        $this->files = array(
+        $this->files = [
             '',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-one.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-two.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'scan-missing.ini',
-        );
+        ];
 
         $this->setEnvironment();
     }
@@ -122,11 +122,11 @@ class IniHelper
      */
     public function setSectionInis($sectionName)
     {
-        $this->files = array(
+        $this->files = [
             $this->loadedIni,
             $this->scanDir.DIRECTORY_SEPARATOR.'section-first.ini',
             $this->scanDir.DIRECTORY_SEPARATOR.'section-'.$sectionName.'.ini',
-        );
+        ];
 
         $this->setEnvironment();
     }

@@ -47,12 +47,12 @@ class IniFilesTest extends BaseTestCase
     public function iniFilesProvider()
     {
         // $iniFunc
-        return array(
-            'no-inis' => array('setNoInis'),
-            'loaded-ini' => array('setLoadedIni'),
-            'scanned-inis' => array('setScannedInis'),
-            'all-inis' => array('setAllInis'),
-        );
+        return [
+            'no-inis' => ['setNoInis'],
+            'loaded-ini' => ['setLoadedIni'],
+            'scanned-inis' => ['setScannedInis'],
+            'all-inis' => ['setAllInis'],
+        ];
     }
 
     /**
@@ -90,12 +90,12 @@ class IniFilesTest extends BaseTestCase
     public function tmpIniProvider()
     {
         // $iniFunc, $matches (number of disabled entries)
-        return array(
-            'no-inis' => array('setNoInis', 0),
-            'loaded-ini' => array('setLoadedIni', 1),
-            'scanned-inis' => array('setScannedInis', 1),
-            'all-inis' => array('setAllInis', 2),
-        );
+        return [
+            'no-inis' => ['setNoInis', 0],
+            'loaded-ini' => ['setLoadedIni', 1],
+            'scanned-inis' => ['setScannedInis', 1],
+            'all-inis' => ['setAllInis', 2],
+        ];
     }
 
     /**
@@ -140,13 +140,13 @@ class IniFilesTest extends BaseTestCase
     public function mergeIniProvider()
     {
         // $name, $value
-        return array(
-            'simple' => array('date.timezone', 'Antarctica/McMurdo'),
-            'single-quotes' => array('error_append_string', "<'color'>"),
-            'newline' => array('error_append_string', "<color\n>"),
-            'double-quotes' => array('error_append_string', '<style="color">'),
-            'backslashes' => array('error_append_string', '<style=\\\\\\"color\\\\">'),
-        );
+        return [
+            'simple' => ['date.timezone', 'Antarctica/McMurdo'],
+            'single-quotes' => ['error_append_string', "<'color'>"],
+            'newline' => ['error_append_string', "<color\n>"],
+            'double-quotes' => ['error_append_string', '<style="color">'],
+            'backslashes' => ['error_append_string', '<style=\\\\\\"color\\\\">'],
+        ];
     }
 
     /**
@@ -199,10 +199,10 @@ class IniFilesTest extends BaseTestCase
      */
     public function iniSectionsProvider()
     {
-        return array(
-            'host-section' => array('host'),
-            'path-section' => array('path'),
-        );
+        return [
+            'host-section' => ['host'],
+            'path-section' => ['path'],
+        ];
     }
 
     /**

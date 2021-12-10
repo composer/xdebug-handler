@@ -57,11 +57,11 @@ class PhpConfigTest extends BaseTestCase
     public function commandLineProvider()
     {
         // $method, $expected
-        return array(
-            'original' => array('useOriginal', array()),
-            'standard' => array('useStandard', array('-n', '-c', '')),
-            'persistent' => array('usePersistent', array()),
-        );
+        return [
+            'original' => ['useOriginal', []],
+            'standard' => ['useStandard', ['-n', '-c', '']],
+            'persistent' => ['usePersistent', []],
+        ];
     }
 
     /**
@@ -87,7 +87,7 @@ class PhpConfigTest extends BaseTestCase
         }
 
         $config = new PhpConfig();
-        $tests = array('useOriginal', 'usePersistent', 'useStandard');
+        $tests = ['useOriginal', 'usePersistent', 'useStandard'];
 
         foreach ($tests as $method) {
             BaseTestCase::safeCall($config, $method, null, $this);
@@ -124,7 +124,7 @@ class PhpConfigTest extends BaseTestCase
      */
     private function checkEnvironment($scanDir, $phprc, $name)
     {
-        $tests = array('PHP_INI_SCAN_DIR' => $scanDir, 'PHPRC' => $phprc);
+        $tests = ['PHP_INI_SCAN_DIR' => $scanDir, 'PHPRC' => $phprc];
 
         foreach ($tests as $env => $value) {
             $message = $name.' '.strtolower($env);

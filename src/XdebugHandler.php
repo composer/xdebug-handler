@@ -213,7 +213,7 @@ class XdebugHandler
             }
         }
 
-        $paths = array((string) php_ini_loaded_file());
+        $paths = [(string) php_ini_loaded_file()];
         $scanned = php_ini_scanned_files();
 
         if ($scanned !== false) {
@@ -241,14 +241,14 @@ class XdebugHandler
             return null;
         }
 
-        return array(
+        return [
             'tmpIni' => $envArgs[0],
             'scannedInis' => (bool) $envArgs[1],
             'scanDir' => '*' === $envArgs[2] ? false : $envArgs[2],
             'phprc' => '*' === $envArgs[3] ? false : $envArgs[3],
             'inis' => explode(PATH_SEPARATOR, $envArgs[4]),
             'skipped' => $envArgs[5],
-        );
+        ];
     }
 
     /**
@@ -326,7 +326,7 @@ class XdebugHandler
             }
         }
 
-        $process = proc_open($cmd, array(), $pipes);
+        $process = proc_open($cmd, [], $pipes);
         if (is_resource($process)) {
             $exitCode = proc_close($process);
         }
@@ -447,7 +447,7 @@ class XdebugHandler
      */
     private function getCommand()
     {
-        $php = array(PHP_BINARY);
+        $php = [PHP_BINARY];
         $args = array_slice($_SERVER['argv'], 1);
 
         if (!$this->persistent) {
@@ -455,7 +455,7 @@ class XdebugHandler
             array_push($php, '-n', '-c', $this->tmpIni);
         }
 
-        return array_merge($php, array($this->script), $args);
+        return array_merge($php, [$this->script], $args);
     }
 
     /**
@@ -486,13 +486,13 @@ class XdebugHandler
         }
 
         // Flag restarted process and save values for it to use
-        $envArgs = array(
+        $envArgs = [
             self::RESTART_ID,
             $this->loaded,
             (int) $scannedInis,
             false === $scanDir ? '*' : $scanDir,
             false === $phprc ? '*' : $phprc,
-        );
+        ];
 
         return putenv($this->envAllowXdebug.'='.implode('|', $envArgs));
     }
@@ -575,14 +575,14 @@ class XdebugHandler
      */
     private function setEnvRestartSettings($envArgs)
     {
-        $settings = array(
+        $settings = [
             php_ini_loaded_file(),
             $envArgs[2],
             $envArgs[3],
             $envArgs[4],
             getenv($this->envOriginalInis),
             self::$skipped,
-        );
+        ];
 
         Process::setEnv(self::RESTART_SETTINGS, implode('|', $settings));
     }

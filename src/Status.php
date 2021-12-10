@@ -86,14 +86,14 @@ class Status
     public function report($op, $data)
     {
         if ($this->logger !== null || $this->debug) {
-            $callable = array($this, 'report'.$op);
+            $callable = [$this, 'report'.$op];
 
             if (!is_callable($callable)) {
                 throw new \InvalidArgumentException('Unknown op handler: '.$op);
             }
 
-            $params = $data !== null ? $data : array();
-            call_user_func_array($callable, array($params));
+            $params = $data !== null ? [$data] : [];
+            call_user_func_array($callable, $params);
         }
     }
 

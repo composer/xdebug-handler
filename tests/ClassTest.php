@@ -33,7 +33,7 @@ class ClassTest extends BaseTestCase
     {
         $this->expectException('RuntimeException');
         /** @phpstan-ignore-next-line */
-        new XdebugHandler(array('name'));
+        new XdebugHandler(['name']);
     }
 
     /**
@@ -47,7 +47,7 @@ class ClassTest extends BaseTestCase
     {
         $xdebug = new XdebugHandler('myapp');
 
-        $params = null !== $value ? array($value) : array();
+        $params = null !== $value ? [$value] : [];
         $result = BaseTestCase::safeCall($xdebug, $setter, $params, $this);
         self::assertInstanceOf(get_class($xdebug), $result);
     }
@@ -58,11 +58,11 @@ class ClassTest extends BaseTestCase
     public function setterProvider()
     {
         // $setter, $value
-        return array(
-            'setLogger' => array('setLogger', new Logger()),
-            'setMainScript' => array('setMainScript', '--'),
-            'setPersistent' => array('setPersistent', null),
-        );
+        return [
+            'setLogger' => ['setLogger', new Logger()],
+            'setMainScript' => ['setMainScript', '--'],
+            'setPersistent' => ['setPersistent', null],
+        ];
     }
 
     /**
@@ -88,9 +88,9 @@ class ClassTest extends BaseTestCase
      */
     public function methodProvider()
     {
-        return array(
-            array('requiresRestart'),
-            array('restart'),
-        );
+        return [
+            ['requiresRestart'],
+            ['restart'],
+        ];
     }
 }

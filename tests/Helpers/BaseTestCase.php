@@ -27,19 +27,19 @@ abstract class BaseTestCase extends TestCase
      * @var array
      * @phpstan-var array<string, string|false>
      */
-    private static $env = array();
+    private static $env = [];
 
     /** @var string[] */
-    private static $argv = array();
+    private static $argv = [];
 
     /** @var string[] */
-    private static $names = array(
+    private static $names = [
         CoreMock::ALLOW_XDEBUG,
         CoreMock::ORIGINAL_INIS,
         'PHP_INI_SCAN_DIR',
         'PHPRC',
         XdebugHandler::RESTART_SETTINGS,
-    );
+    ];
 
     /**
      * Saves the current environment and argv state
@@ -90,8 +90,8 @@ abstract class BaseTestCase extends TestCase
      */
     public static function safeCall($instance, $method, array $params = null, $self = null)
     {
-        $callable = array($instance, $method);
-        $params = $params !== null ? $params : array();
+        $callable = [$instance, $method];
+        $params = $params !== null ? $params : [];
 
         if (is_callable($callable)) {
             return call_user_func_array($callable, $params);

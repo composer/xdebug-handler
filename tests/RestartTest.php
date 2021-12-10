@@ -46,7 +46,7 @@ class RestartTest extends BaseTestCase
      */
     public function testRestartWhenModeIsNotOff()
     {
-        $loaded = array(true, 'debug,trace');
+        $loaded = [true, 'debug,trace'];
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkRestart($xdebug);
@@ -83,7 +83,7 @@ class RestartTest extends BaseTestCase
      */
     public function testNoRestartWhenModeIsOff()
     {
-        $loaded = array(true, 'off');
+        $loaded = [true, 'off'];
 
         $xdebug = CoreMock::createAndCheck($loaded);
         $this->checkNoRestart($xdebug);
@@ -111,7 +111,7 @@ class RestartTest extends BaseTestCase
     {
         $loaded = true;
         // We can only check this by setting a script
-        $settings = array('setMainScript' => array($script));
+        $settings = ['setMainScript' => [$script]];
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkNoRestart($xdebug);
@@ -122,11 +122,11 @@ class RestartTest extends BaseTestCase
      */
     public function unreachableScriptProvider()
     {
-        return array(
-            array('nonexistent.php'),
-            array('-'),
-            array('Standard input code'),
-        );
+        return [
+            ['nonexistent.php'],
+            ['-'],
+            ['Standard input code'],
+        ];
     }
 
     /**
@@ -139,7 +139,7 @@ class RestartTest extends BaseTestCase
     {
         $loaded = true;
         $this->setArgv();
-        $settings = array('setMainScript' => array($script));
+        $settings = ['setMainScript' => [$script]];
 
         $xdebug = CoreMock::createAndCheck($loaded, null, $settings);
         $this->checkRestart($xdebug);
@@ -156,10 +156,10 @@ class RestartTest extends BaseTestCase
      */
     public function scriptSetterProvider()
     {
-        return array(
-            array((string) realpath($_SERVER['argv'][0])),
-            array('--'),
-        );
+        return [
+            [(string) realpath($_SERVER['argv'][0])],
+            ['--'],
+        ];
     }
 
     /**
@@ -169,14 +169,14 @@ class RestartTest extends BaseTestCase
     {
         $loaded = true;
         $this->setArgv();
-        $settings = array('setPersistent' => array());
+        $settings = ['setPersistent' => []];
 
         // Check command
         $xdebug = PartialMock::createAndCheck($loaded, null, $settings);
         $command = $xdebug->getCommand();
         $tmpIni = $xdebug->getTmpIni();
 
-        foreach (array('-n', '-c', $tmpIni) as $param) {
+        foreach (['-n', '-c', $tmpIni] as $param) {
             self::assertNotContains($param, $command);
         }
     }
@@ -213,6 +213,6 @@ class RestartTest extends BaseTestCase
      */
     private function setArgv()
     {
-        $_SERVER['argv'] = array(__FILE__, 'command', '--param1, --param2');
+        $_SERVER['argv'] = [__FILE__, 'command', '--param1, --param2'];
     }
 }
