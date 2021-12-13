@@ -54,5 +54,12 @@ jobs:
       - name: Install latest dependencies
         run: composer update ${{ env.COMPOSER_FLAGS }}
 
+      # Provides flexibilty for using either simple-phpunit or phpunit
+      - name: Determine PHPUnit binary
+        run: |
+          name=$([ -f vendor/bin/simple-phpunit ] && echo simple-phpunit || echo phpunit)
+          echo "BIN_PHPUNIT=vendor/bin/$name" >> $GITHUB_ENV
+        shell: bash
+
       - name: Run tests
-        run: vendor/bin/simple-phpunit --verbose
+        run: ${{ env.BIN_PHPUNIT }} --verbose
