@@ -14,7 +14,7 @@ now extracted and made available as a stand-alone library.
 
 Removed support for legacy PHP versions and added type declarations.
 
-Long term support for version 2 (PHP 5.3.2 - 7.2.4) follows [Composer 2.2 LTS](https://blog.packagist.com/composer-2-2/]) policy.
+Long term support for version 2 (PHP 5.3.2 - 7.2.4) follows [Composer 2.2 LTS](https://blog.packagist.com/composer-2-2/) policy.
 
 ## Installation
 

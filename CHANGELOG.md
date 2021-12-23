@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [3.0.0] - 2021-12-23
+  * Removed: support for legacy PHP versions (< PHP 7.2.5).
+  * Added: type declarations to arguments and return values.
+  * Added: strict typing to all classes.
+
 ## [2.0.3] - 2021-12-08
   * Added: support, type annotations and refactoring for stricter PHPStan analysis.
 
@@ -94,7 +99,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/2.0.3...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/3.0.0...HEAD
+[3.0.0]: https://github.com/composer/xdebug-handler/compare/2.0.3...3.0.0
 [2.0.3]: https://github.com/composer/xdebug-handler/compare/2.0.2...2.0.3
 [2.0.2]: https://github.com/composer/xdebug-handler/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/composer/xdebug-handler/compare/2.0.0...2.0.1
