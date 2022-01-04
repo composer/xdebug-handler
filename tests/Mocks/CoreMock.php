@@ -35,8 +35,8 @@ class CoreMock extends XdebugHandler
     /** @var bool */
     public $restarted;
 
-    /** @var bool */
-    public $parentLoaded;
+    /** @var string|null */
+    public $parentXdebugVersion;
 
     /** @var null|static */
     protected $childProcess;
@@ -80,7 +80,7 @@ class CoreMock extends XdebugHandler
             // properties on the parent and child
             $parentProcess->restarted = true;
             $xdebug->restarted = true;
-            $xdebug->parentLoaded = $parentProcess->parentLoaded;
+            $xdebug->parentXdebugVersion = $parentProcess->parentXdebugVersion;
 
             // Make the child available
             $parentProcess->childProcess = $xdebug;
@@ -109,15 +109,15 @@ class CoreMock extends XdebugHandler
         parent::__construct('mock');
 
         $this->refClass = new \ReflectionClass('Composer\XdebugHandler\XdebugHandler');
-        $this->parentLoaded = $loaded ? static::TEST_VERSION : null;
+        $this->parentXdebugVersion = $loaded ? static::TEST_VERSION : null;
 
-        // Set private loaded
-        $prop = $this->refClass->getProperty('loaded');
+        // Set private static xdebugVersion
+        $prop = $this->refClass->getProperty('xdebugVersion');
         $prop->setAccessible(true);
-        $prop->setValue($this, $this->parentLoaded);
+        $prop->setValue($this, $this->parentXdebugVersion);
 
-        // Set private mode
-        $prop = $this->refClass->getProperty('mode');
+        // Set private static xdebugMode
+        $prop = $this->refClass->getProperty('xdebugMode');
         $prop->setAccessible(true);
         $prop->setValue($this, $mode);
 
@@ -128,11 +128,6 @@ class CoreMock extends XdebugHandler
 
         // Ensure static private skipped is unset
         $prop = $this->refClass->getProperty('skipped');
-        $prop->setAccessible(true);
-        $prop->setValue($this, null);
-
-        // Ensure static private inRestart is unset
-        $prop = $this->refClass->getProperty('inRestart');
         $prop->setAccessible(true);
         $prop->setValue($this, null);
 

@@ -86,7 +86,7 @@ class SettingsTest extends BaseTestCase
         putenv(CoreMock::ORIGINAL_INIS);
         unset($_SERVER[CoreMock::ORIGINAL_INIS]);
 
-        // Mock not loaded ($inRestart and $skipped statics are unset)
+        // Mock not loaded (static $skipped is unset in mock constructor)
         $loaded = false;
         CoreMock::createAndCheck($loaded);
 
