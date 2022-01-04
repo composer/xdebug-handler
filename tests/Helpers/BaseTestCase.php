@@ -132,7 +132,7 @@ abstract class BaseTestCase extends TestCase
         self::assertArrayHasKey(CoreMock::ORIGINAL_INIS, $_SERVER);
 
         // Skipped version must only be reported if it was unloaded in the restart
-        if (!$xdebug->parentLoaded) {
+        if ($xdebug->parentXdebugVersion === null) {
             // Mocked successful restart without Xdebug
             $version = '';
         } elseif ($xdebug instanceof FailMock) {
