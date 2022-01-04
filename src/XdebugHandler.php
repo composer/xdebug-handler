@@ -42,6 +42,12 @@ class XdebugHandler
     /** @var bool */
     private static $xdebugActive;
 
+    /** @var string|null */
+    private static $xdebugMode;
+
+    /** @var string|null */
+    private static $xdebugVersion;
+
     /** @var bool */
     private $cli;
 
@@ -53,12 +59,6 @@ class XdebugHandler
 
     /** @var string */
     private $envOriginalInis;
-
-    /** @var string|null */
-    private $loaded;
-
-    /** @var string|null */
-    private $mode;
 
     /** @var bool */
     private $persistent;
@@ -89,13 +89,7 @@ class XdebugHandler
         $this->envAllowXdebug = self::$name.self::SUFFIX_ALLOW;
         $this->envOriginalInis = self::$name.self::SUFFIX_INIS;
 
-        if (extension_loaded('xdebug')) {
-            $version = phpversion('xdebug');
-            $this->loaded = $version !== false ? $version : 'unknown';
-            $this->mode = $this->getXdebugMode($this->loaded);
-        }
-
-        self::$xdebugActive = $this->loaded !== null && $this->mode !== 'off';
+        self::setXdebugDetails();
         self::$inRestart = false;
 
         if ($this->cli = PHP_SAPI === 'cli') {
@@ -153,7 +147,7 @@ class XdebugHandler
      */
     public function check()
     {
-        $this->notify(Status::CHECK, $this->loaded.'|'.$this->mode);
+        $this->notify(Status::CHECK, self::$xdebugVersion.'|'.self::$xdebugMode);
         $envArgs = explode('|', (string) getenv($this->envAllowXdebug));
 
         if (!((bool) $envArgs[0]) && $this->requiresRestart(self::$xdebugActive)) {
@@ -174,7 +168,7 @@ class XdebugHandler
             Process::setEnv($this->envAllowXdebug);
             self::$inRestart = true;
 
-            if ($this->loaded === null) {
+            if (self::$xdebugVersion === null) {
                 // Skipped version is only set if Xdebug is not loaded
                 self::$skipped = $envArgs[1];
             }
@@ -271,6 +265,7 @@ class XdebugHandler
      */
     public static function isXdebugActive()
     {
+        self::setXdebugDetails();
         return self::$xdebugActive;
     }
 
@@ -492,7 +487,7 @@ class XdebugHandler
         // Flag restarted process and save values for it to use
         $envArgs = array(
             self::RESTART_ID,
-            $this->loaded,
+            self::$xdebugVersion,
             (int) $scannedInis,
             false === $scanDir ? '*' : $scanDir,
             false === $phprc ? '*' : $phprc,
@@ -700,38 +695,50 @@ class XdebugHandler
     }
 
     /**
-     * Returns the Xdebug mode if available
+     * Sets static properties $xdebugActive, $xdebugVersion and $xdebugMode
      *
-     * @param string $version
-     *
-     * @return string|null
+     * @return void
      */
-    private function getXdebugMode($version)
+    private static function setXdebugDetails()
     {
-        if (version_compare($version, '3.1', '>=')) {
+        if (self::$xdebugActive !== null) {
+            return;
+        }
+
+        self::$xdebugActive = false;
+        if (!extension_loaded('xdebug')) {
+            return;
+        }
+
+        $version = phpversion('xdebug');
+        self::$xdebugVersion = $version !== false ? $version : 'unknown';
+
+        if (version_compare(self::$xdebugVersion, '3.1', '>=')) {
             $modes = xdebug_info('mode');
-            return count($modes) === 0 ? 'off' : implode(',', $modes);
+            self::$xdebugMode = count($modes) === 0 ? 'off' : implode(',', $modes);
+            self::$xdebugActive = self::$xdebugMode !== 'off';
+            return;
         }
 
         // See if xdebug.mode is supported in this version
         $iniMode = ini_get('xdebug.mode');
         if ($iniMode === false) {
-            return null;
+            return;
         }
 
         // Environment value wins but cannot be empty
         $envMode = (string) getenv('XDEBUG_MODE');
         if ($envMode !== '') {
-            $mode = $envMode;
+            self::$xdebugMode = $envMode;
         } else {
-            $mode = $iniMode !== '' ? $iniMode : 'off';
+            self::$xdebugMode = $iniMode !== '' ? $iniMode : 'off';
         }
 
         // An empty comma-separated list is treated as mode 'off'
-        if (Preg::isMatch('/^,+$/', str_replace(' ', '', $mode))) {
-            $mode = 'off';
+        if (Preg::isMatch('/^,+$/', str_replace(' ', '', self::$xdebugMode))) {
+            self::$xdebugMode = 'off';
         }
 
-        return $mode;
+        self::$xdebugActive = self::$xdebugMode !== 'off';
     }
 }
