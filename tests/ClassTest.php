@@ -11,11 +11,11 @@
 
 namespace Composer\XdebugHandler\Tests;
 
-use Composer\XdebugHandler\Tests\Helpers\BaseTestCase;
 use Composer\XdebugHandler\Tests\Helpers\LoggerFactory;
 use Composer\XdebugHandler\XdebugHandler;
+use PHPUnit\Framework\TestCase;
 
-class ClassTest extends BaseTestCase
+class ClassTest extends TestCase
 {
     /**
      * @return void
@@ -37,32 +37,20 @@ class ClassTest extends BaseTestCase
     }
 
     /**
-     * @dataProvider setterProvider     *
-     * @param string $setter
-     * @param \Psr\Log\AbstractLogger|string|null $value
-     *
      * @return void
      */
-    public function testSettersAreFluent($setter, $value)
+    public function testSettersAreFluent()
     {
         $xdebug = new XdebugHandler('myapp');
 
-        $params = null !== $value ? array($value) : array();
-        $result = BaseTestCase::safeCall($xdebug, $setter, $params, $this);
-        self::assertInstanceOf(get_class($xdebug), $result);
-    }
+        $result = $xdebug->setLogger(LoggerFactory::createLogger());
+        self::assertInstanceOf(get_class($xdebug), $result, 'setLogger');
 
-    /**
-     * @return array<string, mixed[]>
-     */
-    public function setterProvider()
-    {
-        // $setter, $value
-        return array(
-            'setLogger' => array('setLogger', LoggerFactory::createLogger()),
-            'setMainScript' => array('setMainScript', '--'),
-            'setPersistent' => array('setPersistent', null),
-        );
+        $result = $xdebug->setMainScript('--');
+        self::assertInstanceOf(get_class($xdebug), $result, 'setMainScript');
+
+        $result = $xdebug->setPersistent();
+        self::assertInstanceOf(get_class($xdebug), $result, 'setPersistent');
     }
 
     /**
