@@ -1,8 +1,10 @@
 name: Continuous Integration
 
 on:
-  - push
-  - pull_request
+  push:
+    paths-ignore: ["**.md"]
+  pull_request:
+    paths-ignore: ["**.md"]
 
 env:
   COMPOSER_FLAGS: --ansi --no-interaction --no-progress --prefer-dist
