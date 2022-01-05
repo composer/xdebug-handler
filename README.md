@@ -1,9 +1,9 @@
 # composer/xdebug-handler
 
-[![packagist](https://img.shields.io/packagist/v/composer/xdebug-handler.svg)](https://packagist.org/packages/composer/xdebug-handler)
-[![Continuous Integration](https://github.com/composer/xdebug-handler/workflows/Continuous%20Integration/badge.svg?branch=main)](https://github.com/composer/xdebug-handler/actions)
+[![packagist](https://img.shields.io/badge/packagist-v2.0.4-blue)](https://packagist.org/packages/composer/xdebug-handler#2.0.4)
+[![Continuous Integration](https://github.com/composer/xdebug-handler/actions/workflows/continuous-integration.yml/badge.svg?branch=2.0)](https://github.com/composer/xdebug-handler/actions?query=branch:2.0)
 ![license](https://img.shields.io/github/license/composer/xdebug-handler.svg)
-![php](https://img.shields.io/packagist/php-v/composer/xdebug-handler.svg?colorB=8892BF&label=php)
+![php](https://img.shields.io/packagist/php-v/composer/xdebug-handler/2.0.2?colorB=8892BF)
 
 Restart a CLI process without loading the Xdebug extension, unless `xdebug.mode=off`.
 
