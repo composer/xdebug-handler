@@ -18,7 +18,7 @@
         "issues": "https://github.com/composer/xdebug-handler/issues"
     },
     "require": {
-        "php": "^7.2.5 || ^8.0",
+        "php": "^7.2.5 || ^8.1",
         "psr/log": "^1 || ^2 || ^3",
         "composer/pcre": "^1"
     },
