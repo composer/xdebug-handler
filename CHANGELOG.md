@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+## [2.0.5] - 2022-02-24
+  * Fixed: regression in 2.0.4 affecting Xdebug 2.
+
 ## [2.0.4] - 2022-01-04
   * Fixed: allow calling `isXdebugActive` before class instantiation.
 
@@ -97,7 +100,8 @@
   * Break: the following class was renamed:
     - `Composer\XdebugHandler` -> `Composer\XdebugHandler\XdebugHandler`
 
-[Unreleased]: https://github.com/composer/xdebug-handler/compare/2.0.4...HEAD
+[Unreleased]: https://github.com/composer/xdebug-handler/compare/2.0.5...HEAD
+[2.0.5]: https://github.com/composer/xdebug-handler/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/composer/xdebug-handler/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/composer/xdebug-handler/compare/2.0.2...2.0.3
 [2.0.2]: https://github.com/composer/xdebug-handler/compare/2.0.1...2.0.2
