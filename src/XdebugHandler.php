@@ -185,7 +185,7 @@ class XdebugHandler
      * The equivalent of calling php_ini_loaded_file then php_ini_scanned_files.
      * The loaded ini location is the first entry and may be empty.
      *
-     * @return string[]
+     * @return list<non-empty-string>
      */
     public static function getAllIniFiles(): array
     {
@@ -204,7 +204,9 @@ class XdebugHandler
             $paths = array_merge($paths, array_map('trim', explode(',', $scanned)));
         }
 
-        return $paths;
+        return array_filter($paths, function (string $path) {
+            return $path !== '';
+        });
     }
 
     /**
