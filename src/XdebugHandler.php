@@ -183,9 +183,9 @@ class XdebugHandler
      * Returns an array of php.ini locations with at least one entry
      *
      * The equivalent of calling php_ini_loaded_file then php_ini_scanned_files.
-     * The loaded ini location is the first entry and may be empty.
+     * The loaded ini location is the first entry and may be an empty string.
      *
-     * @return string[]
+     * @return non-empty-list<string>
      */
     public static function getAllIniFiles(): array
     {
