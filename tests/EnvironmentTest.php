@@ -54,7 +54,7 @@ class EnvironmentTest extends BaseTestCase
     /**
      * @phpstan-return envTestData
      */
-    public function envAllowBeforeProvider(): array
+    public static function envAllowBeforeProvider(): array
     {
         return EnvHelper::dataProvider();
     }
@@ -90,7 +90,7 @@ class EnvironmentTest extends BaseTestCase
     /**
      * @phpstan-return array<string, array{0: string, 1: false|string, 2: false|string, 3: bool}>
      */
-    public function environmentProvider(): array
+    public static function environmentProvider(): array
     {
         // $iniFunc, $scanDir, $phprc, $standard (added below)
         $data = EnvHelper::dataProvider();

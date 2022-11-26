@@ -101,7 +101,7 @@ class RestartTest extends BaseTestCase
     /**
      * @return array<string[]>
      */
-    public function unreachableScriptProvider(): array
+    public static function unreachableScriptProvider(): array
     {
         return [
             ['nonexistent.php'],
@@ -132,7 +132,7 @@ class RestartTest extends BaseTestCase
     /**
      * @return array<string[]>
      */
-    public function scriptSetterProvider(): array
+    public static function scriptSetterProvider(): array
     {
         return [
             [(string) realpath($_SERVER['argv'][0])],

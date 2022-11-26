@@ -54,7 +54,7 @@ class SettingsTest extends BaseTestCase
     /**
      * @phpstan-return envTestData
      */
-    public function environmentProvider(): array
+    public static function environmentProvider(): array
     {
         return EnvHelper::dataProvider();
     }

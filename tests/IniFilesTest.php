@@ -43,7 +43,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * @return array<string, string[]>
      */
-    public function iniFilesProvider(): array
+    public static function iniFilesProvider(): array
     {
         // $iniFunc
         return [
@@ -81,7 +81,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * @phpstan-return array<string, array{0: string, 1: int}>
      */
-    public function tmpIniProvider(): array
+    public static function tmpIniProvider(): array
     {
         // $iniFunc, $matchCount (number of disabled entries)
         return [
@@ -127,7 +127,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * @return array<string, string[]>
      */
-    public function mergeIniProvider(): array
+    public static function mergeIniProvider(): array
     {
         // $name, $value
         return [
@@ -182,7 +182,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * @return array<string, string[]>
      */
-    public function iniSectionsProvider(): array
+    public static function iniSectionsProvider(): array
     {
         return [
             'host-section' => ['host'],

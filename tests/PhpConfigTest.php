@@ -53,7 +53,7 @@ class PhpConfigTest extends BaseTestCase
     /**
      * @phpstan-return array<string, array{0: string, 1: string[]}>
      */
-    public function commandLineProvider(): array
+    public static function commandLineProvider(): array
     {
         // $method, $expected
         return [
@@ -104,7 +104,7 @@ class PhpConfigTest extends BaseTestCase
     /**
      * @phpstan-return envTestData
      */
-    public function environmentProvider(): array
+    public static function environmentProvider(): array
     {
         return EnvHelper::dataProvider();
     }
