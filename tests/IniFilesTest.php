@@ -158,7 +158,7 @@ class IniFilesTest extends BaseTestCase
     /**
      * Tests that directives below HOST and PATH sections are removed
      *
-     * @dataProvider iniSectionsProvider      *
+     * @dataProvider iniSectionsProvider
      */
     public function testIniSections(string $sectionName): void
     {
