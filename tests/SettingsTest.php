@@ -28,7 +28,7 @@ class SettingsTest extends BaseTestCase
      * @param string $iniFunc IniHelper method to use
      * @param false|string $scanDir Initial value for PHP_INI_SCAN_DIR
      * @param false|string $phprc Initial value for PHPRC
-     * @dataProvider environmentProvider     *
+     * @dataProvider environmentProvider
      */
     public function testGetRestartSettings(string $iniFunc, $scanDir, $phprc): void
     {
