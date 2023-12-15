@@ -410,7 +410,7 @@ class XdebugHandler
      */
     private function getCommand(): array
     {
-        $php = [PHP_BINARY];
+        $php = [\escapeshellarg(PHP_BINARY)];
         $args = array_slice($_SERVER['argv'], 1);
 
         if (!$this->persistent) {
