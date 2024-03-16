@@ -82,14 +82,33 @@ class Status
     public function report(string $op, ?string $data): void
     {
         if ($this->logger !== null || $this->debug) {
-            $callable = [$this, 'report'.$op];
+            $param = (string) $data;
 
-            if (!is_callable($callable)) {
-                throw new \InvalidArgumentException('Unknown op handler: '.$op);
+            switch($op) {
+                case self::CHECK:
+                    $this->reportCheck($param);
+                    break;
+                case self::ERROR:
+                    $this->reportError($param);
+                    break;
+                case self::INFO:
+                    $this->reportInfo($param);
+                    break;
+                case self::NORESTART:
+                    $this->reportNoRestart();
+                    break;
+                case self::RESTART:
+                    $this->reportRestart();
+                    break;
+                case self::RESTARTED:
+                    $this->reportRestarted();
+                    break;
+                case self::RESTARTING:
+                    $this->reportRestarting($param);
+                    break;
+                default:
+                    throw new \InvalidArgumentException('Unknown op handler: '.$op);
             }
-
-            $params = $data !== null ? [$data] : [];
-            call_user_func_array($callable, $params);
         }
     }
 
