@@ -64,12 +64,11 @@ jobs:
       - name: Install latest dependencies
         run: composer update ${{ env.COMPOSER_FLAGS }}
 
-      # Provides flexibilty for using either simple-phpunit or phpunit
-      - name: Determine PHPUnit binary
-        run: |
-          name=$([ -f vendor/bin/simple-phpunit ] && echo simple-phpunit || echo phpunit)
-          echo "BIN_PHPUNIT=vendor/bin/$name" >> $GITHUB_ENV
-        shell: bash
-
       - name: Run tests
-        run: ${{ env.BIN_PHPUNIT }} --verbose
+        if: ${{ !matrix.experimental }}
+        run: vendor/bin/phpunit
+
+      # Show deprecations on PHP 8.4
+      - name: Run tests (experimental)
+        if: ${{ matrix.experimental }}
+        run: vendor/bin/phpunit --display-deprecations
