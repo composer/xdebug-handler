@@ -53,6 +53,7 @@ abstract class BaseTestCase extends TestCase
             // Note $_SERVER will already match
         }
 
+        // @phpstan-ignore-next-line
         self::$argv = $_SERVER['argv'];
     }
 

@@ -85,6 +85,23 @@ class RestartTest extends BaseTestCase
         $this->checkRestart($xdebug);
     }
 
+    public function testNoRestartWithUnexpectedArgv(): void
+    {
+        $loaded = true;
+
+        $_SERVER['argv'] = false;
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkNoRestart($xdebug);
+
+        $_SERVER['argv'] = [];
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkNoRestart($xdebug);
+
+        $_SERVER['argv'] = [1, 2];
+        $xdebug = CoreMock::createAndCheck($loaded);
+        $this->checkNoRestart($xdebug);
+    }
+
     /**
      * @dataProvider unreachableScriptProvider
      */
@@ -135,6 +152,7 @@ class RestartTest extends BaseTestCase
     public static function scriptSetterProvider(): array
     {
         return [
+            // @phpstan-ignore-next-line
             [(string) realpath($_SERVER['argv'][0])],
             ['--'],
         ];
