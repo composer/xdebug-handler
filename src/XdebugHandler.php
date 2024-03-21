@@ -282,18 +282,20 @@ class XdebugHandler
      */
     private function doRestart(array $command): void
     {
-        $this->tryEnableSignals();
-        $this->notify(Status::RESTARTING, implode(' ', $command));
-
         if (PHP_VERSION_ID >= 70400) {
             $cmd = $command;
+            $displayCmd = sprintf('[%s]', implode(', ', $cmd));
         } else {
             $cmd = Process::escapeShellCommand($command);
             if (defined('PHP_WINDOWS_VERSION_BUILD')) {
                 // Outer quotes required on cmd string below PHP 8
                 $cmd = '"'.$cmd.'"';
             }
+            $displayCmd = $cmd;
         }
+
+        $this->tryEnableSignals();
+        $this->notify(Status::RESTARTING, $displayCmd);
 
         $process = proc_open($cmd, [], $pipes);
         if (is_resource($process)) {

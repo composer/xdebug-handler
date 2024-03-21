@@ -199,7 +199,7 @@ class Status
     {
         $text = sprintf('Process restarting (%s)', $this->getEnvAllow());
         $this->output($text);
-        $text = 'Running '.$command;
+        $text = 'Running: '.$command;
         $this->output($text);
     }
 
