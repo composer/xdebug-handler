@@ -8,4 +8,10 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+
+    <groups>
+        <exclude>
+            <group>functional</group>
+        </exclude>
+    </groups>
 </phpunit>

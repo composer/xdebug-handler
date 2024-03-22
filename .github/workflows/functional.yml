@@ -1,0 +1,69 @@
+name: Functional Tests
+
+on:
+  push:
+    paths-ignore: ["**.md"]
+  pull_request:
+    paths-ignore: ["**.md"]
+
+env:
+  COMPOSER_FLAGS: --ansi --no-interaction --no-progress --prefer-dist
+
+jobs:
+  tests:
+    name: Functional Tests
+
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+
+    strategy:
+      matrix:
+        php-version:
+          - "7.2"
+          - "8.3"
+        os: [ubuntu-latest]
+        experimental: [false]
+        include:
+          - php-version: "7.2"
+            os: windows-latest
+            experimental: false
+          - php-version: "8.3"
+            os: windows-latest
+            experimental: false
+          - php-version: "8.4"
+            os: ubuntu-latest
+            experimental: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          coverage: xdebug
+          php-version: ${{ matrix.php-version }}
+
+      - name: Get composer cache directory
+        id: composercache
+        shell: bash
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Restore cached dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: php-${{ matrix.php-version }}-composer-
+
+      - name: Install latest dependencies
+        run: composer update ${{ env.COMPOSER_FLAGS }}
+
+      - name: Run tests
+        if: ${{ !matrix.experimental }}
+        run: vendor/bin/phpunit --group functional
+
+      # Show deprecations on PHP 8.4
+      - name: Run tests (experimental)
+        if: ${{ matrix.experimental }}
+        run: vendor/bin/phpunit --group functional --display-deprecations
