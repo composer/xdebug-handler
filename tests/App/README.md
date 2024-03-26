@@ -2,8 +2,8 @@
 
 This folder contains the PHP scripts that produce the output for the functional tests.
 
-They can be run from the command-line to provide a visual representation of xdebug-handler's inner
-workings.
+They can also be run from the command-line to provide a visual representation of xdebug-handler's
+inner workings.
 
 ## Usage
 
@@ -26,6 +26,9 @@ The `--display` options provides colorized output with a detailed list of xdebug
 * [settings] - from getRestartSettings()
 
 These values are obtained after any restart has happened.
+
+Each line of output is prefixed `name[pid]`, where name is either 'logger' (for xdebug-handler's
+internal logger) or the name of the script, and pid is the process identifier.
 
 ## Scripts
 
