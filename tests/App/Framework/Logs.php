@@ -31,7 +31,8 @@ class Logs
         foreach ($outputLines as $line) {
             $line = trim($line);
 
-            if (!(bool) preg_match('/^(.+)\\[(\\d+)\\](.+)$/', $line, $matches)) {
+            // @phpstan-ignore booleanNot.exprNotBoolean
+            if (!preg_match('/^(.+)\\[(\\d+)\\](.+)$/', $line, $matches)) {
                 continue;
             }
 
