@@ -97,7 +97,7 @@ class CoreMock extends XdebugHandler
         static::$settings = $settings;
 
         $xdebug->check();
-        return $xdebug->childProcess !==null ? $xdebug->childProcess : $xdebug;
+        return $xdebug->childProcess !== null ? $xdebug->childProcess : $xdebug;
     }
 
     final public function __construct(bool $loaded, ?string $mode)
@@ -108,24 +108,16 @@ class CoreMock extends XdebugHandler
         $this->parentXdebugVersion = $loaded ? static::TEST_VERSION : null;
 
         // Set private static xdebugVersion
-        $prop = $this->refClass->getProperty('xdebugVersion');
-        $prop->setAccessible(true);
-        $prop->setValue($this, $this->parentXdebugVersion);
+        $this->setProperty('xdebugVersion', $this->parentXdebugVersion);
 
         // Set private static xdebugMode
-        $prop = $this->refClass->getProperty('xdebugMode');
-        $prop->setAccessible(true);
-        $prop->setValue($this, $mode);
+        $this->setProperty('xdebugMode', $mode);
 
         // Set private static xdebugActive
-        $prop = $this->refClass->getProperty('xdebugActive');
-        $prop->setAccessible(true);
-        $prop->setValue($this, $loaded && $mode !== 'off');
+        $this->setProperty('xdebugActive', $loaded && $mode !== 'off');
 
         // Ensure static private skipped is unset
-        $prop = $this->refClass->getProperty('skipped');
-        $prop->setAccessible(true);
-        $prop->setValue($this, null);
+        $this->setProperty('skipped', null);
 
         $this->restarted = false;
     }
@@ -154,6 +146,20 @@ class CoreMock extends XdebugHandler
     protected function restart(array $command): void
     {
         static::createAndCheck(false, $this, static::$settings);
+    }
+
+    /**
+     * @param string|null|bool $value
+     */
+    private function setProperty(string $name, $value): void
+    {
+        $prop = $this->refClass->getProperty($name);
+
+        if (PHP_VERSION_ID < 80100) {
+            $prop->setAccessible(true);
+        }
+
+        $prop->setValue($this, $value);
     }
 
     private static function updateServerEnvironment(): void

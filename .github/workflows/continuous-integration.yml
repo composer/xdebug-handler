@@ -26,16 +26,17 @@ jobs:
           - "8.1"
           - "8.2"
           - "8.3"
+          - "8.4"
         os: [ubuntu-latest]
         experimental: [false]
         include:
           - php-version: "7.2"
             os: windows-latest
             experimental: false
-          - php-version: "8.3"
+          - php-version: "8.4"
             os: windows-latest
             experimental: false
-          - php-version: "8.4"
+          - php-version: "8.5"
             os: ubuntu-latest
             experimental: true
 
@@ -55,7 +56,7 @@ jobs:
         if: ${{ !matrix.experimental }}
         run: vendor/bin/phpunit
 
-      # Show deprecations on PHP 8.4
+      # Show deprecations on latest PHP
       - name: Run tests (experimental)
         if: ${{ matrix.experimental }}
         run: vendor/bin/phpunit --display-deprecations

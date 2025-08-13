@@ -20,17 +20,17 @@ jobs:
       matrix:
         php-version:
           - "7.2"
-          - "8.3"
+          - "8.4"
         os: [ubuntu-latest]
         experimental: [false]
         include:
           - php-version: "7.2"
             os: windows-latest
             experimental: false
-          - php-version: "8.3"
+          - php-version: "8.4"
             os: windows-latest
             experimental: false
-          - php-version: "8.4"
+          - php-version: "8.5"
             os: ubuntu-latest
             experimental: true
 
@@ -48,9 +48,10 @@ jobs:
 
       - name: Run tests
         if: ${{ !matrix.experimental }}
+        # Include --fail-on-skipped when min PHP is > 7.2.5
         run: vendor/bin/phpunit --group functional
 
-      # Show deprecations on PHP 8.4
+      # Show deprecations on latest PHP
       - name: Run tests (experimental)
         if: ${{ matrix.experimental }}
-        run: vendor/bin/phpunit --group functional --display-deprecations
+        run: vendor/bin/phpunit --group functional --fail-on-skipped --display-deprecations
