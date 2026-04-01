@@ -42,7 +42,7 @@ jobs:
           php-version: "${{ matrix.php-version }}"
           coverage: xdebug
 
-      - uses: ramsey/composer-install@v3
+      - uses: ramsey/composer-install@v4
         with:
           dependency-versions: highest
 
