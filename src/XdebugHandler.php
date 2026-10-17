@@ -158,6 +158,13 @@ class XdebugHandler
             Process::setEnv($this->envAllowXdebug);
             self::$inRestart = true;
 
+            // The parent was replaced by exec, so the tmp ini is ours to delete
+            $execIni = getenv($this->envAllowXdebug.'_EXEC_INI');
+            if ($execIni !== false) {
+                Process::setEnv($this->envAllowXdebug.'_EXEC_INI');
+                @unlink($execIni);
+            }
+
             if (self::$xdebugVersion === null) {
                 // Skipped version is only set if Xdebug is not loaded
                 self::$skipped = $envArgs[1];
@@ -297,6 +304,13 @@ class XdebugHandler
         $this->tryEnableSignals();
         $this->notify(Status::RESTARTING, $displayCmd);
 
+        if ($this->canExec() && putenv($this->envAllowXdebug.'_EXEC_INI='.$this->tmpIni)) {
+            // Replaces the current process, so only returns on failure
+            pcntl_exec($command[0], array_slice($command, 1));
+            putenv($this->envAllowXdebug.'_EXEC_INI');
+            $this->notify(Status::ERROR, 'pcntl_exec failed, falling back to proc_open');
+        }
+
         $process = proc_open($cmd, [], $pipes);
         if (is_resource($process)) {
             $exitCode = proc_close($process);
@@ -317,6 +331,23 @@ class XdebugHandler
         }
 
         exit($exitCode);
+    }
+
+    /**
+     * Returns true if the process can be replaced using pcntl_exec
+     *
+     * The persistent ini cannot be used because the tmp ini cannot be deleted
+     * after an exec, and blackfire does not support pcntl_exec.
+     */
+    private function canExec(): bool
+    {
+        return PHP_VERSION_ID >= 70400
+            && !$this->persistent
+            && $this->tmpIni !== null
+            && $this->debug !== '2'
+            && function_exists('pcntl_exec')
+            && getenv('BLACKFIRE_AGENT_SOCKET') === false
+            && !isset($_SERVER['BLACKFIRE_AGENT_SOCKET']);
     }
 
     /**
