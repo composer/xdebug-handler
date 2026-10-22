@@ -24,17 +24,17 @@ jobs:
       matrix:
         php-version:
           - "7.2"
-          - "8.4"
+          - "8.5"
         os: [ubuntu-latest]
         experimental: [false]
         include:
           - php-version: "7.2"
             os: windows-latest
             experimental: false
-          - php-version: "8.4"
+          - php-version: "8.5"
             os: windows-latest
             experimental: false
-          - php-version: "8.5"
+          - php-version: "8.6"
             os: ubuntu-latest
             experimental: true
 
