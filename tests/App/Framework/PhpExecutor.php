@@ -72,7 +72,7 @@ class PhpExecutor
                 fclose($pipes[1]);
             }
 
-            $exitCode = proc_close($process);
+            proc_close($process);
         }
 
         return (string) $output;

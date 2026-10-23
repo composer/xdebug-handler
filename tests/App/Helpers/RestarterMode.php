@@ -31,6 +31,7 @@ class RestarterMode extends XdebugHandler
             $version = (string) phpversion('xdebug');
 
             if (version_compare($version, '3.1', '>=')) {
+                /** @var list<string> $modes */
                 $modes = xdebug_info('mode');
                 return !in_array('coverage', $modes, true);
             }

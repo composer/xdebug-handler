@@ -65,7 +65,7 @@ class SettingsTest extends BaseTestCase
      */
     public function testSyncSettings(): void
     {
-        $ini = EnvHelper::setInis('setAllInis', false, false);
+        EnvHelper::setInis('setAllInis', false, false);
 
         // Create the settings in the environment
         $loaded = true;

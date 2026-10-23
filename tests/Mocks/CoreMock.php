@@ -70,10 +70,11 @@ class CoreMock extends XdebugHandler
             list($loaded, $mode) = $loaded;
         }
 
-        if ($mode !== null && !$loaded) {
+        if (is_string($mode) && !$loaded) {
             throw new \InvalidArgumentException('Unexpected mode when not loaded: '.$mode);
         }
 
+        /** @var string $mode */
         $xdebug = new static($loaded, $mode);
 
         if ($parentProcess !== null) {
@@ -105,7 +106,7 @@ class CoreMock extends XdebugHandler
         parent::__construct('mock');
 
         $this->refClass = new \ReflectionClass('Composer\XdebugHandler\XdebugHandler');
-        $this->parentXdebugVersion = $loaded ? static::TEST_VERSION : null;
+        $this->parentXdebugVersion = $loaded ? self::TEST_VERSION : null;
 
         // Set private static xdebugVersion
         $this->setProperty('xdebugVersion', $this->parentXdebugVersion);

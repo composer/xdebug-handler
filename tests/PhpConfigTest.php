@@ -73,7 +73,7 @@ class PhpConfigTest extends BaseTestCase
      */
     public function testEnvironment(string $iniFunc, $scanDir, $phprc): void
     {
-        $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
+        EnvHelper::setInis($iniFunc, $scanDir, $phprc);
 
         $loaded = true;
         CoreMock::createAndCheck($loaded);

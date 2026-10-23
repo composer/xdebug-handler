@@ -111,6 +111,7 @@ class Status
      */
     private function getSkipped(string $className): string
     {
+        /** @var string $version */
         $version = $className::getSkippedVersion();
 
         if ($version === '') {

@@ -3,7 +3,7 @@ includes:
     - vendor/phpstan/phpstan-strict-rules/rules.neon
 
 parameters:
-    level: 9
+    level: 10
     bootstrapFiles:
         - tests/bootstrap_phpstan.php
     paths:

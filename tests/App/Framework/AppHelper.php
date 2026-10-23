@@ -152,10 +152,11 @@ class AppHelper extends AppRunner
         if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
             $key = array_search('--display', $_SERVER['argv'], true);
 
-            if ($key !== false) {
+            if (is_int($key)) {
                 $result = true;
                 Process::setEnv(self::ENV_IS_DISPLAY, '1');
-                unset($_SERVER['argv'][$key]);
+                // @phpstan-ignore argument.type
+                array_splice($_SERVER['argv'], $key, 1);
             } else {
                 $result = false !== getenv(self::ENV_IS_DISPLAY);
             }
@@ -171,10 +172,11 @@ class AppHelper extends AppRunner
         if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
             $key = array_search('--inis', $_SERVER['argv'], true);
 
-            if ($key !== false) {
+            if (is_int($key)) {
                 $result = true;
                 Process::setEnv(self::ENV_SHOW_INIS, '1');
-                unset($_SERVER['argv'][$key]);
+                // @phpstan-ignore argument.type
+                array_splice($_SERVER['argv'], $key, 1);
             } else {
                 $result = false !== getenv(self::ENV_SHOW_INIS);
             }

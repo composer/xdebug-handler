@@ -24,17 +24,18 @@ class Output
     private $isDisplay;
 
     /** @var int */
-    private $indent = 0;
+    private $indent;
+
+    /** @var int */
+    private $pid;
 
     public function __construct(bool $display)
     {
         $this->isDisplay = $display;
+        $this->indent = 0;
+        $this->pid = (int) getmypid();
 
-        if (!defined('STDOUT')) {
-            define('STDOUT', fopen('php://stdout', 'w'));
-        }
-
-        if (false === ($indent = getenv(self::ENV_OUTPUT_INDENT))) {
+        if (false === getenv(self::ENV_OUTPUT_INDENT)) {
             Process::setEnv(self::ENV_OUTPUT_INDENT, '0');
         } else {
             $this->indentIncrease();
@@ -48,12 +49,11 @@ class Output
 
     public function write(string $message, string $name): void
     {
-        $prefix = sprintf('%s[%d]', $name, getmypid());
+        $prefix = sprintf('%s[%d]', $name, $this->pid);
         $color = $this->isDisplay && $name !== Logs::LOGGER_NAME;
         $text = $this->format($prefix, $message, $color);
 
-        fwrite(STDOUT, $text);
-        fflush(STDOUT);
+        print($text);
     }
 
     private function format(string $prefix, string $text, bool $color): string

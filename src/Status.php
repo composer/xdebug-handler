@@ -34,6 +34,9 @@ class Status
     /** @var bool */
     private $debug;
 
+     /** @var int */
+    private $ellapsed;
+
     /** @var string */
     private $envAllowXdebug;
 
@@ -46,8 +49,8 @@ class Status
     /** @var bool */
     private $modeOff;
 
-     /** @var float */
-    private $time;
+     /** @var int */
+    private $pid;
 
     /**
      * @param string $envAllowXdebug Prefixed _ALLOW_XDEBUG name
@@ -57,11 +60,12 @@ class Status
     {
         $start = getenv(self::ENV_RESTART);
         Process::setEnv(self::ENV_RESTART);
-        $this->time = is_numeric($start) ? round((microtime(true) - $start) * 1000) : 0;
+        $this->ellapsed = is_numeric($start) ? (int) round((microtime(true) - $start) * 1000) : 0;
 
         $this->envAllowXdebug = $envAllowXdebug;
         $this->debug = $debug && defined('STDERR');
         $this->modeOff = false;
+        $this->pid = (int) getmypid();
     }
 
     /**
@@ -122,7 +126,7 @@ class Status
         }
 
         if ($this->debug) {
-            fwrite(STDERR, sprintf('xdebug-handler[%d] %s', getmypid(), $text.PHP_EOL));
+            fwrite(STDERR, sprintf('xdebug-handler[%d] %s', $this->pid, $text.PHP_EOL));
         }
     }
 
@@ -187,7 +191,7 @@ class Status
     private function reportRestarted(): void
     {
         $loaded = $this->getLoadedMessage();
-        $text = sprintf('Restarted (%d ms). %s', $this->time, $loaded);
+        $text = sprintf('Restarted (%d ms). %s', $this->ellapsed, $loaded);
         $level = $this->loaded !== null ? LogLevel::WARNING : null;
         $this->output($text, $level);
     }

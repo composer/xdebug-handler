@@ -25,8 +25,8 @@ class RestarterAllow extends XdebugHandler
 {
     protected function requiresRestart(bool $default): bool
     {
+        /** @var list<string> $argv */
         $argv = is_array($_SERVER['argv'] ?? []) ? $_SERVER['argv'] : [];
-        // @phpstan-ignore-next-line
         $matches = Preg::grep('/^-h$|^(?:--)?help$/', $argv);
         $required = count($matches) === 0;
 

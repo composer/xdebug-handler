@@ -70,7 +70,7 @@ class EnvironmentTest extends BaseTestCase
      */
     public function testEnvironmentBeforeRestart(string $iniFunc, $scanDir, $phprc, bool $standard): void
     {
-        $ini = EnvHelper::setInis($iniFunc, $scanDir, $phprc);
+        EnvHelper::setInis($iniFunc, $scanDir, $phprc);
         $loaded = true;
 
         $settings = $standard ? [] : ['setPersistent' => []];

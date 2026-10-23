@@ -63,7 +63,7 @@ class XdebugHandler
     private $envOriginalInis;
 
     /** @var bool */
-    private $persistent;
+    private $persistent = false;
 
     /** @var string|null */
     private $script;
@@ -632,7 +632,6 @@ class XdebugHandler
     {
         if (function_exists('pcntl_async_signals') && function_exists('pcntl_signal')) {
             pcntl_async_signals(true);
-            $message = 'Async signals enabled';
 
             if (!self::$inRestart) {
                 // Restarting, so ignore SIGINT in parent
@@ -641,9 +640,11 @@ class XdebugHandler
                 // Restarted, no handler set so force default action
                 pcntl_signal(SIGINT, SIG_DFL);
             }
+
+            return;
         }
 
-        if (!self::$inRestart && function_exists('sapi_windows_set_ctrl_handler')) {
+        if (function_exists('sapi_windows_set_ctrl_handler') && !self::$inRestart) {
             // Restarting, so set a handler to ignore CTRL events in the parent.
             // This ensures that CTRL+C events will be available in the child
             // process without having to enable them there, which is unreliable.
@@ -691,6 +692,7 @@ class XdebugHandler
         self::$xdebugVersion = $version !== false ? $version : 'unknown';
 
         if (version_compare(self::$xdebugVersion, '3.1', '>=')) {
+            /** @var list<string> $modes */
             $modes = xdebug_info('mode');
             self::$xdebugMode = count($modes) === 0 ? 'off' : implode(',', $modes);
             self::$xdebugActive = self::$xdebugMode !== 'off';
