@@ -67,7 +67,7 @@ class CoreMock extends XdebugHandler
         $mode = null;
 
         if (is_array($loaded)) {
-            list($loaded, $mode) = $loaded;
+            [$loaded, $mode] = $loaded;
         }
 
         if (is_string($mode) && !$loaded) {

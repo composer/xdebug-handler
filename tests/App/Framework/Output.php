@@ -18,7 +18,7 @@ use Composer\XdebugHandler\Process;
 
 class Output
 {
-    public const ENV_OUTPUT_INDENT = 'XDEBUG_HANDLER_TEST_INDENT';
+    public const ENV_OUTPUT_PIDS = 'XDEBUG_HANDLER_TEST_PID';
 
     /** @var bool */
     private $isDisplay;
@@ -32,19 +32,8 @@ class Output
     public function __construct(bool $display)
     {
         $this->isDisplay = $display;
-        $this->indent = 0;
         $this->pid = (int) getmypid();
-
-        if (false === getenv(self::ENV_OUTPUT_INDENT)) {
-            Process::setEnv(self::ENV_OUTPUT_INDENT, '0');
-        } else {
-            $this->indentIncrease();
-        }
-    }
-
-    public function __destruct()
-    {
-        $this->indentDecrease();
+        $this->indent = $this->calculateIndent();
     }
 
     public function write(string $message, string $name): void
@@ -54,6 +43,29 @@ class Output
         $text = $this->format($prefix, $message, $color);
 
         print($text);
+    }
+
+    private function calculateIndent(): int
+    {
+        $envPids = (string) getenv(self::ENV_OUTPUT_PIDS);
+
+        if ('' === $envPids) {
+            $pids = [];
+        } else {
+            $pids = array_map(function ($item) {
+                return (int) $item;
+            }, explode(',', $envPids));
+        }
+
+        if (!in_array($this->pid, $pids, true)) {
+            $pids[] = $this->pid;
+        } elseif ($pids[count($pids) - 1] !== $this->pid) {
+            array_pop($pids);
+        }
+
+        Process::setEnv(self::ENV_OUTPUT_PIDS, implode(',', $pids));
+
+        return (count($pids) - 1) * 2;
     }
 
     private function format(string $prefix, string $text, bool $color): string
@@ -78,21 +90,5 @@ class Output
         }
 
         return $text;
-    }
-
-    private function indentDecrease(): void
-    {
-        if (false !== ($indent = getenv(self::ENV_OUTPUT_INDENT))) {
-            $this->indent = intval($indent) - 2;
-            Process::setEnv(self::ENV_OUTPUT_INDENT, (string) $this->indent);
-        }
-    }
-
-    private function indentIncrease(): void
-    {
-        if (false !== ($indent = getenv(self::ENV_OUTPUT_INDENT))) {
-            $this->indent = intval($indent) + 2;
-            Process::setEnv(self::ENV_OUTPUT_INDENT, (string) $this->indent);
-        }
     }
 }

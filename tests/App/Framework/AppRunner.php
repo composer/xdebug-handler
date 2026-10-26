@@ -13,12 +13,16 @@ declare(strict_types=1);
 
 namespace Composer\XdebugHandler\Tests\App\Framework;
 
+/**
+ * This class runs and provides functionality for the xdebug-handler functional
+ * tests.
+ */
 class AppRunner
 {
     /** @var string */
-    private $scriptDir;
+    protected $scriptDir;
     /** @var PhpExecutor */
-    private $phpExecutor;
+    protected $phpExecutor;
 
     public function __construct(?string $scriptDir = null)
     {
@@ -31,6 +35,9 @@ class AppRunner
         $this->phpExecutor = new PhpExecutor();
     }
 
+    /**
+     * Runs a script and returns its captured output
+     */
     public function run(string $script, ?PhpOptions $options = null, bool $allow = false): Logs
     {
         $script = $this->checkScript($script);
@@ -54,19 +61,6 @@ class AppRunner
         return new Logs($outputLines);
     }
 
-    public function runScript(string $script, ?PhpOptions $options = null): void
-    {
-        $script = $this->checkScript($script);
-
-        if ($options === null) {
-            $options = new PhpOptions();
-        }
-
-        // set passthru in child proccesses so output gets collected
-        $options->setPassthru(true);
-        $this->phpExecutor->run($script, $options, $this->scriptDir);
-    }
-
     public function getAppName(string $script): string
     {
         return basename($script, '.php');
@@ -84,7 +78,7 @@ class AppRunner
         return strtoupper(str_replace(array('-', ' '), '_', $name));
     }
 
-    private function checkScript(string $script): string
+    protected function checkScript(string $script): string
     {
         if (file_exists($script)) {
             return $script;

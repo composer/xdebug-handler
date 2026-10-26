@@ -18,9 +18,9 @@ use Composer\XdebugHandler\Tests\App\Framework\AppHelper;
 use Composer\XdebugHandler\XdebugHandler;
 
 /**
- * Restarts without xdebug with phar.read_only=0, even if xdebug is not loaded
+ * Restarts without xdebug with phar.readonly=0, even if xdebug is not loaded
  *
- * Usage: php -dphar.read_only=1 app-extend-ini.php
+ * Usage: php -dphar.readonly=1 app-extend-ini.php
  */
 
 $app = new AppHelper(__FILE__);

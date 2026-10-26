@@ -13,6 +13,40 @@ declare(strict_types=1);
 
 namespace Composer\XdebugHandler\Tests\App\Framework;
 
+use Composer\Pcre\Preg;
+
+/**
+ * This class provides the log output from processes run by the test framework.
+ *
+ * The following (truncated) output lines:
+ *
+ *     app-basic[413] start
+ *     logger[413] Checking APP_BASIC_ALLOW_XDEBUG
+ *     ...
+ *     app-basic[414] start
+ *     logger[414] Checking APP_BASIC_ALLOW_XDEBUG
+ *     ...
+ *     logger[413] Restarted process exited 0
+ *
+ * are stored in the items array as:
+ *
+ *     items[0] = [
+ *       { pid: 413, name: app-basic, value: start },
+ *       { pid: 413, name: logger, value: Checking APP_BASIC_ALLOW_XDEBUG },
+ *       { pid: 413, name: logger, value: Restarted process exited 0 },
+ *     ]
+ *
+ *     items[1] = [
+ *       { pid: 414, name: app-basic, value: start },
+ *       { pid: 414, name: logger, value: Checking APP_BASIC_ALLOW_XDEBUG },
+ *     ]
+ *
+ * The zero-based indexes represent the process order. They are accessed by using
+ * a one-based sequence number in a call to getDefault() or getNamed().
+ *
+ *   getDefault(1): returns logger values from process 0 (pid 413)
+ *   getNamed(2, 'app-basic'): returns app-basic values from process 1 (pid 414)
+ */
 class Logs
 {
     public const LOGGER_NAME = 'logger';
@@ -21,137 +55,74 @@ class Logs
     private $items = [];
 
     /**
-     *
      * @param list<string> $outputLines
      */
     public function __construct(array $outputLines)
     {
-        $pids = [];
+        $indexes = [];
 
         foreach ($outputLines as $line) {
             $line = trim($line);
 
-            // @phpstan-ignore booleanNot.exprNotBoolean
-            if (!preg_match('/^(.+)\\[(\\d+)\\](.+)$/', $line, $matches)) {
+            if (!Preg::isMatch('/^(.+)\[(\d+)\]\s(.+)$/', $line, $matches)) {
                 continue;
             }
 
             $pid = (int) $matches[2];
-            $item = new LogItem($pid, $matches[1], $matches[3]);
+            $item = new LogItem($pid, (string) $matches[1], (string) $matches[3]);
 
-            if (!isset($pids[$pid])) {
+            if (!isset($indexes[$pid])) {
                 $this->items[] = [];
-                $pids[$pid] = count($this->items) - 1;
+                $indexes[$pid] = count($this->items) - 1;
             }
 
-            $index = $pids[$pid];
+            $index = $indexes[$pid];
             $this->items[$index][] = $item;
         }
     }
 
     /**
+     * Provides the debug output from a process
      *
-     * @return list<LogItem>
+     * This is the default xdebug-handler debug output.
+     *
+     * @param int $sequence The one-based sequence number of the process
+     * @return ProcessLog
      */
-    public function getOutputForProcess(int $seqNo): array
+    public function getDefault(int $sequence): ProcessLog
     {
-        $index = $seqNo - 1;
-
-        if (isset($this->items[$index])) {
-           return $this->items[$index];
-        }
-
-        return [];
+        return $this->getProcessLog($sequence, 'logger');
     }
 
     /**
+     * Provides the log output from a named script in a process
      *
-     * @return list<LogItem>
+     * This is the output from the script.
+     *
+     * @param int $sequence The one-based sequence number of the process
+     * @param string $name The app name to filter on
+     * @return ProcessLog
      */
-    public function getValuesForProcess(int $seqNo, bool $forLogger = true): array
+    public function getNamed(int $sequence, string $name): ProcessLog
     {
-        $items = $this->getOutputForProcess($seqNo);
-
-        if ($forLogger) {
-            $result = $this->filterValuesForLogger($items);
-        } else {
-            $result = $this->filterValuesForScript($items);
-        }
-
-        return $result;
+        return $this->getProcessLog($sequence, $name);
     }
 
     /**
+     * Provides either the default or named log output from a process
      *
-     * @return list<LogItem>
+     * @param int $sequence The one-based sequence number of the process
+     * @param string $name The app name to filter on
+     * @return ProcessLog
      */
-    public function getValuesForProcessName(int $seqNo, string $name): array
+    private function getProcessLog(int $sequence, string $name): ProcessLog
     {
-        $items = $this->getOutputForProcess($seqNo);
+        $items = $this->items[$sequence - 1] ?? [];
 
-        return $this->filterValuesForScriptName($items, $name);
-    }
-
-    /**
-     *
-     * @param list<LogItem> $items
-     */
-    public function getItemFromList(array $items, int $seqNo, bool $complete = false): string
-    {
-        $index = $seqNo - 1;
-
-        if (!isset($items[$index])) {
-            throw new \LogicException('Log item not found at index: '.$index);
-        }
-
-        $item = $items[$index];
-
-        if (!$complete) {
-            return $item->value;
-        }
-
-        return sprintf('%s[%d] %s', $item->name, $item->pid, $item->value);
-    }
-
-    /**
-     *
-     * @param list<LogItem> $items
-     * @return list<LogItem>
-     */
-    private function filterValuesForScript(array $items): array
-    {
-        $result =  array_filter($items, function($item) {
-            return $item->name !== self::LOGGER_NAME;
-        });
-
-        return array_values($result);
-    }
-
-    /**
-     *
-     * @param list<LogItem> $items
-     * @return list<LogItem>
-     */
-    private function filterValuesForScriptName(array $items, string $name): array
-    {
         $result =  array_filter($items, function($item) use ($name) {
             return $item->name === $name;
         });
 
-        return array_values($result);
-    }
-
-    /**
-     *
-     * @param list<LogItem> $items
-     * @return list<LogItem>
-     */
-    private function filterValuesForLogger(array $items): array
-    {
-        $result = array_filter($items, function($item) {
-            return $item->name === 'logger';
-        });
-
-        return array_values($result);
+        return new ProcessLog(array_values($result), $sequence);
     }
 }

@@ -15,16 +15,18 @@ namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\Tests\App\Framework\AppRunner;
 use Composer\XdebugHandler\Tests\App\Framework\LogItem;
+use Composer\XdebugHandler\Tests\App\Framework\Messages;
 use Composer\XdebugHandler\Tests\App\Framework\PhpOptions;
 use Composer\XdebugHandler\Tests\App\Helpers\FunctionalTestCase;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @group functional
+ * @group xdebug-functional
  */
 class AppRestartTest extends FunctionalTestCase
 {
     /**
+     * Tests basic restart functionality
      *
      * @requires extension xdebug
      */
@@ -33,10 +35,14 @@ class AppRestartTest extends FunctionalTestCase
         $script = 'app-basic.php';
 
         $logs = $this->runner->run($script);
-        $this->checkRestart($logs);
+
+        $provider = $this->createMessageProvider($script);
+        [$main, $child] = $provider->getRestartMessages();
+        $this->checkRestart($logs, $main, $child);
     }
 
     /**
+     * Tests a restart using an auto_prepend_file
      *
      * @requires extension xdebug
      */
@@ -48,12 +54,21 @@ class AppRestartTest extends FunctionalTestCase
         $options->addPhpArgs('-dauto_prepend_file=app-prepend.php');
 
         $logs = $this->runner->run($script, $options);
-        $this->checkRestart($logs);
 
-        // check app-plain has run
-        $appName = $this->runner->getAppName($script);
-        $child = $logs->getValuesForProcessName(2, $appName);
-        self::assertNotEmpty($child);
+        $provider = $this->createMessageProvider('app-prepend');
+        [$main, $child] = $provider->getRestartMessages();
+        $this->checkRestart($logs, $main, $child);
+
+        // check app-plain
+        $processLog = $logs->getNamed(2, 'app-plain');
+
+        // check not loaded at index 1
+        $expected = '[xdebug] extension NOT loaded';
+        $this->checkExpectedMessage($processLog, 1, $expected);
+
+        // check settings available at index 2
+        $expected = '[settings] available';
+        $this->checkExpectedMessage($processLog, 2, $expected);
     }
 
     /**
@@ -69,12 +84,21 @@ class AppRestartTest extends FunctionalTestCase
         $options->setStdin(true);
 
         $logs = $this->runner->run($script, $options);
-        $this->checkRestart($logs);
 
-        // check app-plain has run
-        $appName = 'Standard input code';
-        $child = $logs->getValuesForProcessName(2, $appName);
-        self::assertNotEmpty($child);
+        $provider = $this->createMessageProvider('app-prepend.php');
+        [$main, $child] = $provider->getRestartMessages();
+        $this->checkRestart($logs, $main, $child);
+
+        // check app-plain
+        $processLog = $logs->getNamed(2, 'Standard input code');
+
+        // check not loaded at index 1
+        $expected = '[xdebug] extension NOT loaded';
+        $this->checkExpectedMessage($processLog, 1, $expected);
+
+        // check settings available at index 2
+        $expected = '[settings] available';
+        $this->checkExpectedMessage($processLog, 2, $expected);
     }
 
     /**
@@ -91,13 +115,22 @@ class AppRestartTest extends FunctionalTestCase
         $options->setStdin(true);
 
         $logs = $this->runner->run($script, $options);
-        $this->checkRestart($logs, 0);
 
-        // check not loaded from app-plain
-        $appName = $this->runner->getAppName('app-plain.php');
-        $child = $logs->getValuesForProcessName(2, $appName);
-        $item = $logs->getItemFromList($child, 2);
-        self::assertStringContainsString('The Xdebug extension is not loaded', $item);
+        $provider = $this->createMessageProvider('Standard input code');
+        [$main] = $provider->getRestartMessages();
+        // app-plain does not implement xdebug-handler so there is no logger output
+        $this->checkRestart($logs, $main, []);
+
+        // check app-plain
+        $processLog = $logs->getNamed(2, 'app-plain');
+
+        // check not loaded at index 1
+        $expected = '[xdebug] extension NOT loaded';
+        $this->checkExpectedMessage($processLog, 1, $expected);
+
+        // check settings not available at index 2
+        $expected = '[settings] not available';
+        $this->checkExpectedMessage($processLog, 2, $expected);
     }
 
     /**
@@ -109,23 +142,27 @@ class AppRestartTest extends FunctionalTestCase
         $script = 'app-extend-ini.php';
 
         $options = new PhpOptions();
-        $options->addPhpArgs('-dphar.read_only=1');
+        $options->addPhpArgs('-dphar.readonly=1');
 
         $logs = $this->runner->run($script, $options);
-        $this->checkRestart($logs);
 
-        // check ini setting has changed in child
-        $appName = $this->runner->getAppName($script);
-        $child = $logs->getValuesForProcessName(2, $appName);
-        $item = $logs->getItemFromList($child, 2);
-        self::assertStringContainsString('phar.readonly=0', $item);
+        $provider = $this->createMessageProvider($script);
+        [$main, $child] = $provider->getRestartMessages();
+        $this->checkRestart($logs, $main, $child);
+
+        // check child
+        $processLog = $logs->getNamed(2, 'app-extend-ini');
+
+        // check ini setting has changed at index 1
+        $expected = 'phar.readonly=0';
+        $this->checkExpectedMessage($processLog, 1, $expected);
     }
 
     /**
      *
      * @requires extension xdebug
      */
-    public function testRestartWithXdebug(): void
+    public function testRestartWithXdebugModeChange(): void
     {
         $version = (string) phpversion('xdebug');
 
@@ -139,43 +176,104 @@ class AppRestartTest extends FunctionalTestCase
         $options->addPhpArgs('-dxdebug.mode=develop');
 
         $logs = $this->runner->run($script, $options);
-        $this->checkRestart($logs, 2);
 
-        $child = $logs->getValuesForProcess(2);
-        $item = $logs->getItemFromList($child, 2);
-        self::assertStringContainsString('The Xdebug extension is loaded', $item);
-        self::assertStringContainsString('xdebug.mode=coverage', $item);
+        $provider = $this->createMessageProvider($script);
+        [$main, $child] = $provider->getRestartMessages();
+
+        // Modify restarted messages
+        $child['restarted'][1] = 'The Xdebug extension is loaded';
+        $child['restarted'][2] = 'xdebug.mode=coverage';
+        $this->checkRestart($logs, $main, $child);
     }
 
     /**
      *
      * @requires extension xdebug
      */
-    public function testRestartWithProcessPersistent(): void
+    public function testRestartChildInStandardConfig(): void
+    {
+        $script = 'app-standard.php';
+
+        $logs = $this->runner->run($script);
+
+        $provider = $this->createMessageProvider($script);
+        [$main, $child] = $provider->getRestartMessages();
+        $this->checkRestart($logs, $main, $child);
+
+        // first sub-process - app-plain
+        $processLog = $logs->getNamed(3, 'app-plain');
+
+        // check loaded at index 1
+        $expected = 'extension loaded';
+        $this->checkExpectedMessage($processLog, 1, $expected);
+
+        // check settings not applicable at index 2
+        $expected = '[settings] not applicable';
+        $this->checkExpectedMessage($processLog, 2, $expected);
+
+        // second sub-process - app-basic
+        $processLog = $logs->getDefault(4);
+
+        $provider = $this->createMessageProvider('app-basic');
+        $expected = $provider->getExistingMessages();
+        $this->checkExpectedMessages($expected, $processLog, 'app-basic');
+
+        // get app-basic logs
+        $processLog = $logs->getNamed(4, 'app-basic');
+
+        // check settings available at index 2
+        $expected = '[settings] available';
+        $this->checkExpectedMessage($processLog, 2, $expected);
+    }
+
+    /**
+     *
+     * @requires extension xdebug
+     */
+    public function testRestartChildInPersistentConfig(): void
     {
         $script = 'app-persistent.php';
 
         $logs = $this->runner->run($script);
-        $this->checkRestart($logs);
 
-        // first sub-process - check not loaded from app-plain
-        $appName = $this->runner->getAppName('app-plain.php');
-        $child = $logs->getValuesForProcessName(3, $appName);
-        $item = $logs->getItemFromList($child, 2);
-        self::assertStringContainsString('The Xdebug extension is not loaded', $item);
+        $provider = $this->createMessageProvider($script);
+        [$main, $child] = $provider->getRestartMessages(true);
+        $this->checkRestart($logs, $main, $child);
 
-        // second sub-process - check loaded from app-plain
-        $appName = $this->runner->getAppName('app-plain.php');
-        $child = $logs->getValuesForProcessName(4, $appName);
-        $item = $logs->getItemFromList($child, 2);
-        self::assertStringContainsString('The Xdebug extension is loaded', $item);
+        // first sub-process - app-plain
+        $processLog = $logs->getNamed(3, 'app-plain');
 
-        // third sub-process - check not loaded from app-basic
-        $child = $logs->getValuesForProcess(5);
-        $item = $logs->getItemFromList($child, 2);
-        self::assertStringContainsString('The Xdebug extension is not loaded', $item);
+        // check not loaded at index 1
+        $expected = 'extension NOT loaded';
+        $this->checkExpectedMessage($processLog, 1, $expected);
 
-        $item = $logs->getItemFromList($child, 3);
-        self::assertStringContainsString('Process called with existing restart settings', $item);
+        // check settings available at index 2
+        $expected = '[settings] available';
+        $this->checkExpectedMessage($processLog, 2, $expected);
+
+        // second sub-process - app-plain
+        $processLog = $logs->getNamed(4, 'app-plain');
+
+        // check loaded at index 1
+        $expected = 'extension loaded';
+        $this->checkExpectedMessage($processLog, 1, $expected);
+
+        // check settings not applicable at index 2
+        $expected = '[settings] not applicable';
+        $this->checkExpectedMessage($processLog, 2, $expected);
+
+        // third sub-process - app-basic
+        $processLog = $logs->getDefault(5);
+
+        $provider = $this->createMessageProvider('app-basic');
+        $expected = $provider->getExistingMessages();
+        $this->checkExpectedMessages($expected, $processLog, 'app-basic');
+
+        // get app-basic logs
+        $processLog = $logs->getNamed(5, 'app-basic');
+
+        // check settings available at index 2
+        $expected = '[settings] available';
+        $this->checkExpectedMessage($processLog, 2, $expected);
     }
 }

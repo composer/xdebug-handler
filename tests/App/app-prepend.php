@@ -25,8 +25,7 @@ use Composer\XdebugHandler\XdebugHandler;
  * ini content is merged, so it is available in the restart.
  *
  * If stdin is used, it will be read in the restart:
- * Usage (Unixy)   : cat app-plain.php | php -dauto_prepend_file=app-prepend.php
- * Usage (Windows) : type app-plain.php | php -dauto_prepend_file=app-prepend.php
+ * Usage: php -dauto_prepend_file=app-prepend.php < app-plain.php
  */
 
 $app = new AppHelper(__FILE__);
