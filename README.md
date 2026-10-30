@@ -42,6 +42,8 @@ The constructor takes a single parameter, `$envPrefix`, which is upper-cased and
 - `MYAPP_ALLOW_XDEBUG=1` to override automatic restart and allow Xdebug
 - `MYAPP_ORIGINAL_INIS` to obtain ini file locations in a restarted process
 
+>If the application restarts in a new PHP process, it starts from the beginning, so any code that ran before `$xdebug->check()` runs again. Call this method as early as possible to avoid repeating unnecessary work.
+
 ## Advanced Usage
 
 * [How it works](#how-it-works)
@@ -91,12 +93,14 @@ use Composer\XdebugHandler\XdebugHandler;
 
 $files = XdebugHandler::getAllIniFiles();
 
-# $files[0] always exists, it could be an empty string
+// $files[0] always exists, it could be an empty string
 $loadedIni = array_shift($files);
 $scannedInis = $files;
 ```
 
 These locations are also available in the `MYAPP_ORIGINAL_INIS` environment variable. This is a path-separated string comprising the location returned from `php_ini_loaded_file`, which could be empty, followed by locations parsed from calling `php_ini_scanned_files`.
+
+---
 
 #### _getRestartSettings(): ?array_
 Returns an array of settings that can be used with PHP [sub-processes](#sub-processes), or null if the process was not restarted.
@@ -117,6 +121,7 @@ $settings = XdebugHandler::getRestartSettings();
  *    'skipped'     => the skipped version from getSkippedVersion (string)
  */
 ```
+---
 
 #### _getSkippedVersion(): string_
 Returns the Xdebug version string that was skipped by the restart, or an empty string if there was no restart (or Xdebug is still loaded, perhaps by an extending class restarting for a reason other than removing Xdebug).
@@ -125,8 +130,9 @@ Returns the Xdebug version string that was skipped by the restart, or an empty s
 use Composer\XdebugHandler\XdebugHandler;
 
 $version = XdebugHandler::getSkippedVersion();
-# $version: '3.1.1' (for example), or an empty string
+// $version: '3.1.1' (for example), or an empty string
 ```
+---
 
 #### _isXdebugActive(): bool_
 Returns true if Xdebug is loaded and is running in an active mode (if it supports modes). Returns false if Xdebug is not loaded, or it is running with `xdebug.mode=off`.
@@ -156,8 +162,12 @@ WARNING  No restart (Unable to create temp ini file at: ...)
 
 Status messages can also be output with `XDEBUG_HANDLER_DEBUG`. See [Troubleshooting](#troubleshooting).
 
+---
+
 #### _setMainScript(string $script): self_
 Sets the location of the main script to run in the restart. This is only needed in more esoteric use-cases, or if the `argv[0]` location is inaccessible. The script name `--` is supported for standard input.
+
+---
 
 #### _setPersistent(): self_
 Configures the restart using [persistent settings](#persistent-settings), so that Xdebug is not loaded in any sub-process.
@@ -171,16 +181,17 @@ function SubProcessWithXdebug()
 {
     $phpConfig = new Composer\XdebugHandler\PhpConfig();
 
-    # Set the environment to the original configuration
+    // Set the environment to the original configuration
     $phpConfig->useOriginal();
 
-    # run the process with Xdebug loaded
+    // Run the process with Xdebug loaded
     ...
 
-    # Restore Xdebug-free environment
+    // Restore Xdebug-free environment
     $phpConfig->usePersistent();
 }
 ```
+---
 
 ### Process configuration
 The library offers two strategies to invoke a new PHP process without loading Xdebug, using either _standard_ or _persistent_ settings. Note that this is only important if the application calls a PHP sub-process.
@@ -222,20 +233,20 @@ use Composer\XdebugHandler\PhpConfig;
 $config = new PhpConfig;
 
 $options = $config->useOriginal();
-# $options:     empty array
-# environment:  PHPRC and PHP_INI_SCAN_DIR set to original values
+// $options:     empty array
+// environment:  PHPRC and PHP_INI_SCAN_DIR set to original values
 
 $options = $config->useStandard();
-# $options:     [-n, -c, tmpIni]
-# environment:  PHPRC and PHP_INI_SCAN_DIR set to original values
+// $options:     [-n, -c, tmpIni]
+// environment:  PHPRC and PHP_INI_SCAN_DIR set to original values
 
 $options = $config->usePersistent();
-# $options:     empty array
-# environment:  PHPRC=tmpIni, PHP_INI_SCAN_DIR=''
+// $options:     empty array
+// environment:  PHPRC=tmpIni, PHP_INI_SCAN_DIR=''
 ```
 
 ### Troubleshooting
-The following environment settings can be used to troubleshoot unexpected behavior:
+The following environment settings can be used to troubleshoot unexpected behaviour:
 
 * `XDEBUG_HANDLER_DEBUG=1` Outputs status messages to `STDERR`, if it is defined, irrespective of any PSR3 logger. Each message is prefixed `xdebug-handler[pid]`, where pid is the process identifier.
 
@@ -250,12 +261,16 @@ It is only called if `MYAPP_ALLOW_XDEBUG` is empty, so it will not be called in 
 
 Note that the [setMainScript()](#setmainscriptstring-script-self) and [setPersistent()](#setpersistent-self) setters can be used here, if required.
 
+---
+
 #### _restart(array $command): void_
 An application can extend this to modify the temporary ini file, its location given in the `tmpIni` property. New settings can be safely appended to the end of the data, which is `PHP_EOL` terminated.
 
 The `$command` parameter is an array of unescaped command-line arguments that will be used for the new process.
 
 Remember to finish with `parent::restart($command)`.
+
+---
 
 #### Example
 This example demonstrates two ways to extend basic functionality:
@@ -275,18 +290,19 @@ class MyRestarter extends XdebugHandler
     protected function requiresRestart(bool $default): bool
     {
         if (Command::isHelp()) {
-            # No need to disable Xdebug for this
+            // No need to disable Xdebug for this
             return false;
         }
 
         $this->required = (bool) ini_get('phar.readonly');
+
         return $this->required || $default;
     }
 
     protected function restart(array $command): void
     {
         if ($this->required) {
-            # Add required ini setting to tmpIni
+            // Add required ini setting to tmpIni
             $content = file_get_contents($this->tmpIni);
             $content .= 'phar.readonly=0'.PHP_EOL;
             file_put_contents($this->tmpIni, $content);
