@@ -146,8 +146,19 @@ class AppRestartTest extends FunctionalTestCase
 
         $logs = $this->runner->run($script, $options);
 
+        // use types to compose the message
         $provider = $this->createMessageProvider($script);
-        [$main, $child] = $provider->getRestartMessages();
+        [$mainTypes, $childTypes] = $provider->getRestartTypes();
+        $extras = [];
+
+        $this->modifyTypes($mainTypes, 'check', 'insert-after', 'info1');
+        $extras['info1'] = ['phar.readonly=1 detected, restart required'];
+
+        $this->modifyTypes($mainTypes, 'loaded', 'insert-after', 'info2');
+        $extras['info2'] = ['phar.readonly=0 added to temporary ini file'];
+
+        $main = $provider->compose($mainTypes, $extras);
+        $child = $provider->compose($childTypes);
         $this->checkRestart($logs, $main, $child);
 
         // check child

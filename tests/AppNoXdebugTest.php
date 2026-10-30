@@ -55,15 +55,20 @@ class AppNoXdebugTest extends FunctionalTestCase
 
         $logs = $this->runner->run($script, $options);
 
+        // use types to compose the message
         $provider = $this->createMessageProvider($script);
         [$mainTypes, $childTypes] = $provider->getRestartTypes();
+        $extras = [];
 
-        $index = array_search('loaded', $mainTypes, true);
-        if (is_int($index)) {
-            $mainTypes[$index] = 'not-loaded';
-        }
+        $this->modifyTypes($mainTypes, 'check', 'insert-after', 'info1');
+        $extras['info1'] = ['phar.readonly=1 detected, restart required'];
 
-        $main = $provider->compose($mainTypes);
+        $this->modifyTypes($mainTypes, 'loaded', 'insert-after', 'info2');
+        $extras['info2'] = ['phar.readonly=0 added to temporary ini file'];
+
+        $this->modifyTypes($mainTypes, 'loaded', 'replace', 'not-loaded');
+
+        $main = $provider->compose($mainTypes, $extras);
         $child = $provider->compose($childTypes);
         $this->checkRestart($logs, $main, $child);
 

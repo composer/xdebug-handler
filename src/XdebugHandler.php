@@ -142,7 +142,7 @@ class XdebugHandler
      */
     public function check(): void
     {
-        $this->statusWriter->reportCheck();
+        $this->statusWriter->reportCheck(get_class($this));
         $envArgs = explode('|', (string) getenv($this->envAllowXdebug));
 
         if (!((bool) $envArgs[0]) && $this->requiresRestart(self::$xdebugActive)) {
@@ -258,6 +258,28 @@ class XdebugHandler
     {
         self::setXdebugDetails();
         return self::$xdebugActive;
+    }
+
+    /**
+     * Allows an extending class to output an error status message
+     *
+     * This will be logged at WARNING level if a logger has been set and output
+     * to STDERR if XDEBUG_HANDLER_DEBUG=1.
+     */
+    protected function outputError(string $message): void
+    {
+        $this->statusWriter->error(trim($message));
+    }
+
+    /**
+     * Allows an extending class to output an informational status message
+     *
+     * This will be logged at DEBUG level if a logger has been set and output to
+     * STDERR if XDEBUG_HANDLER_DEBUG=1.
+     */
+    protected function outputInfo(string $message): void
+    {
+        $this->statusWriter->info(trim($message));
     }
 
     /**

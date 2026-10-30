@@ -253,7 +253,7 @@ The following environment settings can be used to troubleshoot unexpected behavi
 * `XDEBUG_HANDLER_DEBUG=2` As above, but additionally saves the temporary ini file and reports its location in a status message.
 
 ### Extending the library
-The API is defined by classes and their accessible elements that are not annotated as @internal. The main class has two protected methods that can be overridden to provide additional functionality:
+The API is defined by classes and their accessible elements that are not annotated as @internal. The main class has four protected methods, two of which can be overridden to provide additional functionality:
 
 #### _requiresRestart(bool $default): bool_
 By default the process will restart if Xdebug is loaded and not running with `xdebug.mode=off`. Extending this method allows an application to decide, by returning a boolean (or equivalent) value.
@@ -269,6 +269,16 @@ An application can extend this to modify the temporary ini file, its location gi
 The `$command` parameter is an array of unescaped command-line arguments that will be used for the new process.
 
 Remember to finish with `parent::restart($command)`.
+
+---
+
+#### _outputError(string $message): void_
+Outputs an error status message. This will be logged at WARNING level and output to STDERR. See [setLogger](#setloggerloggerinterface-logger-self) and  [Troubleshooting](#troubleshooting) for more information.
+
+---
+
+#### _outputInfo(string $message): void_
+Output an informational status message. This will be logged at DEBUG level and output to STDERR. See [setLogger](#setloggerloggerinterface-logger-self) and  [Troubleshooting](#troubleshooting) for more information.
 
 ---
 
@@ -296,6 +306,11 @@ class MyRestarter extends XdebugHandler
 
         $this->required = (bool) ini_get('phar.readonly');
 
+        if ($this->required) {
+            // Output a status message
+            $this->outputInfo('phar.readonly=1 detected, restart required');
+        }
+
         return $this->required || $default;
     }
 
@@ -306,6 +321,9 @@ class MyRestarter extends XdebugHandler
             $content = file_get_contents($this->tmpIni);
             $content .= 'phar.readonly=0'.PHP_EOL;
             file_put_contents($this->tmpIni, $content);
+
+            // Output a status message
+            $this->outputInfo('phar.readonly=0 added to temporary ini file');
         }
 
         parent::restart($command);
