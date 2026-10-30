@@ -50,12 +50,12 @@ php app-extend-allow.php -h --display
 ### app-extend-ini
 
 Demonstrates how an extended class can restart with a specific ini setting, even if xdebug is not
-loaded. The `phar_readonly` ini setting is used in this example.
+loaded. The `phar.readonly` ini setting is used in this example.
 
 ```sh
 cd tests/App
 
-php -dphar.read_only=1 app-extend-ini.php --display
+php -dphar.readonly=1 app-extend-ini.php --display
 ```
 
 ### app-extend-mode
@@ -97,11 +97,7 @@ merged, so it is available in the restart.
 If stdin is used, it will be read in the restart:
 
 ```sh
-# Unixy
-cat app-plain.php | php -dauto_prepend_file=app-prepend.php -- --display
-
-# Windows
-type app-plain.php | php -dauto_prepend_file=app-prepend.php -- --display
+php -dauto_prepend_file=app-prepend.php -- --display < app-plain.php
 ```
 
 ### app-stdin
@@ -114,11 +110,7 @@ Uses xdebug-handler from stdin to remove xdebug from a script. Note that either 
 ```sh
 cd tests/App
 
-# Unixy
-cat app-stdin.php | php -- app-plain.php --display
-
-# Windows
-type app-stdin.php | php -- app-plain.php --display
+php -- app-plain.php --display < app-stdin.php
 ```
 
 While this works in simple scenarios, it is not recommended because the restart settings are not

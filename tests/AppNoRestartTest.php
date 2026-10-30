@@ -14,12 +14,13 @@ declare(strict_types=1);
 namespace Composer\XdebugHandler\Tests;
 
 use Composer\XdebugHandler\Tests\App\Framework\AppRunner;
+use Composer\XdebugHandler\Tests\App\Framework\Messages;
 use Composer\XdebugHandler\Tests\App\Framework\PhpOptions;
 use Composer\XdebugHandler\Tests\App\Helpers\FunctionalTestCase;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @group functional
+ * @group xdebug-functional
  */
 class AppNoRestartTest extends FunctionalTestCase
 {
@@ -33,12 +34,10 @@ class AppNoRestartTest extends FunctionalTestCase
         $script = 'app-basic.php';
 
         $logs = $this->runner->run($script, null, true);
-        $this->checkNoRestart($logs);
 
-        $appName = $this->runner->getAppName($script);
-        $child = $logs->getValuesForProcessName(1, $appName);
-        $item = $logs->getItemFromList($child, 2);
-        self::assertStringContainsString('The Xdebug extension is loaded', $item);
+        $provider = $this->createMessageProvider($script);
+        $expected = $provider->getNoRestartMessages('allow');
+        $this->checkNoRestart($logs, $expected);
     }
 
     /**
@@ -58,7 +57,10 @@ class AppNoRestartTest extends FunctionalTestCase
         $options->addPhpArgs('-dxdebug.mode=off');
 
         $logs = $this->runner->run($script, $options);
-        $this->checkNoRestart($logs, 'Allowed by xdebug.mode');
+
+        $provider = $this->createMessageProvider($script);
+        $expected = $provider->getNoRestartMessages('allow-mode');
+        $this->checkNoRestart($logs, $expected);
     }
 
     /**
@@ -74,7 +76,10 @@ class AppNoRestartTest extends FunctionalTestCase
         $options->addPhpArgs('-ddisable_functions=proc_open');
 
         $logs = $this->runner->run($script, $options);
-        $this->checkNoRestart($logs, 'proc_open function is disabled');
+
+        $provider = $this->createMessageProvider($script);
+        $expected = $provider->getErrorMessages('proc_open function is disabled');
+        $this->checkNoRestart($logs, $expected);
     }
 
     /**
@@ -90,6 +95,9 @@ class AppNoRestartTest extends FunctionalTestCase
         $options->addScriptArgs('--help');
 
         $logs = $this->runner->run($script, $options);
-        $this->checkNoRestart($logs, 'Allowed by application');
+
+        $provider = $this->createMessageProvider($script);
+        $expected = $provider->getNoRestartMessages('allow-app');
+        $this->checkNoRestart($logs, $expected);
     }
 }

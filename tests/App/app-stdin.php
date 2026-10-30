@@ -19,9 +19,7 @@ use Composer\XdebugHandler\XdebugHandler;
 /**
  * Restarts without xdebug using stdin
  *
- * Usage (Unixy)   : cat app-stdin.php | php -- app-plain.php
- * Usage (Windows) : type app-stdin.php | php -- app-plain.php
- *
+ * Usage: php -- app-plain.php < app-stdin.php
  */
 
 $app = new AppHelper(__FILE__);
@@ -36,8 +34,8 @@ $app->write('working: argv0 '. $mainScript);
 $settings = null;
 if ($mainScript === 'Standard input code' && isset($argv[1])) {
     $settings = ['mainScript' => $argv[1]];
-    // @phpstan-ignore-next-line
-    unset($_SERVER['argv'][1]);
+    // @phpstan-ignore argument.type
+    array_splice($_SERVER['argv'], 1, 1);
 }
 
 $xdebug = $app->getXdebugHandler(null, $settings);

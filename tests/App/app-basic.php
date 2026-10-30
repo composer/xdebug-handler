@@ -19,7 +19,7 @@ use Composer\XdebugHandler\XdebugHandler;
 /**
  * Restarts without xdebug
  *
- * Usage: php app.php
+ * Usage: php app-basic.php
  */
 
 $app = new AppHelper(__FILE__);

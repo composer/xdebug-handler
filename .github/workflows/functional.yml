@@ -45,7 +45,7 @@ jobs:
 
       - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
-          php-version: "${{ matrix.php-version }}"
+          php-version: ${{ matrix.php-version }}
           coverage: xdebug
 
       - uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
@@ -54,10 +54,10 @@ jobs:
 
       - name: Run tests
         if: ${{ !matrix.experimental }}
-        # Include --fail-on-skipped when min PHP is > 7.2.5
-        run: vendor/bin/phpunit --group functional
+        # Include --fail-on-skipped when min PHP is > 7.2.5 (for PHPUnit 9.5+)
+        run: vendor/bin/phpunit --group xdebug-functional
 
       # Show deprecations on latest PHP
       - name: Run tests (experimental)
         if: ${{ matrix.experimental }}
-        run: vendor/bin/phpunit --group functional --fail-on-skipped --display-deprecations
+        run: vendor/bin/phpunit --group xdebug-functional --fail-on-skipped --display-deprecations

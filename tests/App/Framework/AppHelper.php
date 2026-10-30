@@ -16,6 +16,15 @@ namespace Composer\XdebugHandler\Tests\App\Framework;
 use Composer\XdebugHandler\Process;
 use Composer\XdebugHandler\XdebugHandler;
 
+/**
+ * This class runs and provides functionality for the xdebug-handler functional
+ * test apps.
+ *
+ * It sets up the logger and outputs debug and status messages to stdout.
+ *
+ * The test apps can be run from the command-line and will show detailed output
+ * with the --display and --inis options.
+ */
 class AppHelper extends AppRunner
 {
     public const ENV_IS_DISPLAY = 'XDEBUG_HANDLER_TEST_DISPLAY';
@@ -23,16 +32,15 @@ class AppHelper extends AppRunner
 
     /** @var string */
     private $appName;
+
     /** @var string */
     private $envPrefix;
+
     /** @var non-empty-list<string> */
     private $serverArgv;
+
     /** @var class-string|null */
     private $className;
-    /** @var bool */
-    private $display;
-    /** @var bool */
-    private $showInis;
 
     /** @var Logger */
     private $logger;
@@ -41,7 +49,7 @@ class AppHelper extends AppRunner
     private $output;
 
     /** @var Status */
-    private $status = null;
+    private $status;
 
     public function __construct(string $script)
     {
@@ -49,13 +57,11 @@ class AppHelper extends AppRunner
         $this->appName = $this->getAppName($script);
         $this->envPrefix = $this->getEnvPrefix($script);
 
-        $this->display = $this->getDisplayFromServer();
-        $this->showInis = $this->getInisFromServer();
-        $this->setServerArgv();
+        [$display, $showInis] = $this->setServerArgvAndOptions();
 
-        $this->output = new Output($this->display);
+        $this->output = new Output($display);
         $this->logger = new Logger($this->output);
-        $this->status = new Status($this->display, $this->showInis);
+        $this->status = new Status($display, $showInis);
     }
 
     /**
@@ -73,9 +79,10 @@ class AppHelper extends AppRunner
     }
 
     /**
+     * Starts an instance of XdebugHandler
      *
-     * @param class-string $class
-     * @param array<string, string> $settings
+     * @param class-string $class Extending class name
+     * @param array<string, string> $settings XdebugHandler settings
      */
     public function getXdebugHandler(?string $class = null, ?array $settings = null): XdebugHandler
     {
@@ -102,16 +109,40 @@ class AppHelper extends AppRunner
         return $xdebug;
     }
 
+    /**
+     * Runs a PHP sub-process
+     *
+     * @param string $script The file to run
+     * @param PhpOptions $options
+     */
     public function runScript(string $script, ?PhpOptions $options = null): void
     {
-        parent::runScript($script, $options);
+        $script = $this->checkScript($script);
+
+        if ($options === null) {
+            $options = new PhpOptions();
+        }
+
+        // set passthru in child proccesses so output gets collected
+        $options->setPassthru(true);
+        $this->phpExecutor->run($script, $options, $this->scriptDir);
     }
 
+    /**
+     * Outputs a message prefixed appname[pid] to stdout
+     *
+     * @param string $message
+     */
     public function write(string $message): void
     {
         $this->logger->write($message, $this->appName);
     }
 
+    /**
+     * Outputs the Xdebug loaded status to stdout
+     *
+     * More details can be shown with the --display and --inis options.
+     */
     public function writeXdebugStatus(): void
     {
         $className = $this->className ?? XdebugHandler::class;
@@ -122,16 +153,38 @@ class AppHelper extends AppRunner
         }
     }
 
-    private function setServerArgv(): void
+    /**
+     * Checks $_SERVER['argv'] and returns $display and $showInis values
+     *
+     * The flags to display the full status and ini file list are passed on the
+     * command-line, then removed and set in the environment.
+     *
+     * @return array<bool, bool>
+     */
+    private function setServerArgvAndOptions(): array
     {
         $args = [];
         $errors = false;
+        $display = false;
+        $showInis = false;
 
         if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
             foreach ($_SERVER['argv'] as $value) {
                 if (!is_string($value)) {
                     $errors = true;
                     break;
+                }
+
+                if ($value === '--display') {
+                    $display = true;
+                    Process::setEnv(self::ENV_IS_DISPLAY, '1');
+                    continue;
+                }
+
+                if ($value === '--inis') {
+                    $showInis = true;
+                    Process::setEnv(self::ENV_SHOW_INIS, '1');
+                    continue;
                 }
 
                 $args[] = $value;
@@ -142,46 +195,12 @@ class AppHelper extends AppRunner
             throw new \RuntimeException('$_SERVER[argv] is not as expected');
         }
 
+        $_SERVER['argv'] = $args;
         $this->serverArgv = $args;
-    }
 
-    private function getDisplayFromServer(): bool
-    {
-        $result = false;
-
-        if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
-            $key = array_search('--display', $_SERVER['argv'], true);
-
-            if (is_int($key)) {
-                $result = true;
-                Process::setEnv(self::ENV_IS_DISPLAY, '1');
-                // @phpstan-ignore argument.type
-                array_splice($_SERVER['argv'], $key, 1);
-            } else {
-                $result = false !== getenv(self::ENV_IS_DISPLAY);
-            }
-        }
-
-        return $result;
-    }
-
-    private function getInisFromServer(): bool
-    {
-        $result = false;
-
-        if (isset($_SERVER['argv']) && is_array($_SERVER['argv'])) {
-            $key = array_search('--inis', $_SERVER['argv'], true);
-
-            if (is_int($key)) {
-                $result = true;
-                Process::setEnv(self::ENV_SHOW_INIS, '1');
-                // @phpstan-ignore argument.type
-                array_splice($_SERVER['argv'], $key, 1);
-            } else {
-                $result = false !== getenv(self::ENV_SHOW_INIS);
-            }
-        }
-
-        return $result;
+        return [
+            $display || false !== getenv(self::ENV_IS_DISPLAY),
+            $showInis || false !== getenv(self::ENV_SHOW_INIS),
+        ];
     }
 }

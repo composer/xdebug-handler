@@ -18,7 +18,7 @@ use Composer\XdebugHandler\Tests\App\Framework\AppHelper;
 /**
  * A plain php script that does not include xdebug-handler
  *
- * Usage: php app-none.php
+ * Usage: php app-plain.php
  */
 
 $app = new AppHelper(__FILE__);

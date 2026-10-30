@@ -142,7 +142,7 @@ class IniHelper
         $this->setEnv(CoreMock::ORIGINAL_INIS, implode(PATH_SEPARATOR, $this->files));
 
         if ($this->envOptions !== null) {
-            list($scanDir, $phprc) = $this->envOptions;
+            [$scanDir, $phprc] = $this->envOptions;
             $this->setEnv('PHP_INI_SCAN_DIR', $scanDir);
             $this->setEnv('PHPRC', $phprc);
         }

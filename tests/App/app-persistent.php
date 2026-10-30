@@ -21,7 +21,7 @@ use Composer\XdebugHandler\PhpConfig;
  * Restarts without xdebug in persistent mode, then calls sub-processes:
  * - app-plain.php (xdebug not loaded)
  * - app-plain.php with original settings (xdebug will be loaded)
- * - app-other.php (xdebug not loaded)
+ * - app-basic.php (xdebug not loaded)
  *
  * Usage: php app-persistent.php
  */

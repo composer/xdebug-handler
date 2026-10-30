@@ -16,10 +16,13 @@ namespace Composer\XdebugHandler\Tests\App\Framework;
 use Composer\XdebugHandler\XdebugHandler;
 
 /**
+ * This class provides xdebug-handler settings and values.
+ *
  * @phpstan-import-type restartData from \Composer\XdebugHandler\PhpConfig
  */
 class Status
 {
+    private const AVAILABLE = 'available';
     private const INVALID = 'not applicable';
     private const MISSING = 'not available';
 
@@ -37,6 +40,7 @@ class Status
     }
 
     /**
+     * Returns a list of xdebug-handler settings and values
      *
      * @param class-string $className
      * @return list<string>
@@ -47,10 +51,20 @@ class Status
         $result = [];
 
         // status
-        [$status, $info] = $this->getXdebugStatus();
-        $result[] = sprintf('[%s] %s', $status, $info);
+        $status = $this->getXdebugStatus();
+        $result[] = sprintf('[xdebug] %s', $status);
+
+        /** @var restartData|null $settings */
+        $settings = $className::getRestartSettings();
+
+        if ($settings === null) {
+            $shortSettings = $this->loaded ? self::INVALID : self::MISSING;
+        } else {
+            $shortSettings = self::AVAILABLE;
+        }
 
         if (!$this->isDisplay) {
+            $result[] = sprintf('[settings] %s', $shortSettings);
             return $result;
         }
 
@@ -63,35 +77,28 @@ class Status
         $result[] = sprintf('[skipped] %s', $skipped);
 
         // envs
-        foreach($this->getEnvs() as $item) {
+        foreach ($this->getEnvs() as $item) {
             $result[] = sprintf('[env] %s', $item);
         }
 
         // inis
-        foreach($this->getInis($className) as $item) {
+        foreach ($this->getInis($className) as $item) {
             $result[] = sprintf('[ini] %s', $item);
         }
 
         // settings
-        foreach($this->getSettings($className) as $item) {
+        foreach ($this->getSettings($settings) as $item) {
             $result[] = sprintf('[settings] %s', $item);
         }
 
         return $result;
     }
 
-    /**
-     *
-     * @return array{0: string, 1: string}
-     */
-    private function getXdebugStatus(): array
+    private function getXdebugStatus(): string
     {
-        $status = $this->loaded ? 'XDEBUG' : 'NO XDEBUG';
-        $text = 'The Xdebug extension is';
-        $suffix = $this->loaded ? 'loaded' : 'not loaded';
-        $info = sprintf('%s %s', $text, $suffix);
+        $suffix = $this->loaded ? 'loaded' : 'NOT loaded';
 
-        return [$status, $info];
+        return sprintf('extension %s', $suffix);
     }
 
     /**
@@ -151,14 +158,13 @@ class Status
      */
     private function getInis(string $className): array
     {
-        $iniFiles = $this->findIniFiles($className);
-
+        /** @var non-empty-list<string> $iniFiles */
+        $iniFiles = $className::getAllIniFiles();
         if ($iniFiles[0] === '') {
-            array_shift($iniFiles);
+            $iniFiles[0] = '(none)';
         }
 
         $count = count($iniFiles);
-
         if ($this->showInis || $count === 1) {
             return $iniFiles;
         }
@@ -169,40 +175,12 @@ class Status
     }
 
     /**
-     * @param class-string $className
-     * @return list<string>
-     */
-    private function findIniFiles(string $className): array
-    {
-        $extended = $className !== XdebugHandler::class;
-
-        if ($extended) {
-            $iniFiles = $className::getAllIniFiles();
-        } elseif (class_exists(XdebugHandler::class)) {
-            $iniFiles = $className::getAllIniFiles();
-        } else {
-            $iniFiles = array((string) php_ini_loaded_file());
-            $scanned = php_ini_scanned_files();
-
-            if ($scanned !== false) {
-                $iniFiles = array_merge($iniFiles, array_map('trim', explode(',', $scanned)));
-            }
-        }
-
-        // @phpstan-ignore-next-line
-        return !is_array($iniFiles) ? [self::MISSING] : $iniFiles;
-    }
-
-    /**
      *
-     * @param class-string $className
+     * @param restartData|null $settings
      * @return list<string>
      */
-    private function getSettings(string $className): array
+    private function getSettings(?array $settings): array
     {
-        /** @var restartData|null $settings */
-        $settings = $className::getRestartSettings();
-
         if ($settings === null) {
             return $this->loaded ? [self::INVALID] : [self::MISSING];
         }
@@ -223,6 +201,7 @@ class Status
         foreach($settings as $key => $value) {
             $data[] = sprintf('%s=%s', $key, $value);
         }
+
         return $data;
     }
 }

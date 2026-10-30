@@ -11,7 +11,7 @@
 
     <groups>
         <exclude>
-            <group>functional</group>
+            <group>xdebug-functional</group>
         </exclude>
     </groups>
 </phpunit>
