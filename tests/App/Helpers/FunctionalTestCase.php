@@ -87,7 +87,12 @@ abstract class FunctionalTestCase extends TestCase
             $index += 1;
 
             foreach ($messages as $message) {
-                self::assertStringContainsString($message, $item->value, $assertMessage);
+                if (0 === strpos($message, '!')) {
+                    $message = substr($message, 1);
+                    self::assertStringNotContainsString($message, $item->value, $assertMessage);
+                } else {
+                    self::assertStringContainsString($message, $item->value, $assertMessage);
+                }
             }
         }
     }

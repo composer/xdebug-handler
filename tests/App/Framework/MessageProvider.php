@@ -30,7 +30,7 @@ class MessageProvider
             'not-loaded'    => ['The Xdebug extension is not loaded'],
             'restarting'    => ['Process restarting', $envAllow.'='],
             'run-std'       => ['Running', PHP_BINARY, '-n', '-c'],
-            'run-persist'   => ['Running', PHP_BINARY],
+            'run-persist'   => ['Running', PHP_BINARY, '!-n', '!-c'],
             'exit'          => ['Restarted process exited 0'],
             'restarted'     => ['Restarted (', 'ms). The Xdebug extension is not loaded'],
             'existing'      => ['Process called with existing restart settings'],
