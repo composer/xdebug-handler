@@ -102,6 +102,31 @@ abstract class FunctionalTestCase extends TestCase
     protected function createMessageProvider(string $script): MessageProvider
     {
         $envAllow = $this->runner->getEnvAllow($script);
-        return new MessageProvider($envAllow);
+        $extended = strpos($script, '-extend-') !== false;
+        return new MessageProvider($envAllow, $extended);
+    }
+
+    /**
+     * Modify the types array based on the specified operation
+     *
+     * @param string[] $types
+     */
+    protected function modifyTypes(array &$types, string $type, string $operation, string $newType): void
+    {
+        $index = array_search($type, $types, true);
+
+        if (!is_int($index)) {
+           throw new \LogicException('Type not found: '.$type);
+        }
+
+        if ($operation === 'replace') {
+            $types[$index] = $newType;
+        } elseif ($operation === 'insert-after') {
+            array_splice($types, $index + 1, 0, $newType);
+        } elseif ($operation === 'insert-before') {
+            array_splice($types, $index, 0, $newType);
+        } else {
+            throw new \LogicException('Unknown operation: '.$operation);
+        }
     }
 }

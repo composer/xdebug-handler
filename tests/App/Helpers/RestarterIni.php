@@ -29,6 +29,10 @@ class RestarterIni extends XdebugHandler
     {
         $this->required = (bool) ini_get('phar.readonly');
 
+        if ($this->required) {
+            $this->outputInfo('phar.readonly=1 detected, restart required');
+        }
+
         return $default || $this->required;
 
     }
@@ -39,6 +43,7 @@ class RestarterIni extends XdebugHandler
             $content = file_get_contents((string) $this->tmpIni);
             $content .= 'phar.readonly = 0'.PHP_EOL;
             file_put_contents((string) $this->tmpIni, $content);
+            $this->outputInfo('phar.readonly=0 added to temporary ini file');
         }
 
         parent::restart($command);

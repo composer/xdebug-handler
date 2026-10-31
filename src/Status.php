@@ -83,13 +83,18 @@ class Status
     }
 
     /**
-     * Checking status messages
+     * Using and Checking status messages
      */
-    public function reportCheck(): void
+    public function reportCheck(string $class): void
     {
-        if ($this->active) {
-            $this->output('Checking '.$this->envAllowXdebug);
+        if (!$this->active) {
+            return;
         }
+
+        if ($class !== XdebugHandler::class) {
+            $this->output(sprintf('Using extending class (%s)', $class));
+        }
+        $this->output('Checking '.$this->envAllowXdebug);
     }
 
     /**

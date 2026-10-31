@@ -15,10 +15,13 @@ namespace Composer\XdebugHandler\Tests\App\Framework;
 
 class MessageProvider
 {
+    /** @var bool */
+    private $extended = false;
+
     /** @var array<string, string[]> */
     private $items = [];
 
-    public function __construct(string $envAllow)
+    public function __construct(string $envAllow, bool $extended)
     {
         // type: array of phrases to check for
         $this->items = [
@@ -36,18 +39,34 @@ class MessageProvider
             'allow-mode'    => ['No restart', $envAllow.'=', 'Allowed by xdebug.mode'],
             'error'         => ['No restart'],
         ];
+
+        if ($extended) {
+            $this->extended = true;
+            $first = ['extend' => ['Using extending class']];
+            $this->items = array_merge($first, $this->items);
+        }
     }
 
     /**
      * @param string[] $types
+     * @param array<string, string[]> $extras
      * @return array<string, string[]>
      */
-    public function compose(array $types): array
+    public function compose(array $types, ?array $extras = null): array
     {
         $result = [];
 
+        if ($this->extended && ($types[0] ?? null) === 'check') {
+            array_unshift($types, 'extend');
+        }
+
         foreach ($types as $key) {
             if (!isset($this->items[$key])) {
+                // Look for extras
+                if (isset($extras[$key]) && is_array($extras[$key])) {
+                    $result[$key] = $extras[$key];
+                    continue;
+                }
                 throw new \LogicException('Message type not found: '.$key);
             }
             $result[$key] = $this->items[$key];
