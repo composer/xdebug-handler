@@ -22,7 +22,7 @@ class PhpExecutor
         $content = null;
         $params = array_merge([PHP_BINARY], $options->getPhpArgs());
 
-        if ($options->getStdin()) {
+        if ($options->useStdin()) {
             $content = $this->getContents($script);
         } else {
             $params[] = $script;
@@ -33,7 +33,7 @@ class PhpExecutor
         $this->setEnvs($options->getEnvs());
 
         try {
-            $output = $this->execute($params, $cwd, $content, $options->getPassthru());
+            $output = $this->execute($params, $options, $cwd, $content);
         } finally {
             $this->unsetEnvs($options->getEnvs());
         }
@@ -45,37 +45,47 @@ class PhpExecutor
      *
      * @param non-empty-list<string> $args
      */
-    private function execute(array $args, ?string $cwd, ?string $stdin, bool $passthru): string
+    private function execute(array $args, PhpOptions $options, ?string $cwd, ?string $script): string
     {
         $command = $this->getCommand($args);
-        $output = '';
+        $stdout = '';
+        $stderr = '';
         $fds = [];
 
-        if ($stdin !== null) {
+        if ($script !== null) {
             $fds[0] = ['pipe', 'r'];
         }
 
-        if (!$passthru) {
+        if ($options->captureOutput()) {
             $fds[1] = ['pipe', 'wb'];
+
+            if ($options->useStderr()) {
+                $fds[2] = ['pipe', 'wb'];
+            }
         }
 
         $process = proc_open($command, $fds, $pipes, $cwd);
 
         if (is_resource($process)) {
-            if ($stdin !== null) {
-                fwrite($pipes[0], $stdin);
+            if ($script !== null) {
+                fwrite($pipes[0], $script);
                 fclose($pipes[0]);
             }
 
-            if (!$passthru) {
-                $output = stream_get_contents($pipes[1]);
+            if ($options->captureOutput()) {
+                $stdout = (string) stream_get_contents($pipes[1]);
                 fclose($pipes[1]);
+
+                if ($options->useStderr()) {
+                    $stderr = (string) stream_get_contents($pipes[2]);
+                    fclose($pipes[2]);
+                }
             }
 
             proc_close($process);
         }
 
-        return (string) $output;
+        return $options->useStderr() ? $stderr : $stdout;
     }
 
     /**

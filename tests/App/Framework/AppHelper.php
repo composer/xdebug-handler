@@ -123,8 +123,8 @@ class AppHelper extends AppRunner
             $options = new PhpOptions();
         }
 
-        // set passthru in child proccesses so output gets collected
-        $options->setPassthru(true);
+        // do not capture output
+        $options->captureOutput(false);
         $this->phpExecutor->run($script, $options, $this->scriptDir);
     }
 
