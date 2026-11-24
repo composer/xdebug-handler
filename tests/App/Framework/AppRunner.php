@@ -46,8 +46,8 @@ class AppRunner
             $options = new PhpOptions();
         }
 
-        // enforce output
-        $options->setPassthru(false);
+        // enforce captured output
+        $options->captureOutput(true);
 
         if ($allow) {
             $options->addEnv($this->getEnvAllow($script), '1');

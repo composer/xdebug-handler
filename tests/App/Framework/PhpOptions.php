@@ -22,9 +22,11 @@ class PhpOptions
     /** @var array<string, string> */
     private $envs = [];
     /** @var bool */
-    private $stdin = false;
+    private $useStderr = false;
     /** @var bool */
-    private $passthru = false;
+    private $useStdin = false;
+    /** @var bool */
+    private $captureOutput = false;
 
     /**
      * @return list<string>
@@ -50,14 +52,28 @@ class PhpOptions
         return $this->envs;
     }
 
-    public function getStdin(): bool
+    public function useStderr(?bool $value = null): bool
     {
-        return $this->stdin;
+        if ($value !== null) {
+            $this->useStderr = $value;
+        }
+        return $this->useStderr;
     }
 
-    public function getPassthru(): bool
+    public function useStdin(?bool $value = null): bool
     {
-        return $this->passthru;
+        if ($value !== null) {
+            $this->useStdin = $value;
+        }
+        return $this->useStdin;
+    }
+
+    public function captureOutput(?bool $value = null): bool
+    {
+        if ($value !== null) {
+            $this->captureOutput = $value;
+        }
+        return $this->captureOutput;
     }
 
     /**
@@ -85,15 +101,5 @@ class PhpOptions
     public function addEnv(string $name, string $value): void
     {
         $this->envs[$name] = $value;
-    }
-
-    public function setPassthru(bool $value): void
-    {
-        $this->passthru = $value;
-    }
-
-    public function setStdin(bool $value): void
-    {
-        $this->stdin = $value;
     }
 }

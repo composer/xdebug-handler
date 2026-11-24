@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Composer\XdebugHandler\Tests;
 
+use Composer\Pcre\Preg;
 use Composer\XdebugHandler\Tests\App\Framework\AppRunner;
 use Composer\XdebugHandler\Tests\App\Framework\LogItem;
 use Composer\XdebugHandler\Tests\App\Framework\Messages;
@@ -81,7 +82,7 @@ class AppRestartTest extends FunctionalTestCase
 
         $options = new PhpOptions();
         $options->addPhpArgs('-dauto_prepend_file=app-prepend.php');
-        $options->setStdin(true);
+        $options->useStdin(true);
 
         $logs = $this->runner->run($script, $options);
 
@@ -112,7 +113,7 @@ class AppRestartTest extends FunctionalTestCase
         $options = new PhpOptions();
         $options->addPhpArgs('--');
         $options->addScriptArgs('app-plain.php');
-        $options->setStdin(true);
+        $options->useStdin(true);
 
         $logs = $this->runner->run($script, $options);
 
@@ -286,5 +287,65 @@ class AppRestartTest extends FunctionalTestCase
         // check settings available at index 2
         $expected = '[settings] available';
         $this->checkExpectedMessage($processLog, 2, $expected);
+    }
+
+    /**
+     *
+     * @requires extension xdebug
+     */
+    public function testDebugOutput(): void
+    {
+        $script = 'app-basic.php';
+
+        // get debug output, which is sent to stderr
+        $options = new PhpOptions();
+        $options->addEnv('XDEBUG_HANDLER_DEBUG', '1');
+        $options->useStderr(true);
+
+        $logs = $this->runner->run($script, $options);
+
+        $provider = $this->createMessageProvider($script);
+        [$mainMessages, $childMessages] = $provider->getRestartMessages();
+        $mainLogs = $logs->getNamed(1, 'xdebug-handler');
+        $this->checkExpectedMessages($mainMessages, $mainLogs, 'main');
+
+        $childLogs = $logs->getNamed(2, 'xdebug-handler');
+        $this->checkExpectedMessages($childMessages, $childLogs, 'child');
+    }
+
+    /**
+     *
+     * @requires extension xdebug
+     */
+    public function testSavedTempIni(): void
+    {
+        $script = 'app-basic.php';
+
+        // get debug output and save the temp ini
+        $options = new PhpOptions();
+        $options->addEnv('XDEBUG_HANDLER_DEBUG', '2');
+        $options->useStderr(true);
+
+        $logs = $this->runner->run($script, $options);
+
+        $provider = $this->createMessageProvider($script);
+        [$mainTypes] = $provider->getRestartTypes();
+        $extras = [];
+
+        // the temp ini saved message is the last message
+        $this->modifyTypes($mainTypes, 'exit', 'insert-after', 'saved');
+        $extras['saved'] = ['Temp ini saved: '];
+
+        $messages = $provider->compose($mainTypes, $extras);
+        $processLog = $logs->getNamed(1, 'xdebug-handler');
+        $this->checkExpectedMessages($messages, $processLog, 'main');
+
+        $lastIndex = count($processLog->getItems()) - 1;
+        $item = $processLog->getItem($lastIndex);
+        Preg::match('/^Temp ini saved: (.*)$/', $item->value, $matches);
+        $tempIni = (string) $matches[1];
+
+        self::assertFileExists($tempIni, 'Temp ini file not found: '.$tempIni);
+        @unlink($tempIni);
     }
 }
